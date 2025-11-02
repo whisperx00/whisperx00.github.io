@@ -123,13 +123,26 @@ select {
   }
 }
 
-// Language switching - hide all by default, show active one
-.en.post-container,
-.pt-br.post-container {
-  display: none;
-  &.active {
-    display: block;
-  }
+// Language switching - show English by default, hide Portuguese
+// Match divs with both classes (e.g., class="en post-container")
+div.en.post-container,
+div[class*="en"][class*="post-container"] {
+  display: block !important;
+}
+
+div.pt-br.post-container,
+div[class*="pt-br"][class*="post-container"] {
+  display: none !important;
+}
+
+// When active class is set by JavaScript, override above
+div.pt-br.post-container.active,
+div[class*="pt-br"][class*="post-container"].active {
+  display: block !important;
+}
+
+div.en.post-container.active {
+  display: block !important;
 }
 
 // Language selector in navbar

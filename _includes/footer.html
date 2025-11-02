@@ -268,11 +268,13 @@
         function _render() {
             var lang = getLang()
             
-            // Hide all language divs first
-            var allLangDivs = document.querySelectorAll(".en.post-container, .pt-br.post-container");
+            // Hide all language divs first - use both classes separately as fallback
+            var allLangDivs = document.querySelectorAll(".en.post-container, .pt-br.post-container, .en, .pt-br");
             allLangDivs.forEach(function(div) {
-                div.style.display = "none";
-                div.classList.remove("active");
+                if (div.classList.contains("en") || div.classList.contains("pt-br")) {
+                    div.style.display = "none";
+                    div.classList.remove("active");
+                }
             });
             
             // Show selected language
@@ -281,6 +283,13 @@
                 if ($ptbr) {
                     $ptbr.style.display = "block";
                     $ptbr.classList.add("active");
+                } else {
+                    // Fallback: try finding pt-br without post-container
+                    var $ptbrFallback = document.querySelector(".pt-br");
+                    if ($ptbrFallback) {
+                        $ptbrFallback.style.display = "block";
+                        $ptbrFallback.classList.add("active");
+                    }
                 }
             } else {
                 // Default to English
@@ -288,6 +297,13 @@
                 if ($en) {
                     $en.style.display = "block";
                     $en.classList.add("active");
+                } else {
+                    // Fallback: try finding en without post-container
+                    var $enFallback = document.querySelector(".en");
+                    if ($enFallback) {
+                        $enFallback.style.display = "block";
+                        $enFallback.classList.add("active");
+                    }
                 }
             }
             // interop with catalog 
