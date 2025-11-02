@@ -4,8 +4,8 @@ SEOTitle: whisperx00 Blog
 header-img: img/hollow-knight.png
 email: gm.manoel.albino@gmail.co,
 description: "May it get me? 🌸"
-keyword: "hynduf, @hynduf, HynDuf's Blog, CP, Arch Linux, Obsidian"
-url: "https://hynduf.github.io" # your host, for absolute URL
+keyword: "whisperx00, @whisperx00, whisperx00's Blog, CP, Arch Linux, Obsidian"
+url: "https://whisperx00.github.io" # your host, for absolute URL
 baseurl: "" # for example, '/blog' if your blog hosted on 'host/blog'
 
 # Publish posts or collection documents with a future date.
@@ -14,9 +14,9 @@ future: true
 # SNS settings
 RSS: false
 github_username: whisperx00
-twitter_username: HynDuf
-facebook_username: HynDuf
-linkedin_username: hynduf
+twitter_username: whisperx00
+facebook_username: whisperx00
+linkedin_username: whisperx00
 
 # Build settings
 # from 2016, 'pygments' is unsupported on GitHub Pages. Use 'rouge' for highlighting instead.
@@ -57,7 +57,7 @@ kramdown:
       start_line: 1
 
 # Disqus settings
-# disqus_username: hynduf
+# disqus_username: whisperx00
 
 # Netease settings
 netease_comment: false
@@ -73,7 +73,7 @@ ga_domain: huangxuan.me
 # Sidebar settings
 sidebar: true # whether or not using Sidebar.
 sidebar-about-description: "how far down the <br/> rabbit holes 🐇, <br/> would it take me? 🤔"
-sidebar-avatar: https://github.com/hynduf.png # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: https://github.com/whisperx00.png # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
 featured-tags: true # whether or not using Feature-Tags

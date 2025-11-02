@@ -1,5 +1,5 @@
 # ABOUT ME
-Hi there 👋, I'm Huynh Tien Dung (HynDuf).
+Hi there 👋, I'm Huynh Tien Dung (whisperx00).
 
 - 👨‍🎓 I am a final-year student at [UET - VNU](https://uet.vnu.edu.vn/) - K66 - C - CLC. 
 - 🌱 I’m currently learning many things to figure out what I really want to do.
@@ -11,7 +11,7 @@ Hi there 👋, I'm Huynh Tien Dung (HynDuf).
   - 💎 I love Obsidian.
 
 # ABOUT THIS WEBSITE
-This is a heavily-customized [fork](https://github.com/HynDuf/hynduf.github.io) of the incredible [Hux Blog - Jekyll Theme](https://github.com/Huxpro/huxpro.github.io). I have a blog about how I did it, [check it out](https://hynduf.github.io/2023/12/31/building-my-aesthetic-personal-site/).
+This is a heavily-customized [fork](https://github.com/whisperx00/whisperx00.github.io) of the incredible [Hux Blog - Jekyll Theme](https://github.com/Huxpro/huxpro.github.io). I have a blog about how I did it, [check it out](https://whisperx00.github.io/2023/12/31/building-my-aesthetic-personal-site/).
 
 # CONTACT
 If you want to reach me out then feel free to DM me on any social media.

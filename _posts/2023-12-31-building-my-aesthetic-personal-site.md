@@ -2,7 +2,7 @@
 layout: post
 title: "Building My Aesthetic Personal Site 📝"
 subtitle: "with a custom Catppuccin Jekyll theme 😺"
-author: "HynDuf"
+author: "whisperx00"
 header-style: text
 tags:
   - Technical
@@ -32,7 +32,7 @@ Then, just fork and clone the repo:
     - `grunt`: This is for generating the `.css` file from the `.less` file after you change some CSS. **Remember** to use the `.less` file to configure the CSS, all the `.css` files are generated from them. You can install `grunt` by `npm install grunt grunt-cli`.
 
 ## Customize
-The files you typically change are in the directories `_includes`, `_layouts`, and `less`. Most of the new changes I made are in `less/hynduf.less`.
+The files you typically change are in the directories `_includes`, `_layouts`, and `less`. Most of the new changes I made are in `less/whisperx00.less`.
 
 Summarizing the changes I made:
 - Home page view (the banner image took up so much space, so I replaced it with some random quotes of my own).

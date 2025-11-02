@@ -3,17 +3,17 @@ Mình xin được tiếp tục series mỗi năm hồi sinh blog 1 lần ạ �
 ## Những điều hay trong năm 2024
 ### NixOS
 - Mình quyết định chuyển qua dùng NixOS sau khi Arch mỗi khi update rất lâu và hay bị conflict linh tinh. Review của mình là ban đầu thì dùng NixOS hơi (rất) khổ nhưng mà sau đó thì mình thấy NixOS (cùng với nix) rất sướng, xịn và đáng giá những khổ cực mà mình đã trải qua.
-- Về những điểm cộng của NixOS thì có khá nhiều (bạn có thể xem [https://www.youtube.com/watch?v=CwfKlX3rA6E](https://www.youtube.com/watch?v=CwfKlX3rA6E)) và nếu hứng thú thì có thể xem repo của mình ở [https://github.com/HynDuf/nixos-conf](https://github.com/HynDuf/nixos-conf).
+- Về những điểm cộng của NixOS thì có khá nhiều (bạn có thể xem [https://www.youtube.com/watch?v=CwfKlX3rA6E](https://www.youtube.com/watch?v=CwfKlX3rA6E)) và nếu hứng thú thì có thể xem repo của mình ở [https://github.com/whisperx00/nixos-conf](https://github.com/whisperx00/nixos-conf).
 
 ### Typst
 - Đây là một công cụ rất xịn thay thế Latex. Từ khi dùng Typst thì mình không thấy có lí do gì để dùng Latex nữa (trừ khi bị bắt nộp bằng Latex 🥹). Cộng đồng của Typst (discord) cũng rất hữu ích bạn có thể hỏi mọi thứ siêu nhanh.
-- Mình có dùng Typst để viết các báo cáo trên trường, [viết CV](https://github.com/HynDuf/typst-cv) và gần đây để viết [Khóa luận tốt nghiệp](https://github.com/HynDuf/KLTN-UET-2024). Trộm vía được 9.9 KLTN, không biết có được KLTN xuất sắc nhất không nữa 😄.
+- Mình có dùng Typst để viết các báo cáo trên trường, [viết CV](https://github.com/whisperx00/typst-cv) và gần đây để viết [Khóa luận tốt nghiệp](https://github.com/whisperx00/KLTN-UET-2024). Trộm vía được 9.9 KLTN, không biết có được KLTN xuất sắc nhất không nữa 😄.
 ![kltn](/assets/kltn.png) 
 
 ### IELTS
 - Sau 1 tháng khổ cực thì mình cũng nhận được thành quả:
 ![IELTS Result](/assets/ielts-result.png)
-- Mình có viết một bài về cách mình học ở [How I Scored an 8.0 in IELTS with Just a Month of Self-Study 🎯📚](https://hynduf.github.io/2024/12/31/how-i-scored-an-8-in-ielts-with-just-a-month-of-self-study/), mọi người có thể đọc ủng hộ 🥲.
+- Mình có viết một bài về cách mình học ở [How I Scored an 8.0 in IELTS with Just a Month of Self-Study 🎯📚](https://whisperx00.github.io/2024/12/31/how-i-scored-an-8-in-ielts-with-just-a-month-of-self-study/), mọi người có thể đọc ủng hộ 🥲.
 
 ### BWF Training
 - Sau khi nhận ra chạy bộ không hợp với mình nữa, mình có tìm tòi và có tập thử cái BWF (Body Weight Fitness) Primer này [https://nick-e.com/primer/#buildup](https://nick-e.com/primer/#buildup). Mình thì lười đi tập Gym và quan trọng hơn là sao phải tốn tiền đi tập khi mình có thể tập ở nhà 😁 (à nhưng tới 1 giai đoạn thì sẽ không còn hiệu quả bằng tập gym nhé (do body weight có hạn)). Mình có tập được khoảng 3-4 tháng và rất recommend nha. Nó chỉ gồm 6 bài tập đơn giản với hướng dẫn chi tiết (xem link ở trên nhé nó có hướng dẫn dần dần trong 14 ngày đầu). Quan trọng nhất là tập đúng động tác nên mình cũng phải quay video và check lại. 

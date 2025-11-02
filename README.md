@@ -1,21 +1,21 @@
-[🌸🐳 HynDuf 👋](https://hynduf.github.io)
+[🌸🐳 whisperx00 👋](https://whisperx00.github.io)
 ================================
 
 <p align="center">
-	<a href="https://github.com/HynDuf/hynduf.github.io/stargazers">
-		<img alt="Stargazers" src="https://img.shields.io/github/stars/HynDuf/hynduf.github.io?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41"></a>
-	<a href="https://github.com/HynDuf/hynduf.github.io/issues">
-		<img alt="Issues" src="https://img.shields.io/github/issues/HynDuf/hynduf.github.io?style=for-the-badge&logo=gitbook&color=B5E8E0&logoColor=D9E0EE&labelColor=302D41"></a>
+	<a href="https://github.com/whisperx00/whisperx00.github.io/stargazers">
+		<img alt="Stargazers" src="https://img.shields.io/github/stars/whisperx00/whisperx00.github.io?style=for-the-badge&logo=starship&color=C9CBFF&logoColor=D9E0EE&labelColor=302D41"></a>
+	<a href="https://github.com/whisperx00/whisperx00.github.io/issues">
+		<img alt="Issues" src="https://img.shields.io/github/issues/whisperx00/whisperx00.github.io?style=for-the-badge&logo=gitbook&color=B5E8E0&logoColor=D9E0EE&labelColor=302D41"></a>
 </p>
 
 
 Please read the original [README.md](https://github.com/Huxpro/huxpro.github.io) first to have the full guide.
 
-This is a heavily-customized [fork](https://github.com/HynDuf/hynduf.github.io) of the incredible [Hux Blog - Jekyll Theme](https://github.com/Huxpro/huxpro.github.io). I have a blog about how I did it, [check it out](https://hynduf.github.io/2023/12/31/building-my-aesthetic-personal-site/).
+This is a heavily-customized [fork](https://github.com/whisperx00/whisperx00.github.io) of the incredible [Hux Blog - Jekyll Theme](https://github.com/Huxpro/huxpro.github.io). I have a blog about how I did it, [check it out](https://whisperx00.github.io/2023/12/31/building-my-aesthetic-personal-site/).
 
 ⚠️  Note: Much of the code was added on the fly, so it may appear somewhat messy. I plan to clean it up in the future.
 ## Customize
-The files you typically change are in the directories `_includes`, `_layouts`, and `less`. Most of the new changes I made are in `less/hynduf.less`.
+The files you typically change are in the directories `_includes`, `_layouts`, and `less`. Most of the new changes I made are in `less/whisperx00.less`.
 
 Summarizing the changes I made:
 - Home page view (the banner image took up so much space, so I replaced it with some random quotes of my own).

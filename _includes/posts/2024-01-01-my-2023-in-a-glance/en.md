@@ -22,8 +22,8 @@ Recently, I tried a different schedule, still a Dual Core though. It's a 5-hour 
 
 - Some other projects I did along the way:
     - Obsidian workflow improving. (Obsidian is a thriving note-taking app btw).
-    - [VietCard - A flashcard mobile application](https://github.com/HynDuf/vietcard) for the UI course at university.
-    - [Personal Blog Website](https://hynduf.github.io/): I put together this site in the last 3 days of 2023, just for this post to be published 😇.
+    - [VietCard - A flashcard mobile application](https://github.com/whisperx00/vietcard) for the UI course at university.
+    - [Personal Blog Website](https://whisperx00.github.io/): I put together this site in the last 3 days of 2023, just for this post to be published 😇.
 
 ## Thank you
 Turns out, I just wrote a bunch of random recommendations throughout the year without much reflection 🥹. Looking back, there are still ups and downs like every year, but I appreciate all of them for shaping who I am today. Lastly, I'd like to give a huge thanks to my family and friends. Thanks for reading till this last line; I wish you have an incredible and healthy new year in 2024.
