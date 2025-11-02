@@ -10,14 +10,12 @@ nav-style: 'invert'
 
 <!-- English Version -->
 <div class="en post-container">
-    {% capture about_en %}{% include about/en.md %}{% endcapture %}
-    {{ about_en | markdownify }}
+    {% include about/en.md %}
 </div>
 
 <!-- Portuguese-Brazil Version -->
 <div class="pt-br post-container">
-    {% capture about_ptbr %}{% include about/pt-BR.md %}{% endcapture %}
-    {{ about_ptbr | markdownify }}
+    {% include about/pt-BR.md %}
 </div>
 
 
