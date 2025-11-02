@@ -238,6 +238,7 @@
     // get nodes
     var $vi = document.querySelector(".vi");
     var $en = document.querySelector(".en");
+    var $ptbr = document.querySelector(".pt-br");
     var $select = document.querySelector("select");
 
     // Changes at v1.8.1: include lang flag as a url query. This interop well with catalog hash anchors.
@@ -252,30 +253,47 @@
     // handle render
     function _render() {
         var lang = getLang()
-        // Fallback to English if `lang` is empty
+        // Hide all language divs first
+        if ($vi) { $vi.style.display = "none"; $vi.classList.remove("active"); }
+        if ($en) { $en.style.display = "none"; $en.classList.remove("active"); }
+        if ($ptbr) { $ptbr.style.display = "none"; $ptbr.classList.remove("active"); }
+        
+        // Show selected language
         if (lang == "en") {
             $select.selectedIndex = 1;
-            $en.style.display = "block";
-            $en.classList.add("active");
-            $vi.style.display = "none";
-            $vi.classList.remove("active");
+            if ($en) {
+                $en.style.display = "block";
+                $en.classList.add("active");
+            }
+        } else if (lang == "pt-br") {
+            $select.selectedIndex = 2;
+            if ($ptbr) {
+                $ptbr.style.display = "block";
+                $ptbr.classList.add("active");
+            }
         } else {
+            // Default to Vietnamese
             $select.selectedIndex = 0;
-            $vi.style.display = "block";
-            $vi.classList.add("active");
-            $en.style.display = "none";
-            $en.classList.remove("active");
+            if ($vi) {
+                $vi.style.display = "block";
+                $vi.classList.add("active");
+            }
         }
         // interop with catalog 
-        generateCatalog(".catalog-body");
+        if (typeof generateCatalog === 'function') {
+            generateCatalog(".catalog-body");
+        }
     }
 
     // handle select change
     function onLanChange(index) {
+        var lang;
         if (index == 0) {
             lang = "vi"
-        } else {
+        } else if (index == 1) {
             lang = "en"
+        } else if (index == 2) {
+            lang = "pt-br"
         }
         setLang(lang)
     }

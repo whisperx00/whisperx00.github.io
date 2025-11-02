@@ -13,6 +13,11 @@ nav-style: 'invert'
     {{ about_en | markdownify }}
 </div>
 
+<div class="pt-br post-container">
+    {% capture about_ptbr %}{% include about/pt-BR.md %}{% endcapture %}
+    {{ about_ptbr | markdownify }}
+</div>
+
 
 {% if site.disqus_username %}
 <!-- disqus 评论框 start -->
