@@ -236,7 +236,6 @@
 <!-- Handle Language Change -->
 <script type="text/javascript">
     // get nodes
-    var $vi = document.querySelector(".vi");
     var $en = document.querySelector(".en");
     var $ptbr = document.querySelector(".pt-br");
     var $select = document.querySelector("select");
@@ -254,29 +253,22 @@
     function _render() {
         var lang = getLang()
         // Hide all language divs first
-        if ($vi) { $vi.style.display = "none"; $vi.classList.remove("active"); }
         if ($en) { $en.style.display = "none"; $en.classList.remove("active"); }
         if ($ptbr) { $ptbr.style.display = "none"; $ptbr.classList.remove("active"); }
         
         // Show selected language
-        if (lang == "en") {
+        if (lang == "pt-br") {
             $select.selectedIndex = 1;
-            if ($en) {
-                $en.style.display = "block";
-                $en.classList.add("active");
-            }
-        } else if (lang == "pt-br") {
-            $select.selectedIndex = 2;
             if ($ptbr) {
                 $ptbr.style.display = "block";
                 $ptbr.classList.add("active");
             }
         } else {
-            // Default to Vietnamese
+            // Default to English
             $select.selectedIndex = 0;
-            if ($vi) {
-                $vi.style.display = "block";
-                $vi.classList.add("active");
+            if ($en) {
+                $en.style.display = "block";
+                $en.classList.add("active");
             }
         }
         // interop with catalog 
@@ -289,10 +281,8 @@
     function onLanChange(index) {
         var lang;
         if (index == 0) {
-            lang = "vi"
-        } else if (index == 1) {
             lang = "en"
-        } else if (index == 2) {
+        } else if (index == 1) {
             lang = "pt-br"
         }
         setLang(lang)

@@ -26,6 +26,11 @@
                         </li>
                         {% endif %}
                         {% endfor %}
+                        {% if page.multilingual or layout.multilingual %}
+                        <li>
+                            {% include multilingual-sel.html %}
+                        </li>
+                        {% endif %}
                         <li>
                             <a id="theme-toggle" onclick="modeSwitcher()"></a>
                         </li>
