@@ -852,20 +852,23 @@ select.sel-lang {
   font-size: 16px;
   font-family: "IBM Plex Mono", monospace;
 }
-div.en.post-container,
-div[class*="en"][class*="post-container"] {
-  display: block !important;
+.en.post-container {
+  display: block;
 }
-div.pt-br.post-container,
-div[class*="pt-br"][class*="post-container"] {
-  display: none !important;
+.pt-br.post-container {
+  display: none;
 }
-div.pt-br.post-container.active,
-div[class*="pt-br"][class*="post-container"].active {
-  display: block !important;
+.pt-br.post-container.active {
+  display: block;
 }
-div.en.post-container.active {
-  display: block !important;
+.en.post-container.active {
+  display: block;
+}
+.en:not(.post-container) {
+  display: block;
+}
+.pt-br:not(.post-container) {
+  display: none;
 }
 .portfolio-hero {
   text-align: center;

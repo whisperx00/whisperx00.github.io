@@ -268,42 +268,33 @@
         function _render() {
             var lang = getLang()
             
-            // Hide all language divs first - use both classes separately as fallback
-            var allLangDivs = document.querySelectorAll(".en.post-container, .pt-br.post-container, .en, .pt-br");
-            allLangDivs.forEach(function(div) {
-                if (div.classList.contains("en") || div.classList.contains("pt-br")) {
-                    div.style.display = "none";
-                    div.classList.remove("active");
-                }
-            });
+            // Find all language divs - try multiple selectors
+            var $enDiv = document.querySelector(".en.post-container") || document.querySelector("div.en.post-container");
+            var $ptbrDiv = document.querySelector(".pt-br.post-container") || document.querySelector("div.pt-br.post-container");
             
             // Show selected language
             if (lang == "pt-br") {
                 if ($select) { $select.selectedIndex = 1; }
-                if ($ptbr) {
-                    $ptbr.style.display = "block";
-                    $ptbr.classList.add("active");
-                } else {
-                    // Fallback: try finding pt-br without post-container
-                    var $ptbrFallback = document.querySelector(".pt-br");
-                    if ($ptbrFallback) {
-                        $ptbrFallback.style.display = "block";
-                        $ptbrFallback.classList.add("active");
-                    }
+                // Hide English and show Portuguese
+                if ($enDiv) {
+                    $enDiv.style.display = "none";
+                    $enDiv.classList.remove("active");
+                }
+                if ($ptbrDiv) {
+                    $ptbrDiv.style.display = "block";
+                    $ptbrDiv.classList.add("active");
                 }
             } else {
                 // Default to English
                 if ($select) { $select.selectedIndex = 0; }
-                if ($en) {
-                    $en.style.display = "block";
-                    $en.classList.add("active");
-                } else {
-                    // Fallback: try finding en without post-container
-                    var $enFallback = document.querySelector(".en");
-                    if ($enFallback) {
-                        $enFallback.style.display = "block";
-                        $enFallback.classList.add("active");
-                    }
+                // Hide Portuguese and show English
+                if ($ptbrDiv) {
+                    $ptbrDiv.style.display = "none";
+                    $ptbrDiv.classList.remove("active");
+                }
+                if ($enDiv) {
+                    $enDiv.style.display = "block";
+                    $enDiv.classList.add("active");
                 }
             }
             // interop with catalog 
