@@ -1,8 +1,8 @@
 # Site settings
-title: "🌸🐳 \  HynDuf \  👋"
-SEOTitle: HynDuf Blog
+title: "🌸🐳 \  whisperx00 \  👋"
+SEOTitle: whisperx00 Blog
 header-img: img/hollow-knight.png
-email: hynduf@gmail.com
+email: gm.manoel.albino@gmail.co,
 description: "May it get me? 🌸"
 keyword: "hynduf, @hynduf, HynDuf's Blog, CP, Arch Linux, Obsidian"
 url: "https://hynduf.github.io" # your host, for absolute URL
@@ -13,7 +13,7 @@ future: true
 
 # SNS settings
 RSS: false
-github_username: hynduf
+github_username: whisperx00
 twitter_username: HynDuf
 facebook_username: HynDuf
 linkedin_username: hynduf
@@ -87,8 +87,8 @@ service-worker: true
 page-mathjax: false
 
 # Friends
-friends:
-  [
-    { title: "Trí Phan", href: "https://triphan2k3.github.io/" },
-    { title: "Vanhger", href: "https://vanhger.github.io/" },
-  ]
+# friends:
+#   [
+#     { title: "Trí Phan", href: "https://triphan2k3.github.io/" },
+#     { title: "Vanhger", href: "https://vanhger.github.io/" },
+#   ]
