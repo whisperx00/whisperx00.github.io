@@ -235,61 +235,91 @@
 {% if page.multilingual %}
 <!-- Handle Language Change -->
 <script type="text/javascript">
-    // get nodes
-    var $en = document.querySelector(".en");
-    var $ptbr = document.querySelector(".pt-br");
-    var $select = document.querySelector("select");
+    // Wait for DOM to be ready
+    function initLanguageSwitcher() {
+        // get nodes - use more specific selectors
+        var $en = document.querySelector(".en.post-container");
+        var $ptbr = document.querySelector(".pt-br.post-container");
+        var $select = document.querySelector(".sel-lang");
 
-    // Changes at v1.8.1: include lang flag as a url query. This interop well with catalog hash anchors.
-    function getLang() { return new URLSearchParams(document.location.search).get("lang") }
-
-    function setLang(newLang) {
-        var params = new URLSearchParams(document.location.search)
-        params.set("lang", newLang)
-        document.location.search = params.toString()  // refresh.
-    }
-
-    // handle render
-    function _render() {
-        var lang = getLang()
-        // Hide all language divs first
-        if ($en) { $en.style.display = "none"; $en.classList.remove("active"); }
-        if ($ptbr) { $ptbr.style.display = "none"; $ptbr.classList.remove("active"); }
+        // If select not found, try general selector
+        if (!$select) {
+            $select = document.querySelector("select.sel-lang");
+        }
         
-        // Show selected language
-        if (lang == "pt-br") {
-            $select.selectedIndex = 1;
-            if ($ptbr) {
-                $ptbr.style.display = "block";
-                $ptbr.classList.add("active");
-            }
-        } else {
-            // Default to English
-            $select.selectedIndex = 0;
-            if ($en) {
-                $en.style.display = "block";
-                $en.classList.add("active");
+        // If still not found, try any select in navbar
+        if (!$select) {
+            var langSelector = document.querySelector(".lang-selector");
+            if (langSelector) {
+                $select = langSelector.querySelector("select");
             }
         }
-        // interop with catalog 
-        if (typeof generateCatalog === 'function') {
-            generateCatalog(".catalog-body");
+
+        // Changes at v1.8.1: include lang flag as a url query. This interop well with catalog hash anchors.
+        function getLang() { return new URLSearchParams(document.location.search).get("lang") }
+
+        function setLang(newLang) {
+            var params = new URLSearchParams(document.location.search)
+            params.set("lang", newLang)
+            document.location.search = params.toString()  // refresh.
         }
+
+        // handle render
+        function _render() {
+            var lang = getLang()
+            
+            // Hide all language divs first
+            var allLangDivs = document.querySelectorAll(".en.post-container, .pt-br.post-container");
+            allLangDivs.forEach(function(div) {
+                div.style.display = "none";
+                div.classList.remove("active");
+            });
+            
+            // Show selected language
+            if (lang == "pt-br") {
+                if ($select) { $select.selectedIndex = 1; }
+                if ($ptbr) {
+                    $ptbr.style.display = "block";
+                    $ptbr.classList.add("active");
+                }
+            } else {
+                // Default to English
+                if ($select) { $select.selectedIndex = 0; }
+                if ($en) {
+                    $en.style.display = "block";
+                    $en.classList.add("active");
+                }
+            }
+            // interop with catalog 
+            if (typeof generateCatalog === 'function') {
+                generateCatalog(".catalog-body");
+            }
+        }
+
+        // handle select change
+        function onLanChange(index) {
+            var lang;
+            if (index == 0) {
+                lang = "en"
+            } else if (index == 1) {
+                lang = "pt-br"
+            }
+            setLang(lang)
+        }
+
+        // Make onLanChange globally available
+        window.onLanChange = onLanChange;
+
+        // init
+        _render();
     }
 
-    // handle select change
-    function onLanChange(index) {
-        var lang;
-        if (index == 0) {
-            lang = "en"
-        } else if (index == 1) {
-            lang = "pt-br"
-        }
-        setLang(lang)
+    // Run when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLanguageSwitcher);
+    } else {
+        initLanguageSwitcher();
     }
-
-    // init
-    _render();
 </script>
 {% endif %}
 

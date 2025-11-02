@@ -123,6 +123,15 @@ select {
   }
 }
 
+// Language switching - hide all by default, show active one
+.en.post-container,
+.pt-br.post-container {
+  display: none;
+  &.active {
+    display: block;
+  }
+}
+
 // Language selector in navbar
 .navbar-custom {
   .lang-selector {
