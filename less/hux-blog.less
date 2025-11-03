@@ -541,20 +541,29 @@ select {
 
 // Language selector in navbar
 .navbar-custom {
+  .nav {
+    li.lang-selector {
+      // Match other nav li items
+      a {
+        // Style to match nav links
+      }
+    }
+  }
   .lang-selector {
     display: flex;
     align-items: center;
-    padding: 20px 10px;
+    padding: 0; // Let nav li handle padding
     .lang {
       margin-top: 0;
       border: 1px solid transparent;
       background: transparent;
       padding: 0;
+      line-height: 1; // Match nav items
       i {
         display: none; // Hide icon in navbar
       }
       select.sel-lang {
-        font-size: 12px;
+        font-size: inherit; // Inherit from nav li a
         text-transform: uppercase;
         font-weight: 800;
         letter-spacing: 1px;
@@ -563,25 +572,73 @@ select {
         padding: 0;
         margin: 0;
         cursor: pointer;
+        line-height: inherit;
+        color: inherit; // Inherit from nav li a
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+      }
+    }
+  }
+  // Standard navbar - ensure this applies to all nav items
+  .nav li {
+    a {
+      text-transform: uppercase;
+      font-size: 12px;
+      line-height: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    &.lang-selector {
+      .lang select.sel-lang {
+        text-transform: uppercase;
+        font-size: 12px;
+        line-height: 20px;
+        font-weight: 800;
+        letter-spacing: 1px;
+      }
+    }
+  }
+  @media only screen and (min-width: 768px) {
+    .nav li a {
+      padding: 20px;
+      color: var(--crust-background-color);
+      &:hover,
+      &:focus {
+        color: var(--main-background-color);
+      }
+    }
+    .lang-selector {
+      .lang select.sel-lang {
+        padding: 20px 10px;
         color: var(--crust-background-color);
-        @media only screen and (min-width: 768px) {
-          color: var(--crust-background-color);
+        &:hover,
+        &:focus {
+          color: var(--main-background-color);
         }
       }
     }
-    @media only screen and (max-width: 767px) {
-      padding: 15px 10px;
-    }
   }
   &.invert {
+    .nav li a {
+      color: var(--main-text-color);
+      font-size: 18px; // Match hynduf.less
+      font-weight: 900;
+      font-family: @font-monospace;
+      &:hover,
+      &:focus {
+        color: var(--accent-color);
+      }
+    }
     .lang-selector {
-      .lang {
-        select.sel-lang {
-          color: var(--main-text-color);
-          &:hover,
-          &:focus {
-            color: var(--accent-color);
-          }
+      .lang select.sel-lang {
+        color: var(--main-text-color);
+        font-size: 18px; // Match nav li a in invert mode
+        font-weight: 900;
+        font-family: @font-monospace;
+        &:hover,
+        &:focus {
+          color: var(--accent-color);
         }
       }
     }

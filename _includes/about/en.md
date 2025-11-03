@@ -218,10 +218,6 @@
       <i class="fa-solid fa-phone"></i>
       <a href="tel:+5563992472995">+55 63 99247-2995</a>
     </div>
-    <div class="contact-item">
-      <i class="fa-solid fa-location-dot"></i>
-      <span>Rua Ruberlei Boareto da Silva 247, Cidade Universitária, Campinas, São Paulo, 13083705, Brasil</span>
-    </div>
   </div>
   <div class="contact-links">
     <a href="https://github.com/{{ site.github_username }}" target="_blank" class="contact-link">
