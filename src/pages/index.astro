@@ -36,6 +36,12 @@ const posts = (await getCollection('posts', p => !p.data.draft))
     </div>
 
     <section class="about" id="about">
+      <div class="photo" aria-label="Photo placeholder">
+        <div class="frame"></div>
+        <span class="corner tl">[ photo ]</span>
+        <span class="corner br">240×280</span>
+        <span class="lbl">drop headshot here<span class="sub">./assets/whisperx00.jpg</span></span>
+      </div>
       <div class="info">
         <div class="line"><span class="k">name</span><span class="v">Manoel Albino Coelho de Miranda <span class="dim">// whisperx00@kali</span></span></div>
         <div class="line"><span class="k">role</span><span class="v">offensive security researcher <span class="muted">— windows &amp; AD · web exploitation · custom tooling</span></span></div>
@@ -43,7 +49,7 @@ const posts = (await getCollection('posts', p => !p.data.draft))
         <div class="line"><span class="k">status</span><span class="v"><span style="color:var(--green);">● open to opportunities</span> <span class="dim">· brazil · open to remote and relocation</span></span></div>
         <div class="line"><span class="k">location</span><span class="v">brazil <span class="dim">· open to remote and relocation</span></span></div>
         <div class="line"><span class="k">spoken</span><span class="v"><span class="muted">portuguese (native)</span><span class="sep">·</span><span class="muted">english (C1)</span><span class="sep">·</span><span class="muted">french (A2 · learning)</span></span></div>
-        <div class="line"><span class="k">education</span><span class="v"><span class="dim">[REVISE: add education]</span></span></div>
+        <div class="line"><span class="k">education</span><span class="v"><span class="muted">Software Engineering</span> <span class="dim">— PUC-Campinas</span></span></div>
         <div class="line"><span class="k">certs</span><span class="v">
           <span class="kbd training">OSCP · in progress</span>
           <span class="kbd planned">OSWP · planned</span>
@@ -138,8 +144,18 @@ const posts = (await getCollection('posts', p => !p.data.draft))
   .tag { font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:lowercase;padding:3px 8px;border:1px solid var(--col,var(--teal));color:var(--col,var(--teal));background:color-mix(in oklab,var(--col,var(--teal)) 10%,transparent); }
 
   /* ---- about ---- */
-  .about { padding:24px;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--mauve);margin-top:20px;opacity:0;transform:translateY(10px); }
+  .about { display:grid;grid-template-columns:220px 1fr;gap:32px;padding:24px;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--mauve);margin-top:20px;opacity:0;transform:translateY(10px); }
   .about.in { opacity:1;transform:none;transition:opacity .4s ease-out,transform .4s ease-out; }
+
+  /* photo placeholder */
+  .about .photo { position:relative;width:220px;height:260px;flex-shrink:0;background:repeating-linear-gradient(45deg,var(--surface0) 0px,var(--surface0) 2px,var(--base) 2px,var(--base) 10px);border:1px solid var(--surface1);overflow:hidden; }
+  .about .photo .frame { position:absolute;inset:8px;border:1px dashed var(--surface1);pointer-events:none; }
+  .about .photo .corner { position:absolute;font-size:10px;letter-spacing:.06em;font-weight:500; }
+  .about .photo .corner.tl { top:10px;left:10px;color:var(--mauve); }
+  .about .photo .corner.br { bottom:10px;right:10px;color:var(--dim); }
+  .about .photo .lbl { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:11.5px;color:var(--sub);text-align:center; }
+  .about .photo .lbl .sub { font-size:10px;color:var(--dim); }
+
   .about .info { display:flex;flex-direction:column;gap:18px; }
   .about .line { display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline;font-size:12.5px;padding-bottom:8px;border-bottom:1px dashed color-mix(in oklab,var(--surface1) 60%,transparent); }
   .about .line:last-child { border-bottom:none;padding-bottom:0; }
@@ -175,6 +191,8 @@ const posts = (await getCollection('posts', p => !p.data.draft))
   @media (max-width:680px) {
     .post { grid-template-columns:1fr;gap:10px; }
     .post .meta { flex-direction:row;gap:10px; }
+    .about { grid-template-columns:1fr; }
+    .about .photo { width:100%;height:180px; }
     .about .line { grid-template-columns:1fr;gap:4px; }
     .bootline { white-space:normal; }
   }
