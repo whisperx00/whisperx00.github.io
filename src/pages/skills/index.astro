@@ -1,0 +1,474 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="whisperx00@kali — skill tree" active="skills">
+  <Fragment slot="head">
+    <style>
+      main { max-width: 1200px; }
+    </style>
+  </Fragment>
+
+  <main>
+    <div class="cmd">
+      <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/skills</span>
+      <span style="color:var(--text);">$ cat</span>
+      <span class="arg">./tree.json</span>
+      <span style="color:var(--text);">|</span>
+      <span style="color:var(--text);">jq</span>
+      <span class="flag">'.classes[]'</span>
+    </div>
+
+    <h1 class="title">skill tree <span class="slash">/</span> <span class="ext">v1.0</span></h1>
+    <p class="lede">
+      <span class="hl">A talent tree for offensive security.</span>
+      branches diverge from each class's <code>origin</code> node.
+      <span style="color:var(--mauve);">★ mastered</span>,
+      <span style="color:var(--green);">● unlocked</span>,
+      <span style="color:var(--yellow);">● training</span>,
+      <span style="color:var(--dim);">○ locked</span>.
+    </p>
+
+    <section class="hud">
+      <div class="cell" style="--col:var(--mauve);">
+        <div class="k">profile · level</div>
+        <div class="v">8 <span style="font-size:11px;color:var(--dim);font-weight:500;">/ 40</span></div>
+        <div class="lvlbar"><span style="--p:20%;background:var(--mauve);"></span><span class="ticks"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+        <div class="s">XP 3,200 · grinding OSCP</div>
+      </div>
+      <div class="cell" style="--col:var(--green);">
+        <div class="k">talent points</div>
+        <div class="v">10 / 22</div>
+        <div class="s">spent across 4 classes</div>
+      </div>
+      <div class="cell" style="--col:var(--peach);">
+        <div class="k">mastered</div>
+        <div class="v">6</div>
+        <div class="s">★ internalized + lab proof</div>
+      </div>
+      <div class="cell" style="--col:var(--yellow);">
+        <div class="k">in training</div>
+        <div class="v">4</div>
+        <div class="s">currently grinding</div>
+      </div>
+    </section>
+
+    <div class="legend">
+      <div class="group">
+        <span class="lab">states:</span>
+        <span class="pip mastered">mastered</span>
+        <span class="pip unlocked">unlocked</span>
+        <span class="pip training">training</span>
+        <span class="pip locked">locked</span>
+      </div>
+      <span class="sep">|</span>
+      <div class="group">
+        <span class="lab">controls:</span>
+        <span>click a node for proof &amp; reqs</span>
+        <span class="sep">·</span>
+        <span>switch class with the tabs above the tree</span>
+      </div>
+    </div>
+
+    <div class="classes" id="classTabs"></div>
+
+    <div class="layout">
+      <div class="canvas" id="canvas">
+        <div class="grid-bg"></div>
+        <svg class="links" id="links" preserveAspectRatio="none"></svg>
+        <div class="nodes" id="nodes"></div>
+      </div>
+      <aside class="sidepanel idle" id="panel" data-state="">
+        <div class="head"><div class="name">select a node</div></div>
+        <div class="meta">click any hex on the tree to open its dossier — proofs, prereqs, time-on-task and notable artifacts.</div>
+      </aside>
+    </div>
+
+    <section class="branchcards" id="branchcards"></section>
+  </main>
+
+  <div class="statusbar" slot="statusbar">
+    <div class="statusbar-inner">
+      <div class="left">
+        <span><span class="dot"></span><span class="k">tree:</span> <span class="v" style="color:var(--green);">in progress · v1</span></span>
+        <span><span class="k">classes:</span> <span class="v">4</span></span>
+        <span><span class="k">nodes:</span> <span class="v">22</span></span>
+      </div>
+      <div class="right">
+        <span><span class="k">tooltip:</span> <span class="v">click hex → side panel</span></span>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  main { max-width: 1200px; }
+  .hud { display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr;gap:10px;margin:0 0 22px; }
+  .hud .cell { background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--col,var(--mauve));padding:11px 14px; }
+  .hud .cell .k { font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim); }
+  .hud .cell .v { font-weight:700;font-size:18px;color:var(--col,var(--text));margin-top:4px; }
+  .hud .cell .s { font-size:10.5px;color:var(--sub);margin-top:2px; }
+  .hud .lvlbar { margin-top:6px;height:5px;background:var(--surface0);position:relative;overflow:hidden; }
+  .hud .lvlbar > span { display:block;height:100%;width:var(--p,20%); }
+  .hud .lvlbar .ticks { position:absolute;inset:0;display:flex; }
+  .hud .lvlbar .ticks i { flex:1;border-right:1px solid var(--mantle); }
+
+  .legend { display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;background:var(--mantle);border:1px solid var(--surface1);padding:10px 14px;align-items:center;font-size:11px;color:var(--sub); }
+  .legend .group { display:flex;gap:14px;align-items:center;flex-wrap:wrap; }
+  .legend .lab { color:var(--dim);letter-spacing:.06em;text-transform:uppercase;font-size:10px; }
+  .legend .pip { display:inline-flex;align-items:center;gap:6px; }
+  .legend .pip::before { content:"";width:9px;height:9px;display:inline-block; }
+  .legend .pip.unlocked::before { background:var(--green);box-shadow:0 0 6px var(--green); }
+  .legend .pip.mastered::before { background:var(--mauve);box-shadow:0 0 6px var(--mauve); }
+  .legend .pip.training::before { background:var(--yellow); }
+  .legend .pip.locked::before { background:var(--dim);opacity:.5; }
+  .legend .sep { color:var(--surface1); }
+
+  .classes { display:flex;gap:0;background:var(--mantle);border:1px solid var(--surface1);margin-bottom:14px;overflow-x:auto; }
+  .classes button { background:transparent;border:0;border-right:1px solid var(--surface1);color:var(--dim);font-family:var(--mono);font-size:12px;padding:11px 16px;cursor:pointer;white-space:nowrap;letter-spacing:.04em;transition:color .15s,background .15s;display:flex;align-items:center;gap:8px; }
+  .classes button:last-child { border-right:0; }
+  .classes button:hover { color:var(--text); }
+  .classes button.on { color:var(--text);background:var(--surface0); }
+  .classes button .glyph { width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;color:var(--col,var(--mauve));font-size:13px; }
+  .classes button.on .glyph { filter:drop-shadow(0 0 4px var(--col,var(--mauve))); }
+  .classes button .pts { margin-left:6px;font-size:10px;color:var(--dim); }
+  .classes button.on .pts { color:var(--col,var(--mauve)); }
+
+  .canvas { position:relative;background:radial-gradient(ellipse at 50% 0%, color-mix(in oklab, var(--col,var(--mauve)) 16%, transparent) 0%, transparent 60%),var(--mantle);border:1px solid var(--surface1);border-top:2px solid var(--col,var(--mauve));overflow:hidden;min-height:780px; }
+  .canvas .grid-bg { position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(to right, color-mix(in oklab, var(--surface1) 50%, transparent) 1px, transparent 1px),linear-gradient(to bottom, color-mix(in oklab, var(--surface1) 50%, transparent) 1px, transparent 1px);background-size:32px 32px;mask-image:radial-gradient(ellipse at 50% 30%, #000 0%, #000 60%, transparent 100%);opacity:.4; }
+  .canvas svg.links { position:absolute;inset:0;width:100%;height:100%;pointer-events:none; }
+  .canvas svg.links path { fill:none;stroke-width:2;stroke-linecap:round; }
+  .canvas svg.links path.unlocked { stroke:color-mix(in oklab,var(--green) 70%, transparent); }
+  .canvas svg.links path.mastered { stroke:color-mix(in oklab,var(--mauve) 80%, transparent);filter:drop-shadow(0 0 5px color-mix(in oklab,var(--mauve) 60%, transparent)); }
+  .canvas svg.links path.training { stroke:color-mix(in oklab,var(--yellow) 70%, transparent);stroke-dasharray:5 4;animation:dash 22s linear infinite; }
+  .canvas svg.links path.locked { stroke:var(--surface1);stroke-dasharray:3 5; }
+  @keyframes dash { to { stroke-dashoffset:-200; } }
+
+  .nodes { position:absolute;inset:0; }
+  .node { position:absolute;transform:translate(-50%,-50%);width:120px;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform .15s; }
+  .node:hover { transform:translate(-50%,-50%) scale(1.04); }
+  .node.selected { transform:translate(-50%,-50%) scale(1.08); }
+  .node .badge { width:54px;height:54px;background:var(--mantle);display:flex;align-items:center;justify-content:center;color:var(--state,var(--dim));font-weight:700;font-size:18px;position:relative;transition:box-shadow .2s,background .15s;clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);box-shadow:inset 0 0 0 2px var(--state,var(--dim)),0 0 0 4px var(--mantle),inset 0 0 0 6px color-mix(in oklab,var(--state,var(--dim)) 35%, var(--mantle)); }
+  .node:hover .badge { box-shadow:inset 0 0 0 2px var(--state,var(--dim)),0 0 0 4px var(--mantle),inset 0 0 0 6px color-mix(in oklab,var(--state,var(--dim)) 35%, var(--mantle)),0 0 16px color-mix(in oklab,var(--state,var(--dim)) 70%, transparent); }
+  .node.selected .badge { box-shadow:inset 0 0 0 2px var(--state,var(--dim)),0 0 0 4px var(--mantle),inset 0 0 0 6px color-mix(in oklab,var(--state,var(--dim)) 50%, var(--mantle)),0 0 22px color-mix(in oklab,var(--state,var(--dim)) 90%, transparent); }
+  .node[data-state="locked"] { opacity:.55; }
+  .node[data-state="locked"] .badge { filter:saturate(.3); }
+  .node[data-state="mastered"] .badge { background:color-mix(in oklab,var(--mauve) 18%, var(--mantle)); }
+  .node[data-state="mastered"] .badge::after { content:"★";position:absolute;top:-9px;right:-9px;font-size:11px;color:var(--mauve);background:var(--crust);width:18px;height:18px;display:flex;align-items:center;justify-content:center;border:1px solid var(--mauve);box-shadow:0 0 8px color-mix(in oklab,var(--mauve) 60%, transparent); }
+  .node[data-state="training"] .badge::after { content:"";position:absolute;top:-7px;right:-7px;width:12px;height:12px;border-radius:50%;background:var(--yellow);border:2px solid var(--crust);animation:pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.25);opacity:.6;} }
+  .node .badge .ico { font-size:20px;line-height:1;color:inherit;font-weight:700; }
+  .node .label { margin-top:8px;font-size:11px;color:var(--text);font-weight:600;line-height:1.25;text-shadow:0 1px 2px var(--crust),0 0 6px var(--crust); }
+  .node[data-state="locked"] .label { color:var(--dim); }
+  .node .lvl { margin-top:3px;font-size:10px;color:var(--state,var(--dim));letter-spacing:.06em;background:var(--crust);padding:1px 6px;border:1px solid var(--surface1); }
+  .node[data-state="mastered"] { --state:var(--mauve); }
+  .node[data-state="unlocked"] { --state:var(--green); }
+  .node[data-state="training"] { --state:var(--yellow); }
+  .node[data-state="locked"]   { --state:var(--dim); }
+
+  .node.origin .badge { width:72px;height:72px;box-shadow:inset 0 0 0 2px var(--col,var(--mauve)),0 0 0 5px var(--mantle),inset 0 0 0 8px color-mix(in oklab,var(--col,var(--mauve)) 50%, var(--mantle)),0 0 26px color-mix(in oklab,var(--col,var(--mauve)) 60%, transparent);color:var(--col,var(--mauve)); }
+  .node.origin .badge .ico { font-size:24px; }
+  .node.origin .label { font-size:13px;color:var(--col,var(--mauve)); }
+  .node.origin .lvl { color:var(--col,var(--mauve));border-color:color-mix(in oklab,var(--col,var(--mauve)) 50%, var(--surface1)); }
+  .node.origin { width:140px; }
+
+  .branch-label { position:absolute;bottom:14px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);padding:5px 12px;background:var(--crust);border:1px solid var(--surface1);transform:translateX(-50%); }
+  .branch-label .accent { color:var(--c,var(--mauve));margin-right:6px; }
+
+  .layout { display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start; }
+  @media (max-width:1024px) { .layout { grid-template-columns:1fr; } }
+
+  .sidepanel { background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--col,var(--mauve));padding:18px 20px;font-size:12px;position:sticky;top:80px; }
+  .sidepanel .head { display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px; }
+  .sidepanel .name { font-weight:700;font-size:16px;color:var(--text); }
+  .sidepanel .lvl-pill { font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:2px 7px;border:1px solid currentColor;color:var(--state,var(--mauve));white-space:nowrap; }
+  .sidepanel[data-state="mastered"] .lvl-pill { --state:var(--mauve); }
+  .sidepanel[data-state="unlocked"] .lvl-pill { --state:var(--green); }
+  .sidepanel[data-state="training"] .lvl-pill { --state:var(--yellow); }
+  .sidepanel[data-state="locked"]   .lvl-pill { --state:var(--dim); }
+  .sidepanel .meta { font-size:10.5px;color:var(--dim);margin-bottom:14px; }
+  .sidepanel .meta .b { color:var(--col,var(--mauve)); }
+  .sidepanel .desc { color:var(--sub);font-size:12px;line-height:1.7;margin-bottom:14px; }
+  .sidepanel .desc :global(.hl) { color:var(--text); }
+  .sidepanel .stats { display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:14px; }
+  .sidepanel .stats .r { display:flex;justify-content:space-between;font-size:11px;border-bottom:1px dashed color-mix(in oklab,var(--surface1) 50%,transparent);padding-bottom:4px; }
+  .sidepanel .stats .r .k { color:var(--dim); }
+  .sidepanel .stats .r .v { color:var(--text); }
+  .sidepanel h4 { margin:14px 0 6px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--col,var(--mauve)); }
+  .sidepanel ul.tags { list-style:none;margin:0 0 4px;padding:0;display:flex;flex-wrap:wrap;gap:5px; }
+  .sidepanel ul.tags li { font-size:10.5px;color:var(--sub);background:var(--base);border:1px solid var(--surface1);padding:1px 7px; }
+  .sidepanel .proofs { margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px; }
+  .sidepanel .proofs li { font-size:11px;color:var(--sub);display:flex;gap:8px;align-items:flex-start; }
+  .sidepanel .proofs li::before { content:"▸";color:var(--col,var(--mauve));margin-top:1px; }
+  .sidepanel .reqs { font-size:11px;color:var(--dim);margin-bottom:6px; }
+  .sidepanel .reqs .satisfied { color:var(--green); }
+  .sidepanel .reqs .missing { color:var(--red); }
+  .sidepanel.idle { border-left-color:var(--surface1); }
+  .sidepanel.idle .name { color:var(--dim); }
+
+  .branchcards { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px; }
+  @media (max-width:820px) { .branchcards { grid-template-columns:1fr; } }
+  .bc { background:var(--mantle);border:1px solid var(--surface1);border-top:2px solid var(--c,var(--green));padding:14px 16px;font-size:11.5px; }
+  .bc h4 { margin:0 0 5px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--c,var(--green)); }
+  .bc p { margin:0 0 6px;color:var(--sub);line-height:1.55;font-size:11px; }
+  .bc .key { font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase; }
+  .bc .key b { color:var(--text);font-weight:600; }
+  @media (max-width:680px) { .hud { grid-template-columns:1fr 1fr; } .canvas { min-height:1100px; } }
+</style>
+
+<script>
+const CLASSES = [
+  {
+    id:"winAD", name:"Windows & AD", glyph:"⎘", color:"mauve", points:"4/8",
+    origin:{ id:"wa-root", label:"AD Enumeration", lvl:"core", state:"mastered",
+      desc:"bloodhound, ldap enumeration, GPO mapping, trust relationships — the patient half of every AD engagement.",
+      tags:["bloodhound","ldap","gpos","trusts"], proofs:["SiDi internship · lab proof","HTB AD boxes"],
+      stat:{xp:"800",time:"3 mo"} },
+    branches:[
+      { name:"AD attack chains", color:"mauve", labelX:18,
+        nodes:[
+          { id:"wa-kerb", label:"Kerberoasting / AS-REP", lvl:"L2", state:"mastered", parent:"wa-root",
+            desc:"AS-REP roasting, kerberoasting service accounts, cracking TGS tickets offline. the bread-and-butter of every AD assessment.",
+            tags:["kerberoast","asreproast","hashcat"], proofs:["SiDi · multiple lab repros","HTB AD boxes"],
+            stat:{xp:"600",time:"2 mo"} },
+          { id:"wa-certipy", label:"Certipy ESC paths", lvl:"L3", state:"unlocked", parent:"wa-kerb",
+            desc:"AD CS misconfigurations — ESC1 through ESC8, forging certificates, PKINIT abuse.",
+            tags:["certipy","adcs","esc1","pkinit"], proofs:["lab repros · HTB"],
+            stat:{xp:"400",time:"1 mo"} },
+          { id:"wa-dcsync", label:"DCSync / GPO abuse", lvl:"L4", state:"training", parent:"wa-certipy",
+            desc:"replication rights abuse, NTDS dumping, pyGPOAbuse for GPO-based persistence.",
+            tags:["dcsync","ntds","pygpoabuse"], proofs:["lab work · in progress"],
+            stat:{xp:"200",time:"ongoing"} },
+        ]
+      },
+      { name:"Windows privesc", color:"blue", labelX:50,
+        nodes:[
+          { id:"wa-token", label:"Token Abuse", lvl:"L2", state:"mastered", parent:"wa-root",
+            desc:"SeImpersonatePrivilege, SeBackupPrivilege, token impersonation chains. JuicyPotato / PrintSpoofer when the box is old enough.",
+            tags:["seimpersonate","sebackup","juicypotato","potato"], proofs:["SiDi · arbitrary-delete PoC","3 HTB windows boxes"],
+            stat:{xp:"700",time:"2 mo"} },
+          { id:"wa-rundll", label:"RunasCs / LSASS", lvl:"L3", state:"unlocked", parent:"wa-token",
+            desc:"RunasCs for lateral movement with known credentials, LSASS dump techniques and their EDR implications.",
+            tags:["runascs","lsass","mimikatz"], proofs:["HTB lab repros"],
+            stat:{xp:"350",time:"3 wks"} },
+        ]
+      },
+      { name:"Pivoting", color:"teal", labelX:82,
+        nodes:[
+          { id:"wa-chisel", label:"Chisel / Ligolo-ng", lvl:"L2", state:"mastered", parent:"wa-root",
+            desc:"tunneling through footholds — chisel SOCKS5, Ligolo-ng for cleaner multi-hop pivoting, proxychains.",
+            tags:["chisel","ligolo","proxychains","socks5"], proofs:["SiDi · multi-hop lab","HTB pro labs"],
+            stat:{xp:"500",time:"1 mo"} },
+          { id:"wa-ssh", label:"SSH pivoting", lvl:"L2", state:"unlocked", parent:"wa-chisel",
+            desc:"ssh -D dynamic forwarding, -L/-R port forwarding, jump host chains.",
+            tags:["ssh","portfwd","jumphost"], proofs:["HTB boxes"],
+            stat:{xp:"250",time:"2 wks"} },
+        ]
+      }
+    ]
+  },
+  {
+    id:"webClient", name:"Web & Client-Side", glyph:"⌖", color:"peach", points:"3/7",
+    origin:{ id:"wc-root", label:"Web Applications", lvl:"core", state:"mastered",
+      desc:"HTTP semantics, session handling, parser footguns. web is where most external footholds happen.",
+      tags:["http","cookies","burp"], proofs:["SiDi · samsung web assessments"],
+      stat:{xp:"600",time:"3 mo"} },
+    branches:[
+      { name:"Web exploitation", color:"peach", labelX:18,
+        nodes:[
+          { id:"wc-lfi", label:"LFI / Path Traversal", lvl:"L2", state:"mastered", parent:"wc-root",
+            desc:"local file inclusion, null-byte tricks, log poisoning, php wrappers, path traversal to RCE chains.",
+            tags:["lfi","rfi","php","log-poisoning"], proofs:["SiDi · samsung assessment","HTB boxes"],
+            stat:{xp:"500",time:"1 mo"} },
+          { id:"wc-ssti", label:"SSTI / File Upload", lvl:"L2", state:"unlocked", parent:"wc-lfi",
+            desc:"server-side template injection across jinja2/twig/freemarker, and file upload bypass chains to webshell.",
+            tags:["ssti","jinja2","file-upload","webshell"], proofs:["HTB boxes · portswigger"],
+            stat:{xp:"400",time:"3 wks"} },
+          { id:"wc-sqli", label:"SQLi", lvl:"L2", state:"unlocked", parent:"wc-ssti",
+            desc:"manual union-based and blind SQLi, time-based exfil, sqlmap when earned.",
+            tags:["sqli","union","blind","sqlmap"], proofs:["portswigger all-labs","HTB"],
+            stat:{xp:"350",time:"2 wks"} },
+        ]
+      },
+      { name:"Client-side", color:"yellow", labelX:50,
+        nodes:[
+          { id:"wc-phish", label:"Phishing campaigns", lvl:"L2", state:"mastered", parent:"wc-root",
+            desc:"spear-phishing payloads and pretexting. proof: led phishing simulation project at SiDi targeting internal employees.",
+            tags:["phishing","social-eng","pretext"], proofs:["SiDi · phishing simulation project"],
+            stat:{xp:"400",time:"1 mo"} },
+          { id:"wc-av", label:"AV / AMSI evasion", lvl:"L3", state:"training", parent:"wc-phish",
+            desc:"static signature bypass, AMSI patching basics, getting shellcode past Defender on a stock Win10 box.",
+            tags:["amsi","defender","shellcode","bypass"], proofs:["lab work · in progress"],
+            stat:{xp:"150",time:"ongoing"} },
+        ]
+      },
+      { name:"Linux privesc", color:"green", labelX:82,
+        nodes:[
+          { id:"wc-linpe", label:"Linux Privesc", lvl:"L2", state:"mastered", parent:"wc-root",
+            desc:"SUID hunting, sudo misconfig, cron races, capability abuse, kernel-exploit picking on old boxes.",
+            tags:["suid","sudo","caps","cron"], proofs:["HTB linux boxes · lab proof"],
+            stat:{xp:"600",time:"2 mo"} },
+          { id:"wc-docker", label:"Container escapes", lvl:"L3", state:"training", parent:"wc-linpe",
+            desc:"privileged container escape, mounted socket abuse, weak seccomp profiles.",
+            tags:["docker","container","escape"], proofs:["lab work · in progress"],
+            stat:{xp:"120",time:"ongoing"} },
+        ]
+      }
+    ]
+  },
+  {
+    id:"engineering", name:"Engineering", glyph:"◈", color:"teal", points:"2/5",
+    origin:{ id:"en-root", label:"Programming", lvl:"core", state:"mastered",
+      desc:"the tooling that makes the offensive work faster. python for scripting, typescript for frontends.",
+      tags:["python","typescript","react"], proofs:["shipped tools: burp-intruder-cli, ldap-parse"],
+      stat:{xp:"800",time:"ongoing"} },
+    branches:[
+      { name:"Languages", color:"teal", labelX:25,
+        nodes:[
+          { id:"en-py", label:"Python", lvl:"C1", state:"mastered", parent:"en-root",
+            desc:"primary scripting language for exploit automation, parsing tools, and quick PoCs. ldap_parse.py shipped as a tool.",
+            tags:["python","scripting","automation"], proofs:["ldap-parse.py","SiDi tooling"],
+            stat:{xp:"600",time:"3+ yrs"} },
+          { id:"en-ts", label:"TypeScript / React", lvl:"B2", state:"mastered", parent:"en-root",
+            desc:"frontend work — burp-intruder-cli is a React app. comfortable with hooks, state, fetch.",
+            tags:["typescript","react","frontend"], proofs:["burp-intruder-cli"],
+            stat:{xp:"400",time:"1+ yr"} },
+        ]
+      },
+      { name:"Tooling shipped", color:"blue", labelX:75,
+        nodes:[
+          { id:"en-burp", label:"Burp Intruder CLI", lvl:"L2", state:"mastered", parent:"en-root",
+            desc:"converts burp intruder configs into ffuf / hydra / wfuzz / curl commands. react frontend.",
+            tags:["burp","ffuf","hydra","react"], proofs:["github.com/whisperx00/burp-intruder-cli"],
+            stat:{xp:"300",time:"2 mo"} },
+          { id:"en-ldap", label:"ldap_parse.py", lvl:"L2", state:"mastered", parent:"en-root",
+            desc:"parses raw ldap enumeration output for AD recon workflows.",
+            tags:["ldap","python","ad","recon"], proofs:["github.com/whisperx00/ldap-parse"],
+            stat:{xp:"250",time:"1 mo"} },
+        ]
+      }
+    ]
+  },
+  {
+    id:"meta", name:"Meta", glyph:"✦", color:"blue", points:"1/2",
+    origin:{ id:"mt-root", label:"Identity", lvl:"origin", state:"mastered",
+      desc:"the person behind the handle. languages spoken, certs pursued, and research directions.",
+      tags:["portuguese","english","oscp"], proofs:["this page"],
+      stat:{xp:"∞",time:"ongoing"} },
+    branches:[
+      { name:"Languages spoken", color:"green", labelX:25,
+        nodes:[
+          { id:"mt-pt", label:"Portuguese", lvl:"native", state:"mastered", parent:"mt-root",
+            desc:"native speaker.", tags:["portuguese"], proofs:["native"], stat:{xp:"∞",time:"lifetime"} },
+          { id:"mt-en", label:"English", lvl:"C1", state:"mastered", parent:"mt-root",
+            desc:"C1 / professional working. all technical communication in english.",
+            tags:["english","C1"], proofs:["C1 proficiency"], stat:{xp:"∞",time:"7+ yrs"} },
+          { id:"mt-fr", label:"French", lvl:"A2", state:"training", parent:"mt-root",
+            desc:"A2 · actively learning. not yet professional.",
+            tags:["french","A2"], proofs:["in progress"], stat:{xp:"200",time:"ongoing"} },
+        ]
+      },
+      { name:"Certifications", color:"yellow", labelX:75,
+        nodes:[
+          { id:"mt-oscp", label:"OSCP", lvl:"in progress", state:"training", parent:"mt-root",
+            desc:"offensive security certified professional. actively pursuing — primary cert goal.",
+            tags:["oscp","offensive-security"], proofs:["in progress"],
+            stat:{xp:"—",time:"ongoing"} },
+          { id:"mt-oswp", label:"OSWP", lvl:"planned", state:"locked", parent:"mt-oscp",
+            desc:"wireless attacks cert. planned after OSCP.",
+            tags:["oswp","wireless"], proofs:["—"], stat:{xp:"0",time:"queued"} },
+          { id:"mt-osai", label:"OSAI", lvl:"planned", state:"locked", parent:"mt-oswp",
+            desc:"AI security cert. planned — aligns with ML/AI research interest.",
+            tags:["osai","ai-security"], proofs:["—"], stat:{xp:"0",time:"queued"} },
+        ]
+      }
+    ]
+  }
+];
+
+const W=1000,H=780;
+function layout(klass){
+  const pos={};
+  pos[klass.origin.id]={x:50,y:12,node:klass.origin,branchColor:klass.color,isOrigin:true};
+  klass.branches.forEach(br=>{
+    const cx=br.labelX,n=br.nodes.length,yStart=28,yEnd=84;
+    br.nodes.forEach((nd,i)=>{
+      const t=n===1?0:i/(n-1);
+      const offset=(i%2===0?-7:7)*(i>0?1:0);
+      const x=i===0?lerp(cx,50,0.18):cx+offset;
+      const y=yStart+t*(yEnd-yStart);
+      pos[nd.id]={x,y,node:nd,branchColor:br.color};
+    });
+  });
+  return pos;
+}
+function lerp(a,b,t){return a+(b-a)*t;}
+
+const tabsHost=document.getElementById('classTabs');
+const canvas=document.getElementById('canvas');
+const linksSvg=document.getElementById('links');
+const nodesEl=document.getElementById('nodes');
+const panel=document.getElementById('panel');
+const branchHost=document.getElementById('branchcards');
+
+let active=CLASSES[0].id,selected=null;
+
+tabsHost.innerHTML=CLASSES.map(c=>`<button data-id="${c.id}" class="${c.id===active?'on':''}" style="--col:var(--${c.color});"><span class="glyph">${c.glyph}</span><span>${c.name}</span><span class="pts">${c.points}</span></button>`).join('');
+tabsHost.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  active=b.dataset.id;
+  document.querySelectorAll('#classTabs button').forEach(x=>x.classList.toggle('on',x.dataset.id===active));
+  selected=null;render();
+});
+
+function lookupNode(klass,id){
+  if(klass.origin.id===id)return klass.origin;
+  for(const br of klass.branches)for(const n of br.nodes)if(n.id===id)return n;
+  return null;
+}
+
+function render(){
+  const klass=CLASSES.find(c=>c.id===active);
+  const pos=layout(klass);
+  canvas.style.setProperty('--col',`var(--${klass.color})`);
+  const links=[];
+  klass.branches.forEach(br=>{br.nodes.forEach(nd=>{const a=pos[nd.parent],b=pos[nd.id];if(!a||!b)return;links.push({a,b,state:nd.state});});});
+  linksSvg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  linksSvg.innerHTML=links.map(L=>{
+    const x1=L.a.x*W/100,y1=L.a.y*H/100,x2=L.b.x*W/100,y2=L.b.y*H/100,my=(y1+y2)/2;
+    return `<path class="${L.state}" d="M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}" />`;
+  }).join('');
+  const branchLabels=klass.branches.map(br=>`<div class="branch-label" style="left:${br.labelX}%;--c:var(--${br.color});"><span class="accent">▸</span>${br.name}</div>`).join('');
+  const nodesHTML=Object.values(pos).map(p=>{
+    const isOrigin=p.isOrigin,ico=isOrigin?klass.glyph:(p.node.label[0]||'?'),isSel=selected===p.node.id;
+    return `<div class="node ${isOrigin?'origin':''} ${isSel?'selected':''}" data-state="${p.node.state}" data-id="${p.node.id}" style="left:${p.x}%;top:${p.y}%;--col:var(--${isOrigin?klass.color:p.branchColor});"><div class="badge"><span class="ico">${ico}</span></div><div class="label">${p.node.label}</div><div class="lvl">${p.node.lvl}</div></div>`;
+  }).join('');
+  nodesEl.innerHTML=nodesHTML+branchLabels;
+  nodesEl.querySelectorAll('.node').forEach(el=>{
+    el.addEventListener('click',()=>{selected=el.dataset.id;nodesEl.querySelectorAll('.node').forEach(x=>x.classList.toggle('selected',x.dataset.id===selected));renderPanel();});
+  });
+  branchHost.innerHTML=klass.branches.map(br=>{
+    const m=br.nodes.filter(n=>n.state==='mastered').length,t=br.nodes.length;
+    return `<article class="bc" style="--c:var(--${br.color});"><h4>▸ ${br.name}</h4><p>${m} of ${t} nodes mastered · path entry from <b style="color:var(--${br.color});">${klass.origin.label}</b>.</p><div class="key"><b>${br.nodes[0]?.label||''}</b> → ${br.nodes.slice(1).map(n=>n.label).join(' → ')||'—'}</div></article>`;
+  }).join('');
+  renderPanel();
+}
+
+function renderPanel(){
+  if(!selected){
+    panel.classList.add('idle');panel.dataset.state='';
+    panel.innerHTML='<div class="head"><div class="name">select a node</div></div><div class="meta">click any hex on the tree to open its dossier — proofs, prereqs, time-on-task and notable artifacts.</div>';
+    return;
+  }
+  const klass=CLASSES.find(c=>c.id===active);
+  const n=lookupNode(klass,selected);
+  if(!n){selected=null;renderPanel();return;}
+  const branchOf=klass.origin.id===n.id?null:klass.branches.find(br=>br.nodes.some(x=>x.id===n.id));
+  const col=branchOf?branchOf.color:klass.color;
+  let reqs='';
+  if(n.parent){const parent=lookupNode(klass,n.parent);const ok=parent&&(parent.state==='mastered'||parent.state==='unlocked');reqs=`<div class="reqs">requires <b style="color:var(--text);">${parent?.label||'—'}</b> · <span class="${ok?'satisfied':'missing'}">${ok?'✓ satisfied':'✗ missing'}</span></div>`;}
+  else{reqs='<div class="reqs">root node · <span class="satisfied">no prerequisites</span></div>';}
+  panel.classList.remove('idle');panel.style.setProperty('--col',`var(--${col})`);panel.dataset.state=n.state;
+  panel.innerHTML=`<div class="head"><div class="name">${n.label}</div><div class="lvl-pill">${n.lvl} · ${n.state}</div></div><div class="meta"><span class="b">${branchOf?branchOf.name:'origin'}</span> · class: ${klass.name}</div><div class="desc">${n.desc}</div>${reqs}<div class="stats">${Object.entries(n.stat).map(([k,v])=>`<div class="r"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}</div><h4>tags</h4><ul class="tags">${(n.tags||[]).map(t=>`<li>#${t}</li>`).join('')}</ul><h4>proof / artifacts</h4><ul class="proofs">${(n.proofs||[]).map(p=>`<li>${p}</li>`).join('')||'<li>no public artifacts</li>'}</ul>`;
+}
+render();
+</script>

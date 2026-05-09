@@ -1,0 +1,88 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('posts', p => !p.data.draft))
+  .sort((a, b) => b.data.date.localeCompare(a.data.date));
+---
+<Layout title="whisperx00@kali — rss / feed" active="rss">
+  <main>
+    <div class="cmd">
+      <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/</span>
+      <span style="color:var(--text);">$ curl</span>
+      <span class="arg">https://whisperx00.github.io/feed.xml</span>
+    </div>
+
+    <h1 class="title">rss <span class="slash">/</span> <span class="ext">feed.xml</span></h1>
+    <p class="lede">
+      <span class="hl">Subscribe to get new posts and writeups.</span>
+      paste the feed URL into any reader.
+    </p>
+
+    <div class="feed-url">
+      <div class="url-bar">
+        <span class="proto">https://</span><span class="host">whisperx00.github.io</span><span class="path">/feed.xml</span>
+      </div>
+      <button class="copy" id="copyBtn" data-copy="https://whisperx00.github.io/feed.xml">cp</button>
+    </div>
+
+    <div class="section-head">
+      <h2><span class="sym">▸</span>latest entries</h2>
+      <div class="meta">{posts.length} {posts.length === 1 ? 'entry' : 'entries'}</div>
+    </div>
+
+    <div class="entries">
+      {posts.length === 0 && (
+        <div class="empty">no posts yet — check back soon.</div>
+      )}
+      {posts.map(p => (
+        <a href={`/posts/${p.id}/`} class="entry" style={`--c:var(--${p.data.accent});`}>
+          <div class="entry-meta">
+            <span class="cat">{p.data.cat}</span>
+            <span class="dt">{p.data.date}</span>
+          </div>
+          <div class="entry-title">{p.data.title}</div>
+        </a>
+      ))}
+    </div>
+  </main>
+
+  <div class="statusbar" slot="statusbar">
+    <div class="statusbar-inner">
+      <div class="left">
+        <span><span class="dot"></span><span class="k">feed:</span> <span class="v" style="color:var(--green);">live</span></span>
+        <span><span class="k">entries:</span> <span class="v">{posts.length}</span></span>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+.feed-url { display: flex; align-items: center; gap: 0; background: var(--mantle); border: 1px solid var(--surface1); margin-bottom: 24px; }
+.url-bar { flex: 1; padding: 10px 14px; font-size: 13px; }
+.proto { color: var(--dim); }
+.host { color: var(--mauve); }
+.path { color: var(--sub); }
+.copy { background: var(--surface0); border: none; border-left: 1px solid var(--surface1); color: var(--sub); font-family: var(--mono); font-size: 11px; padding: 10px 14px; cursor: pointer; transition: color .15s; }
+.copy:hover { color: var(--mauve); }
+
+.entries { display: flex; flex-direction: column; gap: 2px; }
+.entry { display: flex; align-items: center; gap: 16px; padding: 10px 14px; background: var(--mantle); border-left: 2px solid var(--c, var(--mauve)); transition: background .15s; }
+.entry:hover { background: #1f1f2e; }
+.entry-meta { display: flex; gap: 10px; align-items: center; min-width: 160px; }
+.cat { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--c, var(--mauve)); font-weight: 600; }
+.dt { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.entry-title { font-size: 13px; color: var(--sub); }
+.entry:hover .entry-title { color: var(--text); }
+.empty { padding: 20px; color: var(--dim); font-style: italic; font-size: 12px; background: var(--mantle); border: 1px solid var(--surface1); }
+</style>
+
+<script>
+document.getElementById('copyBtn')?.addEventListener('click', e => {
+  const btn = e.currentTarget as HTMLButtonElement;
+  navigator.clipboard.writeText(btn.dataset.copy!).then(() => {
+    btn.textContent = 'ok';
+    setTimeout(() => btn.textContent = 'cp', 1500);
+  });
+});
+</script>

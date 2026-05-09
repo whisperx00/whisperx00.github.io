@@ -1,0 +1,164 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const TOOLS = [
+  {
+    id: "burp-intruder-cli", ver: "0.1", lang: "react", accent: "blue",
+    cat: "tooling", ci: "beta", ciLabel: "beta",
+    tags: ["burp", "fuzzing", "ffuf", "hydra"],
+    desc: "converts burp intruder configs into <span class='hl'>ffuf / hydra / wfuzz / curl</span> commands",
+    demo: [{ t: "p", s: "# [REVISE: paste real demo transcript]" }],
+    stars: 0, forks: 0, issues: 0, downloads: "n/a",
+    updated: "[REVISE: date]", updatedRank: 1,
+  },
+  {
+    id: "ldap-parse", ver: "0.1", lang: "python", accent: "teal",
+    cat: "tooling", ci: "beta", ciLabel: "beta",
+    tags: ["ldap", "ad", "enumeration", "bloodhound"],
+    desc: "parses raw <span class='hl'>ldap enumeration output</span> for AD recon workflows",
+    demo: [{ t: "p", s: "# [REVISE: paste real demo transcript]" }],
+    stars: 0, forks: 0, issues: 0, downloads: "n/a",
+    updated: "[REVISE: date]", updatedRank: 2,
+  },
+];
+---
+<Layout title="whisperx00@kali — tools" active="tools">
+  <main>
+    <div class="cmd">
+      <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/tools</span>
+      <span style="color:var(--text);">$ ls</span>
+      <span class="flag">-la</span>
+      <span class="arg">./published/</span>
+    </div>
+
+    <h1 class="title">tools <span class="slash">/</span> <span class="ext">published</span></h1>
+    <p class="lede">
+      <span class="hl">Small, sharp, single-purpose.</span>
+      everything i maintain publicly — MIT-licensed, documented enough to be useful.
+    </p>
+
+    <div class="summary">
+      <div class="sm" style="--col:var(--mauve);">
+        <div class="k">published</div>
+        <div class="v">2</div>
+        <div class="s">2 beta</div>
+      </div>
+      <div class="sm" style="--col:var(--blue);">
+        <div class="k">languages</div>
+        <div class="v">2</div>
+        <div class="s">react · python</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      {TOOLS.map(t => (
+        <article class="tool" style={`--col:var(--${t.accent});`}>
+          <div class="tool-head">
+            <div class="name">{t.id}</div>
+            <div class="meta-right">
+              <span class="ver">v{t.ver}</span>
+              <span class={`ci ${t.ci}`}>{t.ciLabel}</span>
+            </div>
+          </div>
+          <div class="lang">{t.lang}</div>
+          <div class="desc" set:html={t.desc}></div>
+          <div class="tags-row">
+            {t.tags.map(tag => <span class="tag">#{tag}</span>)}
+          </div>
+          <div class="demo">
+            {t.demo.map(line => (
+              <div class={`dline ${line.t}`}>{line.s}</div>
+            ))}
+          </div>
+          <div class="foot">
+            <span><span class="sym">★</span> {t.stars}</span>
+            <span><span class="sym">⑂</span> {t.forks}</span>
+            <span class="updated">updated: {t.updated}</span>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <div class="section-head">
+      <h2><span class="sym">▸</span>experiments <span class="slash">/</span> <span style="color:var(--text);">./lab</span></h2>
+      <div class="meta">weekend builds · expect sharp edges</div>
+    </div>
+    <div class="experiments">
+      <div class="xp" style="--col:var(--dim);">
+        <div class="xp-head"><div class="xp-name">[REVISE: experiment name]</div><div class="badge">wip</div></div>
+        <div class="xp-desc">[REVISE: one-line description of an in-progress experiment]</div>
+        <div class="xp-foot"><span>[REVISE: lang]</span></div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h2><span class="sym">▸</span>archived <span class="slash">/</span> <span style="color:var(--text);">./attic</span></h2>
+      <div class="meta">superseded · historical · still online</div>
+    </div>
+    <div class="archive">
+      <div class="row head"><span>name</span><span>version</span><span>description</span><span>archived</span></div>
+      <div class="row">
+        <span class="aname">[REVISE: archived tool]</span>
+        <span class="ver">—</span>
+        <span class="adesc">[REVISE: reason for archival]</span>
+        <span class="arch">—</span>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="statusbar" slot="statusbar">
+    <div class="statusbar-inner">
+      <div class="left">
+        <span><span class="dot"></span><span class="k">ci:</span> <span class="v" style="color:var(--yellow);">beta</span></span>
+        <span><span class="k">tools:</span> <span class="v">2</span></span>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+.summary { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.sm { background: var(--mantle); border: 1px solid var(--surface1); border-left: 2px solid var(--col, var(--mauve)); padding: 11px 16px; min-width: 120px; }
+.sm .k { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.sm .v { font-weight: 700; font-size: 20px; color: var(--col, var(--text)); margin-top: 4px; }
+.sm .s { font-size: 10.5px; color: var(--sub); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; margin-bottom: 8px; }
+.tool { background: var(--mantle); border: 1px solid var(--surface1); border-top: 2px solid var(--col, var(--teal)); padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.tool-head { display: flex; justify-content: space-between; align-items: baseline; }
+.name { font-weight: 700; font-size: 14px; color: var(--text); }
+.meta-right { display: flex; gap: 8px; align-items: center; }
+.ver { font-size: 10.5px; color: var(--dim); }
+.ci { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; padding: 1px 6px; border: 1px solid currentColor; }
+.ci.pass { color: var(--green); } .ci.beta { color: var(--yellow); } .ci.archive { color: var(--dim); }
+.lang { font-size: 10.5px; color: var(--col, var(--teal)); letter-spacing: .04em; }
+.desc { font-size: 12px; color: var(--sub); line-height: 1.55; }
+.desc :global(.hl) { color: var(--text); }
+.tags-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.tag { font-size: 10px; color: var(--dim); background: var(--base); border: 1px solid var(--surface1); padding: 1px 5px; }
+.demo { background: var(--base); border: 1px solid var(--surface1); padding: 10px 12px; font-size: 11.5px; }
+.dline.p { color: var(--green); }
+.dline.out { color: var(--dim); }
+.dline.hit { color: var(--peach); }
+.dline.flag { color: var(--red); }
+.foot { display: flex; gap: 12px; font-size: 10.5px; color: var(--sub); margin-top: 4px; }
+.foot .sym { color: var(--dim); }
+.updated { margin-left: auto; color: var(--dim); }
+
+.experiments { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin-bottom: 8px; }
+.xp { background: var(--mantle); border: 1px solid var(--surface1); border-top: 2px solid var(--col, var(--dim)); padding: 14px; }
+.xp-head { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.xp-name { font-weight: 600; font-size: 13px; color: var(--text); }
+.badge { font-size: 10px; color: var(--col, var(--dim)); border: 1px solid currentColor; padding: 1px 5px; letter-spacing: .04em; }
+.xp-desc { font-size: 12px; color: var(--sub); margin-bottom: 8px; }
+.xp-foot { font-size: 10.5px; color: var(--dim); }
+
+.archive { border: 1px solid var(--surface1); }
+.row { display: grid; grid-template-columns: 160px 80px 1fr 100px; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--surface1); font-size: 12px; }
+.row:last-child { border-bottom: none; }
+.row.head { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); background: var(--surface0); }
+.aname { color: var(--sub); }
+.adesc { color: var(--dim); font-size: 11px; }
+.arch { color: var(--dim); font-size: 10.5px; }
+</style>

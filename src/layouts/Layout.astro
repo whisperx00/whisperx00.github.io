@@ -1,0 +1,67 @@
+---
+export interface Props {
+  title: string;
+  active: 'index' | 'writeups' | 'research' | 'tools' | 'skills' | 'about' | 'rss';
+}
+const { title, active } = Astro.props;
+
+const nav = [
+  { id: 'index',    href: '/',             label: 'index'    },
+  { id: 'writeups', href: '/writeups/',    label: 'writeups' },
+  { id: 'research', href: '/research/',    label: 'research' },
+  { id: 'tools',    href: '/tools/',       label: 'tools'    },
+  { id: 'skills',   href: '/skills/',      label: 'skills'   },
+  { id: 'about',    href: '/about/',       label: 'about'    },
+  { id: 'rss',      href: '/rss/',         label: 'rss'      },
+];
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles/global.css">
+  <slot name="head" />
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <div class="brand"><span class="caret">&gt;</span> whisperx00@kali</div>
+    <div class="nav-links">
+      {nav.map(n => (
+        <a href={n.href} class={active === n.id ? 'active' : ''}>
+          <span class="slash">./</span><span class="label">{n.label}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</nav>
+
+<slot />
+
+<slot name="statusbar" />
+
+<footer>
+  <div class="foot-inner">
+    <div class="l">
+      <span style="color:var(--sub);">whisperx00@kali</span>
+      <span class="sep">|</span>
+      <span>&copy; 2026</span>
+      <span class="sep">|</span>
+      <span>built in vim, served from a pi</span>
+    </div>
+    <div class="r">
+      <a href="https://github.com/whisperx00" target="_blank" rel="noopener"><span class="slash">./</span>github</a>
+      <a href="https://www.linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237" target="_blank" rel="noopener"><span class="slash">./</span>linkedin</a>
+      <a href="mailto:gm.manoel.albino@proton.me"><span class="slash">./</span>mail</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

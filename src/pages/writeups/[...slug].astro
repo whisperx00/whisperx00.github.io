@@ -1,0 +1,58 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const writeups = await getCollection('writeups', w => !w.data.draft);
+  return writeups.map(w => ({ params: { slug: w.id }, props: { writeup: w } }));
+}
+
+const { writeup } = Astro.props;
+const { Content } = await writeup.render();
+---
+<Layout title={`whisperx00@kali — ${writeup.data.title}`} active="writeups">
+  <main>
+    <div class="cmd">
+      <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/writeups</span>
+      <span style="color:var(--text);">$ cat</span>
+      <span class="arg">{writeup.id}.md</span>
+    </div>
+
+    <div class="meta-bar">
+      <span class="src">{writeup.data.src}</span>
+      <span class="sep">·</span>
+      <span class="diff" style={`color:var(--${writeup.data.accent})`}>{writeup.data.diffLabel}</span>
+      <span class="sep">·</span>
+      <span>{writeup.data.date}</span>
+      <span class="sep">·</span>
+      <span>read {writeup.data.read}</span>
+    </div>
+
+    <h1 class="title">{writeup.data.title}</h1>
+
+    <div class="tldr-box">
+      <div class="r"><span class="k">entry</span><span>{writeup.data.tldr.entry}</span></div>
+      <div class="r"><span class="k">pivot</span><span>{writeup.data.tldr.piv}</span></div>
+      <div class="r"><span class="k">goal</span><span>{writeup.data.tldr.goal}</span></div>
+    </div>
+
+    <article class="prose"><Content /></article>
+  </main>
+</Layout>
+
+<style>
+.meta-bar { font-size: 12px; color: var(--sub); display: flex; gap: 6px; margin-bottom: 8px; }
+.meta-bar .sep { color: var(--surface1); }
+.meta-bar .src { color: var(--text); font-weight: 500; }
+.tldr-box { background: var(--mantle); border: 1px solid var(--surface1); border-left: 2px solid var(--mauve); padding: 12px 16px; margin: 16px 0 32px; display: flex; flex-direction: column; gap: 6px; }
+.tldr-box .r { display: flex; gap: 12px; font-size: 12px; }
+.tldr-box .k { color: var(--mauve); min-width: 44px; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; padding-top: 1px; }
+.tldr-box span:last-child { color: var(--sub); }
+.prose { max-width: 72ch; color: var(--sub); line-height: 1.75; font-size: 13.5px; }
+.prose h2 { color: var(--text); font-size: 16px; margin-top: 2em; border-bottom: 1px dashed var(--surface1); padding-bottom: 6px; }
+.prose code { background: var(--surface0); padding: 1px 6px; color: var(--peach); border: 1px solid var(--surface1); font-size: 12.5px; }
+.prose pre { background: var(--mantle); border: 1px solid var(--surface1); border-left: 2px solid var(--green); padding: 14px 16px; overflow-x: auto; }
+.prose pre code { background: none; border: none; padding: 0; color: var(--text); }
+.prose a { color: var(--blue); border-bottom: 1px dotted var(--blue); }
+.prose strong { color: var(--text); font-weight: 600; }
+</style>

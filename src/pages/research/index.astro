@@ -1,0 +1,126 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="whisperx00@kali — research" active="research">
+  <main>
+    <div class="cmd">
+      <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/research</span>
+      <span style="color:var(--text);">$ cat</span>
+      <span class="arg">interests.md</span>
+    </div>
+
+    <h1 class="title">research <span class="slash">/</span> <span class="ext">interests</span></h1>
+    <p class="lede">
+      <span class="hl">Active exploration areas, not publications.</span>
+      findings from SiDi are under NDA. listed here as directions, not claims.
+    </p>
+
+    <div class="section-head">
+      <h2><span class="sym">▸</span>active research interests</h2>
+    </div>
+
+    <div class="interests">
+      <article class="interest" style="--c:var(--peach);">
+        <h3>V8 / JerryScript fuzzing with Fuzzilli</h3>
+        <p>
+          structure-aware coverage-guided fuzzing of JavaScript engines.
+          specifically interested in verifier and JIT-compiler state transitions,
+          and how Fuzzilli's IL maps to real engine internals.
+          <span class="placeholder">[REVISE: add concrete sub-questions you're investigating]</span>
+        </p>
+        <div class="tags-row">
+          <span class="tag">#v8</span><span class="tag">#jerryscript</span><span class="tag">#fuzzilli</span><span class="tag">#jit</span>
+        </div>
+      </article>
+
+      <article class="interest" style="--c:var(--teal);">
+        <h3>MCP (Model Context Protocol) attack surface</h3>
+        <p>
+          MCP lets LLM clients talk to arbitrary tool servers.
+          exploring the trust model, prompt-injection via tool outputs,
+          and what happens when a malicious MCP server gets wired into a developer's workflow.
+          <span class="placeholder">[REVISE: add concrete sub-questions you're investigating]</span>
+        </p>
+        <div class="tags-row">
+          <span class="tag">#mcp</span><span class="tag">#llm</span><span class="tag">#prompt-injection</span>
+        </div>
+      </article>
+
+      <article class="interest" style="--c:var(--blue);">
+        <h3>Azure security — AzureHound, BloodHound CE</h3>
+        <p>
+          extending on-prem AD attack knowledge into cloud-hybrid environments.
+          AzureHound graph traversal, Entra ID misconfigs, privilege paths from
+          on-prem compromise into Azure.
+          <span class="placeholder">[REVISE: add concrete sub-questions you're investigating]</span>
+        </p>
+        <div class="tags-row">
+          <span class="tag">#azure</span><span class="tag">#azurehound</span><span class="tag">#bloodhound</span><span class="tag">#entra</span>
+        </div>
+      </article>
+
+      <article class="interest" style="--c:var(--mauve);">
+        <h3>AI/ML security</h3>
+        <p>
+          adversarial inputs, model extraction, and the security of ML pipelines
+          (training data poisoning, supply-chain risks in open-weight models).
+          <span class="placeholder">[REVISE: add concrete sub-questions you're investigating]</span>
+        </p>
+        <div class="tags-row">
+          <span class="tag">#ml-security</span><span class="tag">#adversarial</span><span class="tag">#ai</span>
+        </div>
+      </article>
+    </div>
+
+    <div class="section-head">
+      <h2><span class="sym">▸</span>talks <span class="slash">/</span> <span style="color:var(--text);">presentations</span></h2>
+    </div>
+
+    <div class="talks">
+      <article class="talk" style="--col:var(--peach);">
+        <div class="talk-head">
+          <div class="venue">307 Conference</div>
+          <div class="year">[REVISE: year]</div>
+        </div>
+        <h3 class="talk-title">Browser Exploitation</h3>
+        <p class="talk-desc">
+          <span class="placeholder">[REVISE: add talk abstract / description]</span>
+        </p>
+      </article>
+    </div>
+
+  </main>
+
+  <div class="statusbar" slot="statusbar">
+    <div class="statusbar-inner">
+      <div class="left">
+        <span><span class="dot"></span><span class="k">research:</span> <span class="v" style="color:var(--yellow);">exploration · no public CVEs</span></span>
+        <span><span class="k">interests:</span> <span class="v">4</span></span>
+        <span><span class="k">talks:</span> <span class="v">1</span></span>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+.interests { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+.interest {
+  background: var(--mantle); border: 1px solid var(--surface1);
+  border-left: 2px solid var(--c, var(--mauve)); padding: 18px 20px;
+}
+.interest h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--c, var(--mauve)); }
+.interest p { margin: 0 0 10px; font-size: 12.5px; color: var(--sub); line-height: 1.65; }
+.placeholder { display: block; margin-top: 6px; font-size: 11.5px; color: var(--dim); font-style: italic; }
+.tags-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag { font-size: 10px; color: var(--dim); background: var(--base); border: 1px solid var(--surface1); padding: 1px 5px; }
+
+.talks { display: flex; flex-direction: column; gap: 10px; }
+.talk {
+  background: var(--mantle); border: 1px solid var(--surface1);
+  border-top: 2px solid var(--col, var(--peach)); padding: 16px 20px;
+}
+.talk-head { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); margin-bottom: 6px; }
+.talk-head .venue { color: var(--col, var(--peach)); font-weight: 600; letter-spacing: .04em; }
+.talk-title { margin: 0 0 8px; font-size: 15px; color: var(--text); font-family: var(--sans); font-weight: 600; }
+.talk-desc { margin: 0; font-size: 12px; color: var(--sub); }
+</style>

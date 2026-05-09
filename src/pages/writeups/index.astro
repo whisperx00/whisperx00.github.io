@@ -1,0 +1,172 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const writeups = (await getCollection('writeups', w => !w.data.draft))
+  .sort((a, b) => b.data.date.localeCompare(a.data.date));
+
+const total = writeups.length;
+---
+<Layout title="whisperx00@kali — writeups" active="writeups">
+  <main>
+    <div class="cmd">
+      <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/writeups</span>
+      <span style="color:var(--text);">$ ls</span>
+      <span class="flag">-lt</span>
+      <span class="arg">--filter=all</span>
+    </div>
+
+    <h1 class="title">writeups <span class="slash">/</span> <span class="ext">boot-to-root</span></h1>
+    <p class="lede">
+      <span class="hl">Sanitized, ordered by date, tagged by source.</span>
+      every box i've fully rooted and every chain worth documenting.
+      click a row to expand the boot-to-root tldr.
+    </p>
+
+    <div class="toolbar">
+      <div class="search">
+        <span class="p">/</span>
+        <input id="q" placeholder="grep title, tag, or tech — e.g. 'kerberos', 'sqli'" autocomplete="off" />
+      </div>
+      <div class="tb-group" id="catGroup">
+        <button class="on" data-cat="all">all</button>
+        <button data-cat="htb">htb</button>
+        <button data-cat="ctf">ctf</button>
+        <button data-cat="pro">pro-lab</button>
+        <button data-cat="rt">red-team</button>
+      </div>
+      <div class="tb-group" id="sortGroup">
+        <button class="on" data-sort="date">sort: date</button>
+        <button data-sort="difficulty">difficulty</button>
+        <button data-sort="points">points</button>
+      </div>
+    </div>
+
+    <section class="list" id="list">
+      {writeups.map(w => (
+        <article class="wr" data-id={w.id} data-cat={w.data.cat}
+          data-diff={w.data.diff} data-pts={w.data.pts ?? 0}
+          data-tags={w.data.tags.join(',')}
+          style={`--cat:var(--${w.data.accent});`}>
+          <div class="row-head">
+            <div class="left">
+              <span class="cat-dot"></span>
+              <span class="source">{w.data.src}</span>
+              <span class="diff">{w.data.diffLabel}</span>
+              <span class="pts">{w.data.pts != null ? `${w.data.pts}pts` : 'rt'}</span>
+            </div>
+            <div class="title-col">
+              <span class="wr-title">{w.data.title}</span>
+              <div class="tags-row">
+                {w.data.tags.map(t => <span class="tag">#{t}</span>)}
+              </div>
+            </div>
+            <div class="right">
+              <span class="dt">{w.data.date}</span>
+              <span class="rt">{w.data.read}</span>
+              <span class="caret">▸</span>
+            </div>
+          </div>
+          <div class="tldr">
+            <div class="tldr-row"><span class="k">entry</span><span>{w.data.tldr.entry}</span></div>
+            <div class="tldr-row"><span class="k">pivot</span><span>{w.data.tldr.piv}</span></div>
+            <div class="tldr-row"><span class="k">goal</span><span>{w.data.tldr.goal}</span></div>
+            <a href={`/writeups/${w.id}/`} class="read-link">read full writeup →</a>
+          </div>
+        </article>
+      ))}
+    </section>
+
+  </main>
+
+  <div class="statusbar" slot="statusbar">
+    <div class="statusbar-inner">
+      <div class="left">
+        <span><span class="dot"></span><span class="k">writeups:</span> <span class="v" style="color:var(--green);">all green</span></span>
+        <span><span class="k">total:</span> <span class="v" id="shownCount">{total}</span></span>
+      </div>
+      <div class="right">
+        <span><span class="k">shortcut:</span> <span class="v">/ to search</span></span>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+.search { display: flex; align-items: center; background: var(--mantle); border: 1px solid var(--surface1); padding: 6px 10px; gap: 8px; flex: 1; min-width: 200px; }
+.search .p { color: var(--green); font-weight: 700; }
+.search input { background: transparent; border: none; outline: none; color: var(--text); font-family: var(--mono); font-size: 12px; width: 100%; }
+.search input::placeholder { color: var(--dim); }
+.tb-group { display: flex; }
+.tb-group button {
+  background: var(--mantle); border: 1px solid var(--surface1); border-right: none;
+  color: var(--dim); font-family: var(--mono); font-size: 11px; padding: 6px 12px; cursor: pointer;
+}
+.tb-group button:last-child { border-right: 1px solid var(--surface1); }
+.tb-group button.on { color: var(--text); background: var(--surface0); }
+.tb-group button:hover { color: var(--text); }
+
+.list { display: flex; flex-direction: column; gap: 2px; }
+.wr { background: var(--mantle); border-left: 2px solid var(--cat, var(--mauve)); }
+.wr.hidden { display: none; }
+.row-head {
+  display: grid; grid-template-columns: 160px 1fr 120px;
+  gap: 16px; padding: 12px 16px; cursor: pointer; align-items: center;
+  transition: background .15s;
+}
+.row-head:hover { background: color-mix(in oklab, var(--mantle) 60%, var(--base)); }
+.left { display: flex; gap: 8px; align-items: center; font-size: 11px; }
+.cat-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cat, var(--mauve)); flex-shrink: 0; }
+.source { color: var(--sub); }
+.diff { color: var(--cat, var(--mauve)); font-size: 10.5px; letter-spacing: .04em; }
+.pts { color: var(--dim); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+.title-col { min-width: 0; }
+.wr-title { color: var(--text); font-size: 13px; font-weight: 500; }
+.tags-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.tag { font-size: 10px; color: var(--dim); background: var(--base); border: 1px solid var(--surface1); padding: 1px 5px; }
+.right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; font-size: 11px; color: var(--dim); }
+.dt { color: var(--sub); font-variant-numeric: tabular-nums; }
+.caret { color: var(--cat, var(--mauve)); transition: transform .2s; }
+.wr.open .caret { transform: rotate(90deg); }
+
+.tldr { display: none; padding: 12px 16px; border-top: 1px dashed var(--surface1); background: var(--base); flex-direction: column; gap: 6px; }
+.wr.open .tldr { display: flex; }
+.tldr-row { display: flex; gap: 12px; font-size: 12px; }
+.tldr-row .k { color: var(--cat, var(--mauve)); min-width: 44px; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; padding-top: 1px; }
+.tldr-row span:last-child { color: var(--sub); }
+.read-link { margin-top: 6px; font-size: 11px; color: var(--cat, var(--mauve)); align-self: flex-end; border-bottom: 1px dashed currentColor; }
+</style>
+
+<script>
+const rows = [...document.querySelectorAll('.wr')];
+let cat = 'all', sort = 'date';
+
+document.querySelectorAll('.row-head').forEach(h => {
+  h.addEventListener('click', () => h.closest('.wr').classList.toggle('open'));
+});
+
+function applyFilter() {
+  const q = (document.getElementById('q') as HTMLInputElement).value.toLowerCase();
+  rows.forEach(r => {
+    const matchCat  = cat === 'all' || r.dataset.cat === cat;
+    const matchQ    = !q || r.textContent!.toLowerCase().includes(q);
+    r.classList.toggle('hidden', !(matchCat && matchQ));
+  });
+  document.getElementById('shownCount')!.textContent =
+    String(rows.filter(r => !r.classList.contains('hidden')).length);
+}
+
+document.getElementById('q')!.addEventListener('input', applyFilter);
+document.getElementById('catGroup')!.addEventListener('click', e => {
+  const b = (e.target as Element).closest('button'); if (!b) return;
+  cat = (b as HTMLElement).dataset.cat!;
+  document.querySelectorAll('#catGroup button').forEach(x => x.classList.toggle('on', x === b));
+  applyFilter();
+});
+document.getElementById('sortGroup')!.addEventListener('click', e => {
+  const b = (e.target as Element).closest('button'); if (!b) return;
+  sort = (b as HTMLElement).dataset.sort!;
+  document.querySelectorAll('#sortGroup button').forEach(x => x.classList.toggle('on', x === b));
+});
+</script>

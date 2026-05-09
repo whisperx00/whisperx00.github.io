@@ -1,0 +1,49 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', p => !p.data.draft);
+  return posts.map(p => ({ params: { slug: p.id }, props: { post: p } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+<Layout title={`whisperx00@kali — ${post.data.title}`} active="index">
+  <main>
+    <div class="cmd">
+      <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/posts</span>
+      <span style="color:var(--text);">$ cat</span>
+      <span class="arg">{post.id}.md</span>
+    </div>
+
+    <h1 class="title">{post.data.title}</h1>
+    <p class="meta-line">
+      <span class="cat">{post.data.cat}</span>
+      <span class="sep">·</span>
+      <span>{post.data.date}</span>
+      <span class="sep">·</span>
+      <span>read {post.data.read}</span>
+    </p>
+
+    <article class="prose">
+      <Content />
+    </article>
+  </main>
+</Layout>
+
+<style>
+.meta-line { font-size: 12px; color: var(--sub); margin-bottom: 32px; display: flex; gap: 6px; align-items: center; }
+.meta-line .cat { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--mauve); }
+.meta-line .sep { color: var(--surface1); }
+.prose { max-width: 72ch; color: var(--sub); line-height: 1.75; font-size: 13.5px; }
+.prose h2 { color: var(--text); font-size: 16px; margin-top: 2em; border-bottom: 1px dashed var(--surface1); padding-bottom: 6px; }
+.prose h3 { color: var(--text); font-size: 14px; margin-top: 1.5em; }
+.prose code { background: var(--surface0); padding: 1px 6px; color: var(--peach); border: 1px solid var(--surface1); font-size: 12.5px; }
+.prose pre { background: var(--mantle); border: 1px solid var(--surface1); border-left: 2px solid var(--green); padding: 14px 16px; overflow-x: auto; }
+.prose pre code { background: none; border: none; padding: 0; color: var(--text); }
+.prose a { color: var(--blue); border-bottom: 1px dotted var(--blue); }
+.prose a:hover { color: var(--mauve); }
+.prose strong { color: var(--text); font-weight: 600; }
+</style>

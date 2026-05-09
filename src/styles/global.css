@@ -1,0 +1,137 @@
+/* ================ Catppuccin Mocha tokens ================ */
+:root {
+  --crust:   #11111b;
+  --mantle:  #181825;
+  --base:    #1e1e2e;
+  --surface0:#313244;
+  --surface1:#45475a;
+  --text:    #cdd6f4;
+  --sub:     #a6adc8;
+  --dim:     #6c7086;
+  --mauve:   #cba6f7;
+  --blue:    #89b4fa;
+  --peach:   #fab387;
+  --green:   #a6e3a1;
+  --teal:    #94e2d5;
+  --yellow:  #f9e2af;
+  --red:     #f38ba8;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: "Inter", system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--crust);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+::selection { background: var(--mauve); color: var(--crust); }
+
+/* ================ Nav ================ */
+nav.topnav {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--mantle);
+  border-bottom: 1px solid var(--surface1);
+}
+.nav-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px;
+  font-size: 13px;
+}
+.brand { font-weight: 700; color: var(--mauve); letter-spacing: .01em; }
+.brand .caret { color: var(--green); margin-right: 2px; }
+.nav-links { display: flex; gap: 22px; align-items: center; }
+.nav-links a {
+  color: var(--sub); transition: color .15s;
+  display: inline-flex; align-items: center;
+  padding: 4px 0; border-bottom: 1px solid transparent;
+}
+.nav-links a .slash { color: var(--dim); margin-right: 2px; }
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--blue); border-bottom-color: var(--blue); }
+.nav-links a.active .slash { color: var(--blue); opacity: .6; }
+
+/* ================ Layout ================ */
+main { max-width: 1120px; margin: 0 auto; padding: 40px 28px 80px; }
+
+/* ================ Cmd prompt header ================ */
+.cmd { font-size: 13px; margin-bottom: 16px; color: var(--sub); }
+.cmd .u  { color: var(--green); }
+.cmd .h  { color: var(--mauve); }
+.cmd .d  { color: var(--blue); }
+.cmd .arg{ color: var(--peach); }
+.cmd .flag{ color: var(--yellow); }
+
+/* ================ Page title ================ */
+h1.title {
+  font-family: var(--mono); font-weight: 700;
+  font-size: clamp(22px, 3vw, 30px);
+  color: var(--text); margin: 0 0 8px; letter-spacing: -.005em;
+}
+h1.title .slash { color: var(--dim); }
+h1.title .ext   { color: var(--green); }
+.lede { font-size: 13px; color: var(--sub); max-width: 80ch; margin: 0 0 22px; }
+.lede .hl { color: var(--text); }
+.lede code {
+  background: var(--surface0); padding: 1px 6px;
+  color: var(--peach); border: 1px solid var(--surface1);
+}
+
+/* ================ Section head ================ */
+.section-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin: 48px 0 18px;
+  border-bottom: 1px dashed var(--surface1); padding-bottom: 10px;
+}
+.section-head h2 {
+  font-family: var(--mono); font-weight: 600; font-size: 13px;
+  color: var(--sub); margin: 0; letter-spacing: .04em;
+}
+.section-head h2 .sym { color: var(--mauve); margin-right: 8px; }
+.section-head h2 .slash { color: var(--dim); }
+.section-head .meta { font-size: 11px; color: var(--dim); }
+.section-head .meta .dot { color: var(--green); margin-right: 6px; }
+
+/* ================ Status bar ================ */
+.statusbar {
+  margin-top: 40px;
+  background: var(--surface0);
+  border-top: 1px solid var(--surface1);
+  border-bottom: 1px solid var(--surface1);
+}
+.statusbar-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 28px; font-size: 11px; color: var(--sub);
+}
+.statusbar .left  { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.statusbar .right { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.statusbar .dot   { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); display: inline-block; margin-right: 6px; }
+.statusbar .k { color: var(--dim); }
+.statusbar .v { color: var(--text); }
+
+/* ================ Footer ================ */
+footer { background: var(--mantle); border-top: 1px solid var(--surface1); }
+.foot-inner {
+  max-width: 1120px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 28px; font-size: 11px; color: var(--dim);
+}
+.foot-inner .l span.sep { color: var(--surface1); margin: 0 10px; }
+.foot-inner .r { display: flex; gap: 20px; }
+.foot-inner .r a { color: var(--sub); transition: color .15s; }
+.foot-inner .r a:hover { color: var(--mauve); }
+.foot-inner .r a .slash { color: var(--dim); margin-right: 2px; }
+
+/* ================ Responsive ================ */
+@media (max-width: 680px) {
+  .nav-links { gap: 12px; font-size: 12px; }
+  .nav-links a span.label { display: none; }
+  .statusbar-inner, .foot-inner { flex-direction: column; gap: 8px; align-items: flex-start; }
+}

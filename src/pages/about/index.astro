@@ -1,0 +1,154 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="whisperx00@kali — about / cv" active="about">
+  <main>
+    <div class="cmd">
+      <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/about</span>
+      <span style="color:var(--text);">$ cat</span>
+      <span class="arg">cv.txt</span>
+    </div>
+
+    <h1 class="title">about <span class="slash">/</span> <span class="ext">cv</span></h1>
+    <p class="lede">
+      <span class="hl">Manoel Albino Coelho de Miranda.</span>
+      offensive security researcher — windows &amp; active directory focus.
+      currently interning at SiDi, pursuing OSCP.
+    </p>
+
+    <div class="section-head">
+      <h2><span class="sym">▸</span>experience</h2>
+    </div>
+
+    <div class="timeline">
+      <div class="entry">
+        <div class="entry-head">
+          <div>
+            <div class="org">SiDi</div>
+            <div class="role">offensive security intern</div>
+          </div>
+          <div class="when">2023 — <span style="color:var(--yellow);">[REVISE: end date or "present"]</span></div>
+        </div>
+        <p class="manager">managed by Marcus Farbiarz, offensive security R&amp;D manager</p>
+        <ul class="bullets">
+          <li>security assessments of Samsung products (android / web / windows)</li>
+          <li>identified vulnerabilities including arbitrary file delete and privilege escalations on Windows products</li>
+          <li>participated in a phishing simulation project</li>
+          <li>day-to-day: AD exploitation, windows privesc, web exploitation, custom tooling</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h2><span class="sym">▸</span>education</h2>
+    </div>
+    <div class="edu-placeholder">
+      <span class="dim">[REVISE: add education]</span>
+    </div>
+
+    <div class="section-head">
+      <h2><span class="sym">▸</span>certifications</h2>
+    </div>
+    <div class="certs">
+      <div class="cert training">
+        <div class="cert-name">OSCP</div>
+        <div class="cert-status">in progress</div>
+      </div>
+      <div class="cert planned">
+        <div class="cert-name">OSWP</div>
+        <div class="cert-status">planned</div>
+      </div>
+      <div class="cert planned">
+        <div class="cert-name">OSAI</div>
+        <div class="cert-status">planned</div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h2><span class="sym">▸</span>languages</h2>
+    </div>
+    <div class="languages">
+      <div class="lang"><span class="lang-name">portuguese</span><span class="level native">native</span></div>
+      <div class="lang"><span class="lang-name">english</span><span class="level c1">C1 · professional working</span></div>
+      <div class="lang"><span class="lang-name">french</span><span class="level a2">A2 · learning</span></div>
+    </div>
+
+    <div class="section-head">
+      <h2><span class="sym">▸</span>contact</h2>
+    </div>
+    <div class="contacts">
+      <a href="mailto:gm.manoel.albino@proton.me" class="contact-row">
+        <span class="contact-icon">✉</span>
+        <span>gm.manoel.albino@proton.me</span>
+        <span class="gl">primary →</span>
+      </a>
+      <a href="https://www.linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237" target="_blank" rel="noopener" class="contact-row">
+        <span class="contact-icon">in</span>
+        <span>linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237</span>
+        <span class="gl">→</span>
+      </a>
+      <a href="https://github.com/whisperx00" target="_blank" rel="noopener" class="contact-row">
+        <span class="contact-icon">⌥</span>
+        <span>github.com/whisperx00</span>
+        <span class="gl">→</span>
+      </a>
+      <div class="contact-row dim">
+        <span class="contact-icon">🐱</span>
+        <span>[REVISE: hackthebox handle]</span>
+        <span class="gl">htb →</span>
+      </div>
+    </div>
+
+  </main>
+
+  <div class="statusbar" slot="statusbar">
+    <div class="statusbar-inner">
+      <div class="left">
+        <span><span class="dot"></span><span class="k">status:</span> <span class="v" style="color:var(--green);">open to opportunities</span></span>
+        <span><span class="k">location:</span> <span class="v">brazil · remote ok · relocation ok</span></span>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+.timeline { display: flex; flex-direction: column; gap: 16px; }
+.entry { background: var(--mantle); border: 1px solid var(--surface1); border-left: 2px solid var(--mauve); padding: 18px 20px; }
+.entry-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 16px; }
+.org { font-weight: 700; font-size: 14px; color: var(--text); }
+.role { font-size: 12.5px; color: var(--sub); margin-top: 2px; }
+.when { font-size: 12px; color: var(--dim); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.manager { font-size: 11.5px; color: var(--dim); margin: 0 0 10px; font-style: italic; }
+.bullets { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.bullets li { font-size: 12.5px; color: var(--sub); line-height: 1.55; }
+.bullets li::marker { color: var(--mauve); }
+
+.edu-placeholder { padding: 14px 16px; background: var(--mantle); border: 1px solid var(--surface1); border-left: 2px solid var(--surface1); font-size: 12px; color: var(--dim); font-style: italic; margin-bottom: 8px; }
+
+.certs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.cert { padding: 10px 16px; background: var(--mantle); border: 1px solid var(--surface1); min-width: 110px; }
+.cert-name { font-weight: 700; font-size: 14px; color: var(--text); }
+.cert-status { font-size: 11px; margin-top: 3px; letter-spacing: .04em; }
+.cert.training .cert-status { color: var(--yellow); }
+.cert.planned .cert-status { color: var(--dim); }
+
+.languages { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.lang { display: flex; align-items: center; gap: 14px; font-size: 12.5px; padding: 8px 16px; background: var(--mantle); border: 1px solid var(--surface1); }
+.lang-name { color: var(--text); font-weight: 500; min-width: 100px; }
+.level { font-size: 11px; }
+.level.native { color: var(--green); }
+.level.c1 { color: var(--blue); }
+.level.a2 { color: var(--yellow); }
+
+.contacts { display: flex; flex-direction: column; gap: 4px; }
+.contact-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; background: var(--mantle);
+  border: 1px solid var(--surface1); border-left: 2px solid var(--surface1);
+  font-size: 12.5px; color: var(--sub); transition: border-color .15s, color .15s;
+}
+a.contact-row:hover { border-left-color: var(--mauve); color: var(--text); }
+.contact-icon { color: var(--dim); min-width: 18px; }
+.gl { margin-left: auto; font-size: 11px; color: var(--dim); }
+.dim { color: var(--dim); font-style: italic; }
+</style>
