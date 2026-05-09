@@ -6,149 +6,319 @@ import Layout from '../../layouts/Layout.astro';
     <div class="cmd">
       <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/about</span>
       <span style="color:var(--text);">$ cat</span>
-      <span class="arg">cv.txt</span>
+      <span class="arg">cv.md</span>
+      <span class="flag">|</span>
+      <span style="color:var(--text);">less</span>
     </div>
 
-    <h1 class="title">about <span class="slash">/</span> <span class="ext">cv</span></h1>
-    <p class="lede">
-      <span class="hl">Manoel Albino Coelho de Miranda.</span>
-      offensive security researcher — windows &amp; active directory focus.
-      currently interning at SiDi, pursuing OSCP.
-    </p>
-
-    <div class="section-head">
-      <h2><span class="sym">▸</span>experience</h2>
-    </div>
-
-    <div class="timeline">
-      <div class="entry">
-        <div class="entry-head">
-          <div>
-            <div class="org">SiDi</div>
-            <div class="role">offensive security intern</div>
-          </div>
-          <div class="when">2023 — <span style="color:var(--yellow);">[REVISE: end date or "present"]</span></div>
+    <!-- recruiter hero -->
+    <section class="hero">
+      <div class="photo">
+        <div class="frame"></div>
+        <div class="lab">[ headshot ]<small>./assets/whisperx00.jpg</small></div>
+      </div>
+      <div>
+        <h1>Manoel Albino Coelho de Miranda</h1>
+        <div class="role">Offensive Security Researcher · <span class="hl">windows &amp; AD · web exploitation · custom tooling</span></div>
+        <div class="meta">
+          <span><span class="k">📍</span><span class="v">brazil</span></span>
+          <span><span class="k">●</span><span class="v">open to remote &amp; relocation</span></span>
+          <span><span class="k">⚙</span><span class="v">remote-first ok</span></span>
+          <span><span class="k">🎓</span><span class="v">Software Engineering · PUC-Campinas</span></span>
         </div>
-        <p class="manager">managed by Marcus Farbiarz, offensive security R&amp;D manager</p>
-        <ul class="bullets">
-          <li>security assessments of Samsung products (android / web / windows)</li>
-          <li>identified vulnerabilities including arbitrary file delete and privilege escalations on Windows products</li>
-          <li>participated in a phishing simulation project</li>
-          <li>day-to-day: AD exploitation, windows privesc, web exploitation, custom tooling</li>
+      </div>
+      <div class="open">
+        <div class="badge">open to opportunities</div>
+        <div class="ctas">
+          <a class="primary" href="mailto:gm.manoel.albino@proton.me">✉ contact</a>
+          <a href="https://www.linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237" target="_blank" rel="noopener">linkedin</a>
+          <a href="https://github.com/whisperx00" target="_blank" rel="noopener">github</a>
+        </div>
+        <div style="font-size:10.5px;color:var(--dim);">avg response: under 24h</div>
+      </div>
+    </section>
+
+    <!-- quick stats -->
+    <section class="stripe">
+      <div class="qs" style="--col:var(--mauve);"><div class="k">current role</div><div class="v">intern</div><div class="s">SiDi — Samsung</div></div>
+      <div class="qs" style="--col:var(--teal);"><div class="k">tools built</div><div class="v">2</div><div class="s">published · in use</div></div>
+      <div class="qs" style="--col:var(--blue);"><div class="k">primary focus</div><div class="v">AD / web</div><div class="s">windows · exploitation</div></div>
+      <div class="qs" style="--col:var(--peach);"><div class="k">assessments</div><div class="v">android</div><div class="s">web · windows · samsung</div></div>
+      <div class="qs" style="--col:var(--yellow);"><div class="k">OSCP</div><div class="v">in prog</div><div class="s">PEN-200 · target 2026</div></div>
+      <div class="qs" style="--col:var(--green);"><div class="k">status</div><div class="v">open</div><div class="s">remote ok · relocation ok</div></div>
+    </section>
+
+    <!-- summary -->
+    <div class="section-head">
+      <h2><span class="sym">▸</span>summary <span class="slash">/</span> <span style="color:var(--text);">tldr;</span></h2>
+      <div class="meta">~30 sec read</div>
+    </div>
+    <section class="summary">
+      <p>Offensive security researcher with a focus on <span class="hl">windows &amp; active directory exploitation</span>, web application attacks, and custom tooling. Currently interning at <span class="hl">SiDi</span> (Samsung's R&amp;D institute in Brazil), where I run security assessments of Samsung products across android, web, and windows surfaces — uncovering privilege escalation chains, arbitrary file delete bugs, and building out phishing simulation campaigns.</p>
+      <p>Working through the <span class="hl">OSCP (PEN-200)</span> and shipping small offensive tools alongside it. Strong python and typescript, comfortable in linux and windows internals, fluent in AD attack paths (Kerberoasting, AS-REP, Pass-the-Hash, BloodHound enumeration). Looking for a junior/associate offensive security role or an internship continuation — open to remote and relocation anywhere.</p>
+    </section>
+
+    <!-- experience -->
+    <div class="section-head">
+      <h2><span class="sym">▸</span>experience <span class="slash">/</span> <span style="color:var(--text);">work history</span></h2>
+      <div class="meta">2023 — present</div>
+    </div>
+    <section class="xp">
+      <div class="row">
+        <div class="when"><span class="now">● now</span><span class="span">2023 — present</span></div>
+        <div class="body">
+          <h3>Offensive Security Intern</h3>
+          <div class="org">SiDi — Samsung Innovation Institute<span class="pipe">|</span><span class="loc">Brazil · on-site</span></div>
+          <ul>
+            <li>Security assessments of <b>Samsung products</b> across android, web, and windows surfaces managed by Marcus Farbiarz (offensive security R&amp;D manager).</li>
+            <li>Identified vulnerabilities including <b>arbitrary file delete</b> and <b>privilege escalation</b> on Windows products.</li>
+            <li>Participated in a <b>phishing simulation</b> project end-to-end — from payload crafting to reporting.</li>
+            <li>Day-to-day stack: AD exploitation (BloodHound, impacket), windows privesc, web exploitation (Burp Suite), custom python tooling.</li>
+          </ul>
+          <div class="stack">
+            <span class="t">active-directory</span>
+            <span class="t">windows-privesc</span>
+            <span class="t">web-exploitation</span>
+            <span class="t">python</span>
+            <span class="t">phishing</span>
+            <span class="t">burp-suite</span>
+            <span class="t">bloodhound</span>
+          </div>
+        </div>
+        <div class="right"><div class="imp">active</div><small>current role</small></div>
+      </div>
+    </section>
+
+    <!-- education + certs -->
+    <div class="section-head">
+      <h2><span class="sym">▸</span>education <span class="slash">/</span> <span style="color:var(--text);">&amp; certifications</span></h2>
+      <div class="meta">degrees · certs · in progress</div>
+    </div>
+    <section class="twocol">
+      <div class="card" style="--col:var(--mauve);">
+        <h3>education</h3>
+        <div class="item">
+          <span class="k">2023 — now</span>
+          <span class="v"><b>B.Sc. Software Engineering</b><br/><span class="muted">PUC-Campinas · in progress</span></span>
+        </div>
+        <div class="item">
+          <span class="k">focus</span>
+          <span class="v"><span class="muted">information security · systems programming · networks</span></span>
+        </div>
+      </div>
+      <div class="card" style="--col:var(--teal);">
+        <h3>certifications</h3>
+        <div class="item">
+          <span class="k">offsec</span>
+          <span class="v"><b>OSCP</b> · <span style="color:var(--yellow);">in progress · target 2026</span><br/><span class="muted">PEN-200 · penetration testing with Kali Linux</span></span>
+        </div>
+        <div class="item">
+          <span class="k">offsec</span>
+          <span class="v"><b>OSWP</b> · <span class="muted">planned · PEN-210</span><br/><span class="muted">offensive security wireless professional</span></span>
+        </div>
+        <div class="item">
+          <span class="k">offsec</span>
+          <span class="v"><b>OSAI</b> · <span class="muted">planned</span><br/><span class="muted">AI security — adversarial ML track</span></span>
+        </div>
+        <div class="item">
+          <span class="k">platforms</span>
+          <span class="v"><span class="muted">HackTheBox (active) · TryHackMe · VulnHub</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- skills + languages -->
+    <div class="section-head">
+      <h2><span class="sym">▸</span>skills <span class="slash">/</span> <span style="color:var(--text);">technical &amp; spoken</span></h2>
+      <div class="meta">hands-on, not buzzwords</div>
+    </div>
+    <section class="twocol">
+      <div class="card" style="--col:var(--peach);">
+        <h3>technical · self-rated, hands-on</h3>
+        <div class="skills">
+          <div class="skill" style="--col:var(--mauve);"><span class="name">Active Directory / Kerberos</span><div class="bar"><div class="fill" style="width:82%;"></div></div><span class="yrs">primary</span></div>
+          <div class="skill" style="--col:var(--mauve);"><span class="name">Windows privesc</span><div class="bar"><div class="fill" style="width:78%;"></div></div><span class="yrs">primary</span></div>
+          <div class="skill" style="--col:var(--blue);"><span class="name">Web exploitation (OWASP)</span><div class="bar"><div class="fill" style="width:75%;"></div></div><span class="yrs">primary</span></div>
+          <div class="skill" style="--col:var(--yellow);"><span class="name">Python</span><div class="bar"><div class="fill" style="width:88%;"></div></div><span class="yrs">3+ yrs</span></div>
+          <div class="skill" style="--col:var(--teal);"><span class="name">TypeScript / React</span><div class="bar"><div class="fill" style="width:70%;"></div></div><span class="yrs">2 yrs</span></div>
+          <div class="skill" style="--col:var(--peach);"><span class="name">Burp Suite</span><div class="bar"><div class="fill" style="width:74%;"></div></div><span class="yrs">daily</span></div>
+          <div class="skill" style="--col:var(--peach);"><span class="name">BloodHound / impacket</span><div class="bar"><div class="fill" style="width:72%;"></div></div><span class="yrs">daily</span></div>
+          <div class="skill" style="--col:var(--green);"><span class="name">Linux fundamentals</span><div class="bar"><div class="fill" style="width:80%;"></div></div><span class="yrs">daily</span></div>
+          <div class="skill" style="--col:var(--red);"><span class="name">Metasploit / msfvenom</span><div class="bar"><div class="fill" style="width:65%;"></div></div><span class="yrs">labs</span></div>
+          <div class="skill" style="--col:var(--dim);"><span class="name">C / C++ (basics)</span><div class="bar"><div class="fill" style="width:45%;"></div></div><span class="yrs">learning</span></div>
+        </div>
+      </div>
+      <div class="card" style="--col:var(--blue);">
+        <h3>spoken languages</h3>
+        <div class="langs">
+          <div class="lang"><span class="name">Portuguese</span><span class="lvl">native <span class="cefr">C2</span></span></div>
+          <div class="lang"><span class="name">English</span><span class="lvl">professional <span class="cefr">C1</span></span></div>
+          <div class="lang"><span class="name">French</span><span class="lvl">basic <span class="cefr">A2 · learning</span></span></div>
+        </div>
+        <h3 style="margin-top:18px;color:var(--blue);">soft &amp; ops</h3>
+        <div class="item"><span class="k">tooling</span><span class="v"><span class="muted">builds offensive python tools that ship — burp-intruder-cli, ldap-parse</span></span></div>
+        <div class="item"><span class="k">comms</span><span class="v"><span class="muted">writes clear assessment reports for non-technical stakeholders</span></span></div>
+        <div class="item"><span class="k">learning</span><span class="v"><span class="muted">OSCP labs daily · HTB active · following OffSec blog + VX-underground</span></span></div>
+        <div class="item"><span class="k">methodology</span><span class="v"><span class="muted">PTES-aligned · MITRE ATT&amp;CK fluent · reproducible PoCs</span></span></div>
+      </div>
+    </section>
+
+    <!-- contact -->
+    <div class="section-head">
+      <h2><span class="sym">▸</span>contact <span class="slash">/</span> <span style="color:var(--text);">how to reach me</span></h2>
+      <div class="meta">recruiters welcome · please be specific</div>
+    </div>
+    <section class="contact">
+      <div>
+        <h3>channels</h3>
+        <div class="links">
+          <a href="mailto:gm.manoel.albino@proton.me"><span>✉ gm.manoel.albino@proton.me</span><span class="gl">primary →</span></a>
+          <a href="https://www.linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237" target="_blank" rel="noopener"><span>in linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237</span><span class="gl">→</span></a>
+          <a href="https://github.com/whisperx00" target="_blank" rel="noopener"><span>⌥ github.com/whisperx00</span><span class="gl">→</span></a>
+          <a href="/about/" style="opacity:.45;cursor:default;"><span>🏴 htb · <span style="color:var(--dim);">handle pending</span></span><span class="gl">htb →</span></a>
+        </div>
+      </div>
+      <div class="pref">
+        <h3>recruiter preferences</h3>
+        <p><span class="ok">●</span> <b>happy to hear about:</b></p>
+        <ul>
+          <li>junior / associate offensive security roles (red-team, pentest, VR)</li>
+          <li>windows / AD focused research positions</li>
+          <li>internship continuations or new security internships</li>
+          <li>CTF sponsorship · speaking gigs · research collabs</li>
+          <li>remote-first or relocation (open to anywhere)</li>
         </ul>
+        <p style="margin-top:10px;"><span class="no">●</span> <b>please skip:</b></p>
+        <ul>
+          <li>pure defensive / SOC / blue-team roles</li>
+          <li>"cybersecurity generalist" with no offensive focus</li>
+          <li>unpaid positions or equity-only at seed stage</li>
+        </ul>
+        <p style="margin-top:10px;color:var(--dim);font-size:11px;">avg response time under 24h on weekdays.</p>
       </div>
-    </div>
-
-    <div class="section-head">
-      <h2><span class="sym">▸</span>education</h2>
-    </div>
-    <div class="edu-placeholder">
-      <span class="dim">[REVISE: add education]</span>
-    </div>
-
-    <div class="section-head">
-      <h2><span class="sym">▸</span>certifications</h2>
-    </div>
-    <div class="certs">
-      <div class="cert training">
-        <div class="cert-name">OSCP</div>
-        <div class="cert-status">in progress</div>
-      </div>
-      <div class="cert planned">
-        <div class="cert-name">OSWP</div>
-        <div class="cert-status">planned</div>
-      </div>
-      <div class="cert planned">
-        <div class="cert-name">OSAI</div>
-        <div class="cert-status">planned</div>
-      </div>
-    </div>
-
-    <div class="section-head">
-      <h2><span class="sym">▸</span>languages</h2>
-    </div>
-    <div class="languages">
-      <div class="lang"><span class="lang-name">portuguese</span><span class="level native">native</span></div>
-      <div class="lang"><span class="lang-name">english</span><span class="level c1">C1 · professional working</span></div>
-      <div class="lang"><span class="lang-name">french</span><span class="level a2">A2 · learning</span></div>
-    </div>
-
-    <div class="section-head">
-      <h2><span class="sym">▸</span>contact</h2>
-    </div>
-    <div class="contacts">
-      <a href="mailto:gm.manoel.albino@proton.me" class="contact-row">
-        <span class="contact-icon">✉</span>
-        <span>gm.manoel.albino@proton.me</span>
-        <span class="gl">primary →</span>
-      </a>
-      <a href="https://www.linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237" target="_blank" rel="noopener" class="contact-row">
-        <span class="contact-icon">in</span>
-        <span>linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237</span>
-        <span class="gl">→</span>
-      </a>
-      <a href="https://github.com/whisperx00" target="_blank" rel="noopener" class="contact-row">
-        <span class="contact-icon">⌥</span>
-        <span>github.com/whisperx00</span>
-        <span class="gl">→</span>
-      </a>
-      <div class="contact-row dim">
-        <span class="contact-icon">🐱</span>
-        <span>[REVISE: hackthebox handle]</span>
-        <span class="gl">htb →</span>
-      </div>
-    </div>
+    </section>
 
   </main>
 
   <div class="statusbar" slot="statusbar">
     <div class="statusbar-inner">
       <div class="left">
-        <span><span class="dot"></span><span class="k">status:</span> <span class="v" style="color:var(--green);">open to opportunities</span></span>
+        <span><span class="dot"></span><span class="k">availability:</span> <span class="v" style="color:var(--green);">open to opportunities</span></span>
         <span><span class="k">location:</span> <span class="v">brazil · remote ok · relocation ok</span></span>
+      </div>
+      <div class="right">
+        <span><span class="k">OSCP:</span> <span class="v" style="color:var(--yellow);">in progress · 2026</span></span>
       </div>
     </div>
   </div>
 </Layout>
 
 <style>
-.timeline { display: flex; flex-direction: column; gap: 16px; }
-.entry { background: var(--mantle); border: 1px solid var(--surface1); border-left: 2px solid var(--mauve); padding: 18px 20px; }
-.entry-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 16px; }
-.org { font-weight: 700; font-size: 14px; color: var(--text); }
-.role { font-size: 12.5px; color: var(--sub); margin-top: 2px; }
-.when { font-size: 12px; color: var(--dim); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.manager { font-size: 11.5px; color: var(--dim); margin: 0 0 10px; font-style: italic; }
-.bullets { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
-.bullets li { font-size: 12.5px; color: var(--sub); line-height: 1.55; }
-.bullets li::marker { color: var(--mauve); }
+/* hero */
+.hero { display:grid;grid-template-columns:200px 1fr auto;gap:24px;align-items:center;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--mauve);padding:24px;margin-bottom:14px; }
+.hero .photo { width:200px;height:200px;background:var(--base);border:1px solid var(--surface1);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center; }
+.hero .photo::before { content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,color-mix(in oklab,var(--surface0) 60%,transparent) 0 2px,transparent 2px 10px);opacity:.8; }
+.hero .photo .frame { position:absolute;inset:8px;border:1px dashed var(--surface1); }
+.hero .photo .lab { position:relative;z-index:1;font-size:11px;color:var(--sub);text-align:center;letter-spacing:.04em; }
+.hero .photo .lab small { display:block;color:var(--dim);font-size:10px;margin-top:6px; }
+.hero h1 { font-family:var(--sans);font-weight:700;font-size:28px;color:var(--text);margin:0 0 4px;letter-spacing:-.015em; }
+.hero .role { font-size:13px;color:var(--sub);margin-bottom:14px; }
+.hero .role .hl { color:var(--mauve); }
+.hero .meta { display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--dim); }
+.hero .meta span .k { color:var(--dim);margin-right:4px; }
+.hero .meta span .v { color:var(--text); }
+.hero .open { display:flex;flex-direction:column;align-items:flex-end;gap:8px; }
+.hero .open .badge { display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--green);color:var(--green);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;background:color-mix(in oklab,var(--green) 8%,transparent); }
+.hero .open .badge::before { content:"";width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor; }
+.hero .open .ctas { display:flex;gap:6px; }
+.hero .open .ctas a { font-size:11px;color:var(--sub);border:1px solid var(--surface1);padding:5px 10px;transition:color .15s,border-color .15s;letter-spacing:.04em; }
+.hero .open .ctas a:hover { color:var(--mauve);border-color:var(--mauve); }
+.hero .open .ctas a.primary { color:var(--mauve);border-color:var(--mauve); }
 
-.edu-placeholder { padding: 14px 16px; background: var(--mantle); border: 1px solid var(--surface1); border-left: 2px solid var(--surface1); font-size: 12px; color: var(--dim); font-style: italic; margin-bottom: 8px; }
+/* stat strip */
+.stripe { display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:0 0 32px; }
+.qs { background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--col,var(--mauve));padding:11px 13px; }
+.qs .k { font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:3px; }
+.qs .v { font-weight:700;font-size:16px;color:var(--col,var(--text));letter-spacing:-.01em; }
+.qs .s { font-size:10.5px;color:var(--sub);margin-top:2px; }
 
-.certs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-.cert { padding: 10px 16px; background: var(--mantle); border: 1px solid var(--surface1); min-width: 110px; }
-.cert-name { font-weight: 700; font-size: 14px; color: var(--text); }
-.cert-status { font-size: 11px; margin-top: 3px; letter-spacing: .04em; }
-.cert.training .cert-status { color: var(--yellow); }
-.cert.planned .cert-status { color: var(--dim); }
+/* summary */
+.summary { background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--blue);padding:18px 22px;font-size:13px;color:var(--sub);line-height:1.7; }
+.summary .hl { color:var(--text); }
+.summary p { margin:0 0 10px; }
+.summary p:last-child { margin-bottom:0; }
 
-.languages { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
-.lang { display: flex; align-items: center; gap: 14px; font-size: 12.5px; padding: 8px 16px; background: var(--mantle); border: 1px solid var(--surface1); }
-.lang-name { color: var(--text); font-weight: 500; min-width: 100px; }
-.level { font-size: 11px; }
-.level.native { color: var(--green); }
-.level.c1 { color: var(--blue); }
-.level.a2 { color: var(--yellow); }
+/* xp timeline */
+.xp { display:flex;flex-direction:column;gap:0; }
+.xp .row { display:grid;grid-template-columns:160px 1fr auto;gap:24px;padding:18px 0;border-bottom:1px dashed var(--surface1); }
+.xp .row:last-child { border-bottom:none; }
+.xp .when { font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums;letter-spacing:.04em; }
+.xp .when .now { color:var(--green); }
+.xp .when .span { display:block;color:var(--sub);margin-top:3px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em; }
+.xp .body h3 { font-family:var(--sans);font-weight:600;font-size:16px;color:var(--text);margin:0 0 3px;letter-spacing:-.005em; }
+.xp .body .org { font-size:12px;color:var(--blue);margin-bottom:8px; }
+.xp .body .org .pipe { color:var(--surface1);margin:0 7px; }
+.xp .body .org .loc { color:var(--sub); }
+.xp .body ul { margin:0 0 8px;padding-left:18px;font-size:12px;color:var(--sub);line-height:1.65; }
+.xp .body ul li { margin-bottom:3px; }
+.xp .body ul li b { color:var(--text);font-weight:500; }
+.xp .body .stack { display:flex;flex-wrap:wrap;gap:5px;margin-top:6px; }
+.xp .body .stack .t { font-size:10.5px;color:var(--dim);background:var(--base);border:1px solid var(--surface1);padding:1px 7px; }
+.xp .right { font-size:11px;color:var(--dim);text-align:right;min-width:90px; }
+.xp .right .imp { font-size:13px;color:var(--peach);font-weight:600; }
+.xp .right small { display:block;font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;margin-top:2px; }
 
-.contacts { display: flex; flex-direction: column; gap: 4px; }
-.contact-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 16px; background: var(--mantle);
-  border: 1px solid var(--surface1); border-left: 2px solid var(--surface1);
-  font-size: 12.5px; color: var(--sub); transition: border-color .15s, color .15s;
+/* two-col grid */
+.twocol { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+.card { background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--col,var(--teal));padding:18px 20px; }
+.card h3 { margin:0 0 12px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--col,var(--teal)); }
+.card .item { display:grid;grid-template-columns:90px 1fr;gap:14px;padding:7px 0;border-bottom:1px dashed color-mix(in oklab,var(--surface1) 60%,transparent);font-size:12px; }
+.card .item:last-child { border-bottom:none; }
+.card .item .k { color:var(--dim); }
+.card .item .v { color:var(--text); }
+.card .item .v .muted { color:var(--sub); }
+
+/* skill bars */
+.skills { display:flex;flex-direction:column;gap:9px;margin-bottom:8px; }
+.skill { display:grid;grid-template-columns:185px 1fr 55px;gap:12px;align-items:center;font-size:12px; }
+.skill .name { color:var(--sub); }
+.skill .bar { height:6px;background:var(--base);border:1px solid var(--surface1);overflow:hidden; }
+.skill .bar .fill { height:100%;background:var(--col,var(--mauve)); }
+.skill .yrs { font-size:11px;color:var(--dim);text-align:right;font-variant-numeric:tabular-nums; }
+
+/* lang grid */
+.langs { display:grid;grid-template-columns:repeat(2,1fr);gap:8px 18px;font-size:12px;margin-bottom:14px; }
+.lang { display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed color-mix(in oklab,var(--surface1) 60%,transparent); }
+.lang .name { color:var(--text); }
+.lang .lvl { color:var(--sub);font-size:11px; }
+.lang .lvl .cefr { color:var(--mauve);font-weight:600;margin-left:4px; }
+
+/* contact */
+.contact { background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--peach);padding:18px 22px;display:grid;grid-template-columns:1fr 1fr;gap:16px; }
+.contact h3 { margin:0 0 10px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--peach); }
+.contact .links { display:flex;flex-direction:column;gap:8px;font-size:12px; }
+.contact .links a { color:var(--text);display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--base);border:1px solid var(--surface1);transition:border-color .15s,color .15s; }
+.contact .links a:hover { border-color:var(--mauve);color:var(--mauve); }
+.contact .links a .gl { color:var(--dim);font-size:11px; }
+.contact .links a:hover .gl { color:var(--mauve); }
+.contact .pref { font-size:12px;color:var(--sub);line-height:1.65; }
+.contact .pref .ok { color:var(--green); }
+.contact .pref .no { color:var(--red); }
+.contact .pref ul { margin:6px 0 0;padding-left:16px; }
+
+@media (max-width:900px) {
+  .stripe { grid-template-columns:repeat(3,1fr); }
 }
-a.contact-row:hover { border-left-color: var(--mauve); color: var(--text); }
-.contact-icon { color: var(--dim); min-width: 18px; }
-.gl { margin-left: auto; font-size: 11px; color: var(--dim); }
-.dim { color: var(--dim); font-style: italic; }
+@media (max-width:820px) {
+  .hero { grid-template-columns:1fr; }
+  .hero .open { align-items:flex-start; }
+  .twocol { grid-template-columns:1fr; }
+  .xp .row { grid-template-columns:1fr;gap:6px; }
+  .contact { grid-template-columns:1fr; }
+  .skill { grid-template-columns:1fr 55px; }
+  .skill .bar { grid-column:1 / -1; }
+}
+@media (max-width:520px) {
+  .stripe { grid-template-columns:repeat(2,1fr); }
+}
 </style>
