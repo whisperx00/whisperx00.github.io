@@ -2,13 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 ---
 <Layout title="whisperx00@kali — skill tree" active="skills">
-  <Fragment slot="head">
-    <style>
-      main { max-width: 1200px; }
-    </style>
-  </Fragment>
-
-  <main>
+  <main class="skills-page">
     <div class="cmd">
       <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/skills</span>
       <span style="color:var(--text);">$ cat</span>
@@ -100,8 +94,8 @@ import Layout from '../../layouts/Layout.astro';
   </div>
 </Layout>
 
-<style>
-  main { max-width: 1200px; }
+<style is:global>
+  .skills-page main { max-width: 1200px; }
   .hud { display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr;gap:10px;margin:0 0 22px; }
   .hud .cell { background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--col,var(--mauve));padding:11px 14px; }
   .hud .cell .k { font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim); }
