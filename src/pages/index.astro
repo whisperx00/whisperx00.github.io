@@ -7,43 +7,49 @@ const posts = (await getCollection('posts', p => !p.data.draft))
 ---
 <Layout title="whisperx00@kali — offsec notes" active="index">
   <main>
-    <div class="cmd">
-      <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~</span>
-      <span style="color:var(--text);">$ whoami --long</span>
-    </div>
 
-    <h1 class="title">offensive security researcher.</h1>
-    <p class="lede">
-      focus on <span class="hl">windows &amp; active directory</span>, web exploitation, and custom tooling.
-      writeups from HTB labs, intern work at SiDi, and anything else worth documenting.
-    </p>
+    <section class="bootlog" id="bootlog" aria-hidden="true"></section>
 
-    <div class="tags">
-      <span class="tag" style="--col:var(--mauve);">active-directory</span>
-      <span class="tag" style="--col:var(--blue);">windows</span>
-      <span class="tag" style="--col:var(--peach);">web-exploitation</span>
-      <span class="tag" style="--col:var(--green);">python</span>
-      <span class="tag" style="--col:var(--teal);">typescript</span>
-      <span class="tag" style="--col:var(--yellow);">oscp-in-progress</span>
-    </div>
+    <section class="hero">
+      <div class="prompt" id="prompt">
+        <span class="u">whisperx00</span><span class="at">@</span><span class="h">kali</span><span class="p">:</span><span class="d">~</span><span class="s">$</span>
+        <span class="s" style="color:var(--sub);margin-left:4px;">whoami --long</span>
+      </div>
+      <h1 class="title"><span class="typed" id="typed"></span><span class="cursor" id="cursor"></span></h1>
+      <p class="subtitle" id="subtitle">
+        focus on <span class="hl">windows &amp; active directory</span>, web exploitation, and custom tooling.
+        writeups from HTB labs, intern work at SiDi, and anything else worth documenting.
+      </p>
+      <div class="tags" id="tags">
+        <span class="tag" style="--col:var(--mauve);">active-directory</span>
+        <span class="tag" style="--col:var(--blue);">windows</span>
+        <span class="tag" style="--col:var(--peach);">web-exploitation</span>
+        <span class="tag" style="--col:var(--green);">python</span>
+        <span class="tag" style="--col:var(--teal);">typescript</span>
+        <span class="tag" style="--col:var(--yellow);">oscp-in-progress</span>
+      </div>
+    </section>
 
-    <div class="section-head">
+    <div class="section-head" id="sh-about">
       <h2><span class="sym">▸</span>cat <span class="slash">/</span> <span style="color:var(--text);">whoami.txt</span></h2>
+      <div class="meta"><span class="dot">●</span>offensive security researcher</div>
     </div>
 
-    <section class="about">
+    <section class="about" id="about">
       <div class="info">
         <div class="line"><span class="k">name</span><span class="v">Manoel Albino Coelho de Miranda <span class="dim">// whisperx00@kali</span></span></div>
         <div class="line"><span class="k">role</span><span class="v">offensive security researcher <span class="muted">— windows &amp; AD · web exploitation · custom tooling</span></span></div>
         <div class="line"><span class="k">experience</span><span class="v"><span class="muted">offensive security intern @ SiDi</span> <span class="dim">· samsung product assessments · AD exploitation · windows privesc · phishing simulation</span></span></div>
+        <div class="line"><span class="k">status</span><span class="v"><span style="color:var(--green);">● open to opportunities</span> <span class="dim">· brazil · open to remote and relocation</span></span></div>
         <div class="line"><span class="k">location</span><span class="v">brazil <span class="dim">· open to remote and relocation</span></span></div>
-        <div class="line"><span class="k">spoken</span><span class="v"><span class="muted">portuguese (native)</span> · <span class="muted">english (C1)</span> · <span class="muted">french (A2 · learning)</span></span></div>
+        <div class="line"><span class="k">spoken</span><span class="v"><span class="muted">portuguese (native)</span><span class="sep">·</span><span class="muted">english (C1)</span><span class="sep">·</span><span class="muted">french (A2 · learning)</span></span></div>
+        <div class="line"><span class="k">education</span><span class="v"><span class="dim">[REVISE: add education]</span></span></div>
         <div class="line"><span class="k">certs</span><span class="v">
           <span class="kbd training">OSCP · in progress</span>
           <span class="kbd planned">OSWP · planned</span>
           <span class="kbd planned">OSAI · planned</span>
         </span></div>
-        <div class="line"><span class="k">skills</span><span class="v"><span class="muted">active directory · windows privesc · web exploitation · python · typescript / react</span></span></div>
+        <div class="line"><span class="k">skills</span><span class="v"><span class="muted">active directory</span><span class="sep">·</span><span class="muted">windows privesc</span><span class="sep">·</span><span class="muted">web exploitation</span><span class="sep">·</span><span class="muted">python</span><span class="sep">·</span><span class="muted">typescript / react</span></span></div>
         <div class="line"><span class="k">contact</span><span class="v">
           <a href="https://github.com/whisperx00" target="_blank" rel="noopener">github.com/whisperx00</a>
           <span class="sep">·</span>
@@ -51,17 +57,17 @@ const posts = (await getCollection('posts', p => !p.data.draft))
           <span class="sep">·</span>
           <a href="https://www.linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237" target="_blank" rel="noopener">linkedin</a>
           <span class="sep">·</span>
-          <a href="/about/">full cv →</a>
+          <a href="/about/" style="color:var(--mauve);border-bottom:1px dotted var(--mauve);">full cv →</a>
         </span></div>
       </div>
     </section>
 
-    <div class="section-head">
+    <div class="section-head" id="sh-posts">
       <h2><span class="sym">▸</span>recent <span class="slash">/</span> <span style="color:var(--text);">posts</span></h2>
-      <div class="meta"><span class="dot">●</span>{posts.length} {posts.length === 1 ? 'entry' : 'entries'}</div>
+      <div class="meta"><span class="dot">●</span>{posts.length} {posts.length === 1 ? 'entry' : 'entries'} · sorted desc</div>
     </div>
 
-    <section class="posts">
+    <section class="posts" id="posts">
       {posts.map(p => (
         <a href={`/posts/${p.id}/`} class="post" style={`--cat:var(--${p.data.accent});`}>
           <div class="meta">
@@ -79,7 +85,7 @@ const posts = (await getCollection('posts', p => !p.data.draft))
 
   </main>
 
-  <div class="statusbar" slot="statusbar">
+  <div class="statusbar" id="statusbar" slot="statusbar">
     <div class="statusbar-inner">
       <div class="left">
         <span><span class="dot"></span><span class="k">system:</span> <span class="v" style="color:var(--green);">operational</span></span>
@@ -93,56 +99,152 @@ const posts = (await getCollection('posts', p => !p.data.draft))
 </Layout>
 
 <style>
-.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
-.tag {
-  font-size: 11px; font-weight: 500; letter-spacing: .04em; text-transform: lowercase;
-  padding: 3px 8px;
-  border: 1px solid var(--col, var(--teal));
-  color: var(--col, var(--teal));
-  background: color-mix(in oklab, var(--col, var(--teal)) 10%, transparent);
-}
+  /* ---- boot log ---- */
+  .bootlog { font-size:12.5px;color:var(--sub);margin-bottom:36px;display:flex;flex-direction:column;gap:4px;overflow:hidden;transition:opacity .6s ease-out,max-height .8s ease-in-out,margin-bottom .8s ease-in-out,filter .6s ease-out;max-height:600px; }
+  .bootlog.collapsing { opacity:0;max-height:0;margin-bottom:0;filter:blur(2px);pointer-events:none; }
+  .bootline { display:flex;gap:10px;align-items:baseline;opacity:0;transform:translateY(-4px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+  .bootline.in { opacity:1;transform:none;transition:opacity .18s ease-out,transform .18s ease-out; }
+  .badge { display:inline-block;min-width:58px;text-align:center;padding:1px 6px;border:1px solid currentColor;font-size:11px;font-weight:600;letter-spacing:.04em;flex-shrink:0; }
+  .badge.ok   { color:var(--green); }
+  .badge.info { color:var(--blue); }
+  .badge.warn { color:var(--yellow); }
+  .badge.fail { color:var(--red); }
+  .bootline .t   { color:var(--dim);font-variant-numeric:tabular-nums; }
+  .bootline .msg { color:var(--sub); }
+  .bootline .msg b { color:var(--text);font-weight:500; }
+  .bootline .msg .acc-m { color:var(--mauve); }
+  .bootline .msg .acc-b { color:var(--blue); }
+  .bootline .msg .acc-p { color:var(--peach); }
+  .bootline .msg .acc-g { color:var(--green); }
 
-.about { padding: 20px; background: var(--mantle); border: 1px solid var(--surface1); border-left: 2px solid var(--mauve); margin-bottom: 8px; }
-.about .info { display: flex; flex-direction: column; gap: 14px; }
-.about .line {
-  display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: baseline;
-  font-size: 12.5px; padding-bottom: 8px;
-  border-bottom: 1px dashed color-mix(in oklab, var(--surface1) 60%, transparent);
-}
-.about .line:last-child { border-bottom: none; padding-bottom: 0; }
-.about .line .k { color: var(--dim); }
-.about .line .k::before { content: "$ "; color: var(--green); }
-.about .line .v { color: var(--text); line-height: 1.6; }
-.about .line .v .muted { color: var(--sub); }
-.about .line .v .dim { color: var(--dim); }
-.about .line .v a { color: var(--blue); border-bottom: 1px dotted var(--blue); }
-.about .line .v a:hover { color: var(--mauve); border-color: var(--mauve); }
-.about .line .v .sep { color: var(--surface1); margin: 0 6px; }
-.kbd { display: inline-block; padding: 1px 6px; border: 1px solid var(--surface1); background: var(--base); color: var(--sub); font-size: 11px; margin-right: 5px; }
-.kbd.training { color: var(--yellow); border-color: color-mix(in oklab, var(--yellow) 50%, var(--surface1)); }
-.kbd.planned  { color: var(--dim); }
+  /* ---- hero ---- */
+  .hero { margin-top:14px;margin-bottom:64px; }
+  .prompt { font-size:13px;margin-bottom:14px;opacity:0;transform:translateY(4px); }
+  .prompt.in { opacity:1;transform:none;transition:opacity .2s ease-out,transform .2s ease-out; }
+  .prompt .u { color:var(--green); } .prompt .at { color:var(--sub); } .prompt .h { color:var(--mauve); }
+  .prompt .p { color:var(--sub); } .prompt .d { color:var(--blue); } .prompt .s { color:var(--text); }
 
-.posts { display: flex; flex-direction: column; gap: 10px; }
-.post {
-  display: grid; grid-template-columns: 140px 1fr auto; gap: 24px; align-items: flex-start;
-  padding: 16px 20px 16px 16px; background: var(--mantle);
-  border-left: 2px solid var(--cat, var(--mauve));
-  transition: background .15s;
-}
-.post:hover { background: #1f1f2e; }
-.post .meta { font-size: 11px; color: var(--dim); display: flex; flex-direction: column; gap: 3px; padding-top: 3px; }
-.post .meta .dt { color: var(--sub); }
-.post .body .cat {
-  font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--cat, var(--mauve)); margin-bottom: 6px; display: inline-flex; align-items: center; gap: 8px;
-}
-.post .body .cat::before { content: ""; display: inline-block; width: 6px; height: 6px; background: currentColor; }
-.post .body h3 { font-family: var(--sans); font-weight: 600; font-size: 16px; color: var(--text); margin: 0; line-height: 1.35; }
-.post .arrow { font-size: 18px; color: var(--dim); transition: color .15s, transform .15s; }
-.post:hover .arrow { color: var(--cat, var(--mauve)); transform: translateX(3px); }
+  h1.title { font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.3;color:var(--text);margin:0 0 18px;letter-spacing:-.005em;min-height:1.3em; }
+  h1.title .typed { white-space:pre-wrap; }
+  .cursor { display:inline-block;width:.55em;height:1em;background:var(--text);vertical-align:-2px;margin-left:2px;animation:blink 1s steps(2) infinite; }
+  @keyframes blink { 50%{opacity:0;} }
 
-@media (max-width: 680px) {
-  .post { grid-template-columns: 1fr; gap: 8px; }
-  .about .line { grid-template-columns: 1fr; gap: 4px; }
-}
+  .subtitle { font-size:13px;color:var(--sub);max-width:720px;margin:0 0 22px;opacity:0;transform:translateY(6px); }
+  .subtitle.in { opacity:1;transform:none;transition:opacity .35s ease-out,transform .35s ease-out; }
+  .subtitle .hl { color:var(--text); }
+
+  .tags { display:flex;flex-wrap:wrap;gap:8px;opacity:0;transform:translateY(6px); }
+  .tags.in { opacity:1;transform:none;transition:opacity .35s ease-out .1s,transform .35s ease-out .1s; }
+  .tag { font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:lowercase;padding:3px 8px;border:1px solid var(--col,var(--teal));color:var(--col,var(--teal));background:color-mix(in oklab,var(--col,var(--teal)) 10%,transparent); }
+
+  /* ---- about ---- */
+  .about { padding:24px;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--mauve);margin-top:20px;opacity:0;transform:translateY(10px); }
+  .about.in { opacity:1;transform:none;transition:opacity .4s ease-out,transform .4s ease-out; }
+  .about .info { display:flex;flex-direction:column;gap:18px; }
+  .about .line { display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline;font-size:12.5px;padding-bottom:8px;border-bottom:1px dashed color-mix(in oklab,var(--surface1) 60%,transparent); }
+  .about .line:last-child { border-bottom:none;padding-bottom:0; }
+  .about .line .k { color:var(--dim); }
+  .about .line .k::before { content:"$ ";color:var(--green); }
+  .about .line .v { color:var(--text);line-height:1.6; }
+  .about .line .v .muted { color:var(--sub); }
+  .about .line .v .dim { color:var(--dim); }
+  .about .line .v .sep { color:var(--surface1);margin:0 6px; }
+  .about .line .v a { color:var(--blue);border-bottom:1px dotted var(--blue);transition:color .15s; }
+  .about .line .v a:hover { color:var(--mauve);border-color:var(--mauve); }
+  .kbd { display:inline-block;padding:1px 6px;border:1px solid var(--surface1);background:var(--base);color:var(--sub);font-size:11px;margin-right:5px; }
+  .kbd.training { color:var(--yellow);border-color:color-mix(in oklab,var(--yellow) 50%,var(--surface1)); }
+  .kbd.planned  { color:var(--dim); }
+
+  /* ---- posts ---- */
+  .posts { display:flex;flex-direction:column;gap:0; }
+  .post { display:grid;grid-template-columns:148px 1fr auto;gap:28px;align-items:flex-start;padding:18px 20px 18px 18px;background:var(--mantle);border-left:2px solid var(--cat,var(--mauve));transition:background .15s;margin-bottom:10px;opacity:0;transform:translateX(-18px); }
+  .post.in { opacity:1;transform:none;transition:opacity .35s ease-out,transform .35s ease-out,background .15s; }
+  .post:hover { background:#1f1f2e; }
+  .post .meta { font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:3px;padding-top:3px;font-variant-numeric:tabular-nums; }
+  .post .meta .dt { color:var(--sub); }
+  .post .body .cat { font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--cat,var(--mauve));margin-bottom:6px;display:inline-flex;align-items:center;gap:8px; }
+  .post .body .cat::before { content:"";display:inline-block;width:6px;height:6px;background:currentColor; }
+  .post .body h3 { font-family:var(--sans);font-weight:600;font-size:17px;color:var(--text);margin:0 0 6px;line-height:1.35;letter-spacing:-.01em; }
+  .post .arrow { font-size:18px;color:var(--dim);padding-top:2px;transition:color .15s,transform .15s; }
+  .post:hover .arrow { color:var(--cat,var(--mauve));transform:translateX(3px); }
+
+  /* ---- statusbar anim ---- */
+  #statusbar { opacity:0; }
+  #statusbar.in { opacity:1;transition:opacity .4s ease-out; }
+
+  @media (max-width:680px) {
+    .post { grid-template-columns:1fr;gap:10px; }
+    .post .meta { flex-direction:row;gap:10px; }
+    .about .line { grid-template-columns:1fr;gap:4px; }
+    .bootline { white-space:normal; }
+  }
 </style>
+
+<script>
+const BOOT_LINES = [
+  { t:"[  0.000012]", badge:"OK",   cls:"ok",   msg:'reached target <b>local-fs.target</b>.' },
+  { t:"[  0.041820]", badge:"OK",   cls:"ok",   msg:'started <span class="acc-m">whisperx00-identity.service</span> — operator authenticated.' },
+  { t:"[  0.118440]", badge:"INFO", cls:"info", msg:'mounting <b>/dev/sda2</b> on <span class="acc-b">/home/whisperx00</span>' },
+  { t:"[  0.239001]", badge:"OK",   cls:"ok",   msg:'loaded content collections (posts + writeups indexed, drafts excluded)' },
+  { t:"[  0.402771]", badge:"OK",   cls:"ok",   msg:'tools: <span class="acc-p">burp-intruder-cli</span>, <span class="acc-b">ldap-parse</span> — beta · in use' },
+  { t:"[  0.613098]", badge:"INFO", cls:"info", msg:'OSCP: <span style="color:var(--yellow);">● in progress</span> · SiDi internship active · wireguard up' },
+  { t:"[  0.887240]", badge:"OK",   cls:"ok",   msg:'spawning shell on /dev/tty1 ...' },
+];
+
+const TITLE_TEXT = "offensive security researcher. windows & AD.";
+
+let timers: ReturnType<typeof setTimeout>[] = [];
+function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+
+function runBoot(){
+  clearTimers();
+  const bootEl = document.getElementById('bootlog')!;
+  bootEl.innerHTML = '';
+  BOOT_LINES.forEach(L => {
+    const line = document.createElement('div');
+    line.className = 'bootline';
+    line.innerHTML = `<span class="t">${L.t}</span><span class="badge ${L.cls}">${L.badge}</span><span class="msg">${L.msg}</span>`;
+    bootEl.appendChild(line);
+  });
+
+  ['prompt','subtitle','tags','about','statusbar'].forEach(id => {
+    document.getElementById(id)?.classList.remove('in');
+  });
+  document.querySelectorAll('.post').forEach(p => p.classList.remove('in'));
+  const typedEl = document.getElementById('typed')!;
+  typedEl.textContent = '';
+  document.getElementById('cursor')!.style.display = 'inline-block';
+  bootEl.classList.remove('collapsing');
+
+  const stagger = 260;
+  const lines = bootEl.querySelectorAll('.bootline');
+  let t0 = 150;
+  lines.forEach((ln, i) => timers.push(setTimeout(() => ln.classList.add('in'), t0 + i * stagger)));
+  const afterBoot = t0 + lines.length * stagger + 200;
+
+  timers.push(setTimeout(() => document.getElementById('prompt')!.classList.add('in'), afterBoot));
+
+  const startType = afterBoot + 350;
+  const perChar   = 28;
+  for (let i = 0; i <= TITLE_TEXT.length; i++){
+    timers.push(setTimeout(() => { typedEl.textContent = TITLE_TEXT.slice(0, i); }, startType + i * perChar));
+  }
+  const endType = startType + TITLE_TEXT.length * perChar;
+
+  timers.push(setTimeout(() => document.getElementById('subtitle')!.classList.add('in'), endType + 200));
+  timers.push(setTimeout(() => document.getElementById('tags')!.classList.add('in'),     endType + 400));
+  timers.push(setTimeout(() => document.getElementById('about')!.classList.add('in'),    endType + 550));
+
+  const posts = document.querySelectorAll('.post');
+  const postStart = endType + 850;
+  posts.forEach((p, i) => timers.push(setTimeout(() => p.classList.add('in'), postStart + i * 230)));
+  const postsEnd = postStart + posts.length * 230;
+
+  timers.push(setTimeout(() => document.getElementById('statusbar')!.classList.add('in'), postsEnd + 350));
+  timers.push(setTimeout(() => {
+    bootEl.classList.add('collapsing');
+  }, postsEnd + 1200));
+}
+
+runBoot();
+</script>
