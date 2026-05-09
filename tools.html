@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>nyx@void — tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --crust:#11111b;--mantle:#181825;--base:#1e1e2e;--surface0:#313244;--surface1:#45475a;
+    --text:#cdd6f4;--sub:#a6adc8;--dim:#6c7086;
+    --mauve:#cba6f7;--blue:#89b4fa;--peach:#fab387;--green:#a6e3a1;--teal:#94e2d5;--yellow:#f9e2af;--red:#f38ba8;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --sans:"Inter",system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--crust);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--mauve);color:var(--crust);}
+
+  nav.topnav{position:sticky;top:0;z-index:40;background:var(--mantle);border-bottom:1px solid var(--surface1);}
+  .nav-inner{max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;font-size:13px;}
+  .brand{font-weight:700;color:var(--mauve);}
+  .brand .caret{color:var(--green);margin-right:2px;}
+  .nav-links{display:flex;gap:22px;align-items:center;}
+  .nav-links a{color:var(--sub);padding:4px 0;border-bottom:1px solid transparent;transition:color .15s;}
+  .nav-links a .slash{color:var(--dim);margin-right:2px;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-links a.active{color:var(--blue);border-bottom-color:var(--blue);}
+  .nav-links a.active .slash{color:var(--blue);opacity:.6;}
+
+  main{max-width:1120px;margin:0 auto;padding:40px 28px 80px;}
+
+  .cmd{font-size:13px;margin-bottom:20px;color:var(--sub);}
+  .cmd .u{color:var(--green);} .cmd .h{color:var(--mauve);} .cmd .d{color:var(--blue);}
+  .cmd .arg{color:var(--peach);} .cmd .flag{color:var(--yellow);}
+
+  h1.title{font-family:var(--mono);font-weight:700;font-size:clamp(22px,3vw,30px);color:var(--text);margin:0 0 10px;letter-spacing:-.005em;}
+  h1 .slash{color:var(--dim);}
+  h1 .ext{color:var(--peach);}
+
+  .lede{font-size:13px;color:var(--sub);max-width:80ch;margin:0 0 28px;}
+  .lede .hl{color:var(--text);}
+  .lede code{background:var(--surface0);padding:1px 6px;color:var(--peach);border:1px solid var(--surface1);}
+
+  /* ========= summary bar ========= */
+  .summary{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:0 0 32px;
+  }
+  .sm{
+    background:var(--mantle);border:1px solid var(--surface1);
+    border-left:2px solid var(--col,var(--teal));
+    padding:12px 14px;
+  }
+  .sm .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;}
+  .sm .v{font-weight:700;font-size:18px;color:var(--col,var(--text));letter-spacing:-.01em;}
+  .sm .s{font-size:10.5px;color:var(--sub);margin-top:3px;}
+
+  /* ========= filter toolbar ========= */
+  .toolbar{display:flex;gap:10px;margin-bottom:20px;align-items:stretch;flex-wrap:wrap;}
+  .tb-group{display:flex;background:var(--mantle);border:1px solid var(--surface1);}
+  .tb-group button{
+    background:transparent;border:0;border-right:1px solid var(--surface1);
+    color:var(--dim);font-family:var(--mono);font-size:12px;padding:9px 12px;cursor:pointer;
+    transition:color .15s,background .15s;
+  }
+  .tb-group button:last-child{border-right:0;}
+  .tb-group button:hover{color:var(--text);}
+  .tb-group button.on{color:var(--text);background:var(--surface0);}
+  .tb-group button.on .dot{background:currentColor;}
+  .tb-group .dot{display:inline-block;width:6px;height:6px;margin-right:6px;background:var(--dim);vertical-align:middle;}
+
+  /* ========= tool cards grid ========= */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+  @media (max-width:820px){ .grid{grid-template-columns:1fr;} .summary{grid-template-columns:repeat(2,1fr);} }
+
+  .tool{
+    background:var(--base);
+    border:1px solid var(--surface1);
+    border-top:2px solid var(--col,var(--mauve));
+    border-radius:4px;
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    transition:transform .15s, border-color .15s;
+  }
+  .tool:hover{transform:translateY(-2px);border-color:color-mix(in oklab,var(--col,var(--mauve)) 40%,var(--surface1));}
+
+  .tool header{
+    display:grid;grid-template-columns:1fr auto;gap:10px;align-items:baseline;
+    padding:16px 18px 10px;
+  }
+  .tool h3{
+    font-family:var(--mono);font-weight:700;font-size:17px;color:var(--text);margin:0;letter-spacing:-.005em;
+  }
+  .tool h3 .at{color:var(--dim);font-weight:500;margin:0 3px;}
+  .tool h3 .ver{color:var(--col,var(--mauve));}
+  .tool .lang{font-size:10.5px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+  .tool .lang::before{content:"";display:inline-block;width:8px;height:8px;background:var(--col,var(--mauve));}
+
+  .tool .status-row{
+    padding:0 18px 10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    font-size:11px;color:var(--sub);
+  }
+  .tool .status-row .tag{
+    font-size:10.5px;color:var(--dim);background:var(--mantle);border:1px solid var(--surface1);padding:1px 7px;letter-spacing:.02em;
+  }
+  .tool .status-row .ci{
+    display:inline-flex;align-items:center;gap:6px;padding:1px 7px;
+    border:1px solid currentColor;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;
+  }
+  .tool .status-row .ci.pass{color:var(--green);}
+  .tool .status-row .ci.beta{color:var(--yellow);}
+  .tool .status-row .ci.archive{color:var(--dim);}
+
+  .tool .desc{
+    padding:0 18px 14px;font-size:12.5px;color:var(--sub);line-height:1.65;max-width:64ch;
+  }
+  .tool .desc .hl{color:var(--text);}
+
+  .tool .demo{
+    margin:0 18px 14px;background:var(--crust);border:1px solid var(--surface1);border-left:2px solid var(--green);
+    padding:10px 12px;font-size:11.5px;color:var(--sub);line-height:1.7;
+    font-family:var(--mono);overflow-x:auto;white-space:pre;
+  }
+  .tool .demo .p{color:var(--green);}
+  .tool .demo .arg{color:var(--peach);}
+  .tool .demo .flag{color:var(--yellow);}
+  .tool .demo .out{color:var(--dim);}
+  .tool .demo .hit{color:var(--col,var(--mauve));}
+
+  .tool .stats{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    border-top:1px dashed var(--surface1);
+    padding:12px 18px 10px;
+    font-size:11px;color:var(--dim);
+  }
+  .tool .stats .cell{display:flex;flex-direction:column;gap:1px;}
+  .tool .stats .cell .n{font-weight:700;font-size:13px;color:var(--text);letter-spacing:-.01em;font-variant-numeric:tabular-nums;}
+  .tool .stats .cell .l{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);}
+
+  .tool footer{
+    margin-top:auto;
+    display:flex;gap:0;border-top:1px solid var(--surface1);
+  }
+  .tool footer a{
+    flex:1;text-align:center;padding:10px 12px;
+    font-size:11px;color:var(--sub);letter-spacing:.02em;
+    border-right:1px solid var(--surface1);
+    transition:color .15s,background .15s;
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .tool footer a:last-child{border-right:0;}
+  .tool footer a:hover{color:var(--col,var(--mauve));background:var(--mantle);}
+  .tool footer a .gl{color:var(--dim);transition:color .15s;}
+  .tool footer a:hover .gl{color:var(--col,var(--mauve));}
+
+  /* ========= experiments / archive ========= */
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin:52px 0 18px;border-bottom:1px dashed var(--surface1);padding-bottom:10px;}
+  .section-head h2{font-weight:600;font-size:13px;color:var(--sub);margin:0;letter-spacing:.04em;}
+  .section-head h2 .sym{color:var(--mauve);margin-right:8px;}
+  .section-head h2 .slash{color:var(--dim);}
+  .section-head .meta{font-size:11px;color:var(--dim);}
+
+  .experiments{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;}
+  @media (max-width:820px){ .experiments{grid-template-columns:1fr;} }
+  .xp{
+    background:var(--mantle);border:1px solid var(--surface1);
+    border-left:2px solid var(--col,var(--yellow));
+    padding:14px 16px;display:flex;flex-direction:column;gap:6px;
+  }
+  .xp .head{display:flex;justify-content:space-between;align-items:baseline;}
+  .xp .name{font-weight:700;font-size:13px;color:var(--text);}
+  .xp .badge{
+    font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:1px 6px;
+    border:1px solid var(--col,var(--yellow));color:var(--col,var(--yellow));
+  }
+  .xp .desc{font-size:11.5px;color:var(--dim);line-height:1.55;}
+  .xp .foot{font-size:10.5px;color:var(--sub);margin-top:4px;display:flex;gap:10px;}
+  .xp .foot .k{color:var(--dim);margin-right:3px;}
+
+  /* archive table */
+  .archive{
+    background:var(--mantle);border:1px solid var(--surface1);
+    font-family:var(--mono);font-size:12px;overflow:hidden;
+  }
+  .archive .row{
+    display:grid;grid-template-columns:160px 80px 1fr 90px 90px;
+    gap:14px;align-items:center;padding:10px 16px;
+    border-bottom:1px dashed var(--surface1);
+  }
+  .archive .row:last-child{border-bottom:none;}
+  .archive .row.head{color:var(--dim);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--surface0);border-bottom:1px solid var(--surface1);}
+  .archive .row .name{color:var(--sub);}
+  .archive .row .ver{color:var(--dim);font-variant-numeric:tabular-nums;}
+  .archive .row .desc{color:var(--dim);font-size:11px;}
+  .archive .row .arch{color:var(--dim);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;}
+  .archive .row .act a{color:var(--sub);font-size:11px;border:1px solid var(--surface1);padding:3px 8px;transition:color .15s,border-color .15s;}
+  .archive .row .act a:hover{color:var(--mauve);border-color:var(--mauve);}
+
+  /* ========= install block ========= */
+  .install{
+    margin-top:36px;
+    background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--teal);
+    padding:18px 20px;
+  }
+  .install h3{margin:0 0 12px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);}
+  .install .blocks{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  @media (max-width:820px){ .install .blocks{grid-template-columns:1fr;} }
+  .install .blk{
+    background:var(--crust);border:1px solid var(--surface1);padding:10px 12px;
+    font-size:11.5px;color:var(--sub);display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .install .blk code{color:var(--text);}
+  .install .blk .pkg{color:var(--peach);margin-right:8px;letter-spacing:.06em;text-transform:uppercase;font-size:10.5px;}
+  .install .blk button{
+    background:transparent;border:1px solid var(--surface1);color:var(--sub);font-family:var(--mono);font-size:10.5px;
+    padding:3px 8px;cursor:pointer;transition:color .15s,border-color .15s;
+  }
+  .install .blk button:hover{color:var(--green);border-color:var(--green);}
+  .install .blk button.ok{color:var(--green);border-color:var(--green);}
+
+  /* status/footer (same as siblings) */
+  .statusbar{margin-top:40px;background:var(--surface0);border-top:1px solid var(--surface1);border-bottom:1px solid var(--surface1);}
+  .statusbar-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:10px 28px;font-size:11px;color:var(--sub);}
+  .statusbar .left{display:flex;gap:14px;align-items:center;}
+  .statusbar .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);display:inline-block;margin-right:6px;}
+  .statusbar .right{display:flex;gap:18px;align-items:center;}
+  .statusbar .k{color:var(--dim);} .statusbar .v{color:var(--text);}
+
+  footer{background:var(--mantle);border-top:1px solid var(--surface1);}
+  .foot-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:18px 28px;font-size:11px;color:var(--dim);}
+  .foot-inner .l span.sep{color:var(--surface1);margin:0 10px;}
+  .foot-inner .r{display:flex;gap:20px;}
+  .foot-inner .r a{color:var(--sub);}
+  .foot-inner .r a:hover{color:var(--mauve);}
+  .foot-inner .r a .slash{color:var(--dim);margin-right:2px;}
+
+  @media (max-width:680px){
+    .nav-links{gap:12px;font-size:12px;}
+    .nav-links a span.label{display:none;}
+    .summary{grid-template-columns:1fr 1fr;}
+    .archive .row{grid-template-columns:1fr;gap:4px;padding:12px 14px;}
+    .archive .row.head{display:none;}
+    .tool .stats{grid-template-columns:repeat(2,1fr);gap:8px;}
+    .statusbar-inner,.foot-inner{flex-direction:column;gap:8px;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <div class="brand"><span class="caret">&gt;</span> nyx@void</div>
+    <div class="nav-links">
+      <a href="index.html"><span class="slash">./</span><span class="label">index</span></a>
+      <a href="writeups.html"><span class="slash">./</span><span class="label">writeups</span></a>
+      <a href="research.html"><span class="slash">./</span><span class="label">research</span></a>
+      <a href="#" class="active"><span class="slash">./</span><span class="label">tools</span></a>
+      <a href="skills.html"><span class="slash">./</span><span class="label">skills</span></a>
+      <a href="about.html"><span class="slash">./</span><span class="label">about</span></a>
+      <a href="rss.html"><span class="slash">./</span><span class="label">rss</span></a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+  <div class="cmd">
+    <span class="u">nyx</span>@<span class="h">void</span>:<span class="d">~/bin</span>
+    <span style="color:var(--text);">$</span>
+    <span style="color:var(--text);">make</span>
+    <span class="arg">release</span>
+    <span class="flag">--all</span>
+  </div>
+
+  <h1 class="title">tools <span class="slash">/</span> <span class="ext">./bin</span></h1>
+  <p class="lede">
+    <span class="hl">Small, sharp, single-purpose.</span>
+    everything i maintain publicly — exploit scaffolding, fuzzers, protocol taps.
+    MIT-licensed, documented enough to be useful, <span class="hl">not</span> commercial-grade.
+    found a bug? <code>issues/</code> is open. want a feature? fork it, that's what it's there for.
+  </p>
+
+  <!-- summary bar -->
+  <section class="summary">
+    <div class="sm" style="--col:var(--mauve);">
+      <div class="k">published</div>
+      <div class="v">7</div>
+      <div class="s">3 active · 2 beta · 2 archived</div>
+    </div>
+    <div class="sm" style="--col:var(--green);">
+      <div class="k">total stars</div>
+      <div class="v">2.6k</div>
+      <div class="s">across all repos</div>
+    </div>
+    <div class="sm" style="--col:var(--peach);">
+      <div class="k">downloads</div>
+      <div class="v">48k</div>
+      <div class="s">pip + cargo, last 30d</div>
+    </div>
+    <div class="sm" style="--col:var(--blue);">
+      <div class="k">contributors</div>
+      <div class="v">31</div>
+      <div class="s">across 4 repos</div>
+    </div>
+    <div class="sm" style="--col:var(--teal);">
+      <div class="k">last release</div>
+      <div class="v">2d</div>
+      <div class="s">pwn-husk v0.8.2</div>
+    </div>
+  </section>
+
+  <!-- filters -->
+  <div class="toolbar">
+    <div class="tb-group" id="catGroup">
+      <button class="on" data-cat="all"><span class="dot"></span>all</button>
+      <button data-cat="pwn"><span class="dot" style="background:var(--peach);"></span>exploit</button>
+      <button data-cat="fuzz"><span class="dot" style="background:var(--teal);"></span>fuzzing</button>
+      <button data-cat="net"><span class="dot" style="background:var(--mauve);"></span>network</button>
+      <button data-cat="rev"><span class="dot" style="background:var(--blue);"></span>reversing</button>
+    </div>
+    <div class="tb-group" id="sortGroup">
+      <button class="on" data-sort="updated">sort: updated</button>
+      <button data-sort="stars">stars</button>
+      <button data-sort="name">name</button>
+    </div>
+  </div>
+
+  <!-- main grid -->
+  <section class="grid" id="grid"></section>
+
+  <!-- experiments -->
+  <div class="section-head">
+    <h2><span class="sym">▸</span>experiments <span class="slash">/</span> <span style="color:var(--text);">./lab</span></h2>
+    <div class="meta">weekend builds · expect sharp edges</div>
+  </div>
+  <section class="experiments">
+    <div class="xp" style="--col:var(--yellow);">
+      <div class="head"><div class="name">bpftrap</div><div class="badge">wip</div></div>
+      <div class="desc">one-file eBPF tracer that sprays probes across syscall boundaries to catch races. not stable, not packaged.</div>
+      <div class="foot"><span><span class="k">lang:</span>C + python</span><span><span class="k">touched:</span>11d ago</span></div>
+    </div>
+    <div class="xp" style="--col:var(--teal);">
+      <div class="head"><div class="name">ropline</div><div class="badge" style="color:var(--teal);border-color:var(--teal);">toy</div></div>
+      <div class="desc">toy ROP chain visualizer. paste a chain, get an interactive stack diagram. probably broken on musl.</div>
+      <div class="foot"><span><span class="k">lang:</span>typescript</span><span><span class="k">touched:</span>1mo ago</span></div>
+    </div>
+    <div class="xp" style="--col:var(--mauve);">
+      <div class="head"><div class="name">umbra-kit</div><div class="badge" style="color:var(--mauve);border-color:var(--mauve);">private</div></div>
+      <div class="desc">red-team payload kit. not public, won't be public. listed for transparency only.</div>
+      <div class="foot"><span><span class="k">lang:</span>rust</span><span><span class="k">touched:</span>3d ago</span></div>
+    </div>
+  </section>
+
+  <!-- archived -->
+  <div class="section-head">
+    <h2><span class="sym">▸</span>archived <span class="slash">/</span> <span style="color:var(--text);">./attic</span></h2>
+    <div class="meta">superseded · historical · still online</div>
+  </div>
+  <section class="archive">
+    <div class="row head">
+      <span>name</span><span>version</span><span>description</span><span>archived</span><span></span>
+    </div>
+    <div class="row">
+      <span class="name">pwnforge</span><span class="ver">v0.3.1</span>
+      <span class="desc">ancestor of pwn-husk. kept online because a few CTF writeups link to it.</span>
+      <span class="arch">2023 · read-only</span>
+      <span class="act"><a href="#">source →</a></span>
+    </div>
+    <div class="row">
+      <span class="name">sigma-snoop-legacy</span><span class="ver">v0.9.0</span>
+      <span class="desc">pre-1.0 python version. sat on my disk for 2 years before 1.x rewrote it in go.</span>
+      <span class="arch">2024 · read-only</span>
+      <span class="act"><a href="#">source →</a></span>
+    </div>
+  </section>
+
+  <!-- install -->
+  <div class="install">
+    <h3>install · one-liners</h3>
+    <div class="blocks">
+      <div class="blk"><div><span class="pkg">pip</span><code>pip install pwn-husk</code></div><button data-copy="pip install pwn-husk">cp</button></div>
+      <div class="blk"><div><span class="pkg">cargo</span><code>cargo install thinwire</code></div><button data-copy="cargo install thinwire">cp</button></div>
+      <div class="blk"><div><span class="pkg">go</span><code>go install void.sh/sigma-snoop@latest</code></div><button data-copy="go install void.sh/sigma-snoop@latest">cp</button></div>
+    </div>
+  </div>
+
+</main>
+
+<div class="statusbar">
+  <div class="statusbar-inner">
+    <div class="left">
+      <span><span class="dot"></span><span class="k">ci:</span> <span class="v" style="color:var(--green);">all passing</span></span>
+      <span><span class="k">coverage:</span> <span class="v">78% avg</span></span>
+      <span><span class="k">shown:</span> <span class="v" id="shownCount">—</span></span>
+    </div>
+    <div class="right">
+      <span><span class="k">licenses:</span> <span class="v">MIT (all public)</span></span>
+      <span><span class="k">mirrors:</span> <span class="v">github · sourcehut · gitlab</span></span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="l">
+      <span style="color:var(--sub);">nyx@void</span>
+      <span class="sep">|</span>
+      <span>&copy; 2026</span>
+      <span class="sep">|</span>
+      <span>built in vim, served from a pi</span>
+    </div>
+    <div class="r">
+      <a href="#"><span class="slash">./</span>github</a>
+      <a href="#"><span class="slash">./</span>linkedin</a>
+      <a href="#"><span class="slash">./</span>pgp</a>
+      <a href="#"><span class="slash">./</span>mail</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const TOOLS = [
+  {
+    id:"pwn-husk", ver:"0.8.2", lang:"Python", accent:"peach", cat:"pwn",
+    ci:"pass", ciLabel:"passing",
+    tags:["rop","glibc","pwntools"],
+    updated:"2d ago", updatedRank:1,
+    stars:1412, forks:87, issues:6, downloads:"22k/mo",
+    desc:"ROP chain scaffolding for <span class='hl'>glibc 2.35+</span>. reads <span class='hl'>/proc/maps</span>, emits pwntools templates, handles stack-pivot math, and auto-leaks for 2.35–2.38 libc builds.",
+    demo:[
+      { t:"p", s:"$ husk scaffold ./target --leak libc --pivot auto"},
+      { t:"out", s:"[*] detected glibc 2.37 · PIE · Full RELRO"},
+      { t:"hit", s:"[+] generated exploit.py · pivot = __libc_csu_init+0x7a"},
+      { t:"out", s:"[*] 1 leak gadget · 3 rop gadgets · ~18 lines"}
+    ]
+  },
+  {
+    id:"sigma-snoop", ver:"1.2.0", lang:"Go", accent:"teal", cat:"fuzz",
+    ci:"pass", ciLabel:"passing",
+    tags:["fuzzer","differential","corpus"],
+    updated:"12d ago", updatedRank:2,
+    stars:612, forks:34, issues:3, downloads:"8.1k/mo",
+    desc:"differential fuzzer for <span class='hl'>parser mismatches</span>. diffs two parsers against shared corpora, triages divergences into minimal repros, and ships a corpus minimizer that's ~6× faster than the 1.1 one.",
+    demo:[
+      { t:"p", s:"$ sigma-snoop diff libjson-a libjson-b --corpus ./seeds"},
+      { t:"out", s:"[*] 4,198 inputs · 12 threads"},
+      { t:"hit", s:"[!] divergence @ input #2019 (minified: 14 bytes)"},
+      { t:"out", s:"  → a: PARSE_ERR · b: {\"\\u0000\":null}"}
+    ]
+  },
+  {
+    id:"thinwire", ver:"0.3.0", lang:"Rust", accent:"mauve", cat:"net",
+    ci:"beta", ciLabel:"beta",
+    tags:["l2","radio","mutation"],
+    updated:"3w ago", updatedRank:3,
+    stars:289, forks:11, issues:9, downloads:"1.4k/mo",
+    desc:"L2 tap &amp; replay for low-level fuzzing of proprietary radio stacks. raw dump, field-aware mutation, and goroutine-cheap workers. used on three stacks so far; two vendors patched, one ghosted.",
+    demo:[
+      { t:"p", s:"$ thinwire tap wlan1 --mutate crc,len --workers 8"},
+      { t:"out", s:"[*] listening · ~2,300 frames/sec"},
+      { t:"hit", s:"[+] anomaly on frame 0x4a12 (crc mutated · device halted)"}
+    ]
+  },
+  {
+    id:"yarn-rev", ver:"0.5.1", lang:"Python", accent:"blue", cat:"rev",
+    ci:"pass", ciLabel:"passing",
+    tags:["ida","binaryninja","vm"],
+    updated:"6w ago", updatedRank:4,
+    stars:198, forks:8, issues:2, downloads:"900/mo",
+    desc:"tiny helper lib for reversing <span class='hl'>custom VMs</span>. plug it into ida/binja, get a decompiler scaffold that handles constant folding, branch elision, and opcode-table inference for free.",
+    demo:[
+      { t:"p", s:"$ yarn-rev infer ./challenge.bin --trace runs/"},
+      { t:"out", s:"[*] 17 opcodes found · 4 with branch behavior"},
+      { t:"hit", s:"[+] emitted trace.asm and solver.smt2"}
+    ]
+  },
+  {
+    id:"crispr", ver:"0.2.0", lang:"Rust", accent:"yellow", cat:"fuzz",
+    ci:"beta", ciLabel:"beta",
+    tags:["grammar","structure-aware","libfuzzer"],
+    updated:"2mo ago", updatedRank:5,
+    stars:143, forks:5, issues:14, downloads:"500/mo",
+    desc:"structure-aware grammar fuzzer built on libfuzzer. the tool i used for the eBPF verifier paper. pre-1.0, so expect breaking changes whenever i think of a better API.",
+    demo:[
+      { t:"p", s:"$ crispr fuzz grammar.crispr --target ./bpf_verifier"},
+      { t:"out", s:"[*] corpus: 12,408 entries (14 seeds)"},
+      { t:"hit", s:"[+] crash: ebpf_verify_cfg · minimized (31 bytes)"}
+    ]
+  },
+  {
+    id:"kernboot", ver:"0.1.3", lang:"Bash", accent:"green", cat:"pwn",
+    ci:"pass", ciLabel:"passing",
+    tags:["kernel","qemu","kasan"],
+    updated:"3mo ago", updatedRank:6,
+    stars:96, forks:4, issues:1, downloads:"n/a",
+    desc:"boot any kernel you just built into qemu with KASAN, serial, and a decent rootfs in one command. not clever, just the commands i kept re-deriving.",
+    demo:[
+      { t:"p", s:"$ kernboot ./vmlinux --kasan --rootfs alpine"},
+      { t:"out", s:"[*] qemu-system-x86_64 · 2 cpu · 4G · serial"},
+      { t:"hit", s:"[+] shell at /dev/ttyS0 (login: root · no pass)"}
+    ]
+  }
+];
+
+let state = { cat:"all", sort:"updated" };
+
+function render(){
+  let rows = TOOLS.slice();
+  if (state.cat !== "all") rows = rows.filter(t=>t.cat===state.cat);
+  if (state.sort === "stars")   rows.sort((a,b)=>b.stars - a.stars);
+  if (state.sort === "name")    rows.sort((a,b)=>a.id.localeCompare(b.id));
+  if (state.sort === "updated") rows.sort((a,b)=>a.updatedRank - b.updatedRank);
+
+  const host = document.getElementById('grid');
+  host.innerHTML = rows.map(t=>`
+    <article class="tool" style="--col:var(--${t.accent});">
+      <header>
+        <h3>${t.id}<span class="at">@</span><span class="ver">${t.ver}</span></h3>
+        <span class="lang">${t.lang}</span>
+      </header>
+      <div class="status-row">
+        <span class="ci ${t.ci}">● ${t.ciLabel}</span>
+        ${t.tags.map(x=>`<span class="tag">#${x}</span>`).join('')}
+      </div>
+      <div class="desc">${t.desc}</div>
+      <div class="demo">${t.demo.map(l=>{
+        if (l.t==='p')   return `<span class="p">${l.s}</span>`;
+        if (l.t==='out') return `<span class="out">${l.s}</span>`;
+        if (l.t==='hit') return `<span class="hit">${l.s}</span>`;
+        return l.s;
+      }).join('\n')}</div>
+      <div class="stats">
+        <div class="cell"><span class="n">${t.stars >= 1000 ? (t.stars/1000).toFixed(1)+'k' : t.stars}</span><span class="l">★ stars</span></div>
+        <div class="cell"><span class="n">${t.forks}</span><span class="l">⑂ forks</span></div>
+        <div class="cell"><span class="n">${t.issues}</span><span class="l">open issues</span></div>
+        <div class="cell"><span class="n">${t.downloads}</span><span class="l">downloads</span></div>
+      </div>
+      <footer>
+        <a href="#"><span class="gl">▸</span>source</a>
+        <a href="#"><span class="gl">▸</span>docs</a>
+        <a href="#"><span class="gl">⬇</span>changelog</a>
+        <a href="#"><span class="gl">●</span>issues</a>
+      </footer>
+    </article>
+  `).join('');
+
+  document.getElementById('shownCount').textContent = rows.length + '/' + TOOLS.length;
+}
+
+document.getElementById('catGroup').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#catGroup button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); state.cat = b.dataset.cat; render();
+});
+document.getElementById('sortGroup').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#sortGroup button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); state.sort = b.dataset.sort; render();
+});
+
+// install copy buttons
+document.addEventListener('click', async e=>{
+  const b = e.target.closest('[data-copy]'); if(!b) return;
+  try{ await navigator.clipboard.writeText(b.dataset.copy); }
+  catch(_){
+    const ta=document.createElement('textarea');ta.value=b.dataset.copy;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(_){}ta.remove();
+  }
+  b.classList.add('ok'); b.textContent='✓';
+  setTimeout(()=>{ b.classList.remove('ok'); b.textContent='cp'; }, 1400);
+});
+
+render();
+</script>
+</body>
+</html>

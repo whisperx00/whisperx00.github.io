@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>nyx@void — offsec notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --crust:#11111b;
+    --mantle:#181825;
+    --base:#1e1e2e;
+    --surface0:#313244;
+    --surface1:#45475a;
+    --text:#cdd6f4;
+    --sub:#a6adc8;
+    --dim:#6c7086;
+    --mauve:#cba6f7;
+    --blue:#89b4fa;
+    --peach:#fab387;
+    --green:#a6e3a1;
+    --teal:#94e2d5;
+    --yellow:#f9e2af;
+    --red:#f38ba8;
+    --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans:"Inter", system-ui, sans-serif;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--crust);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--mauve);color:var(--crust);}
+
+  /* ================= NAV ================= */
+  nav.topnav{
+    position:sticky;top:0;z-index:40;
+    background:var(--mantle);
+    border-bottom:1px solid var(--surface1);
+  }
+  .nav-inner{
+    max-width:1120px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 28px;
+    font-family:var(--mono);font-size:13px;
+  }
+  .brand{
+    font-weight:700;color:var(--mauve);letter-spacing:.01em;
+  }
+  .brand .caret{color:var(--green);margin-right:2px;}
+  .nav-links{display:flex;gap:22px;align-items:center;}
+  .nav-links a{color:var(--sub);transition:color .15s;display:inline-flex;align-items:center;padding:4px 0;border-bottom:1px solid transparent;}
+  .nav-links a .slash{color:var(--dim);margin-right:2px;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-links a.active{color:var(--blue);border-bottom-color:var(--blue);}
+  .nav-links a.active .slash{color:var(--blue);opacity:.6;}
+
+  /* ================= LAYOUT ================= */
+  main{max-width:1120px;margin:0 auto;padding:48px 28px 80px;}
+
+  /* ================= BOOT LOG ================= */
+  .bootlog{
+    font-family:var(--mono);font-size:12.5px;
+    color:var(--sub);
+    margin-bottom:36px;
+    display:flex;flex-direction:column;gap:4px;
+    min-height:0;
+    overflow:hidden;
+    transition:opacity .6s ease-out, max-height .8s ease-in-out, margin-bottom .8s ease-in-out, filter .6s ease-out;
+    max-height:600px;
+  }
+  .bootlog.collapsing{
+    opacity:0;
+    max-height:0;
+    margin-bottom:0;
+    filter:blur(2px);
+    pointer-events:none;
+  }
+  .bootline{
+    display:flex;gap:10px;align-items:baseline;
+    opacity:0;transform:translateY(-4px);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .bootline.in{opacity:1;transform:none;transition:opacity .18s ease-out, transform .18s ease-out;}
+  .badge{
+    display:inline-block;min-width:58px;text-align:center;
+    padding:1px 6px;border:1px solid currentColor;font-size:11px;font-weight:600;letter-spacing:.04em;
+    flex-shrink:0;
+  }
+  .badge.ok{color:var(--green);}
+  .badge.info{color:var(--blue);}
+  .badge.warn{color:var(--yellow);}
+  .badge.fail{color:var(--red);}
+  .bootline .t{color:var(--dim);font-variant-numeric:tabular-nums;}
+  .bootline .msg{color:var(--sub);}
+  .bootline .msg b{color:var(--text);font-weight:500;}
+  .bootline .msg .acc-m{color:var(--mauve);}
+  .bootline .msg .acc-b{color:var(--blue);}
+  .bootline .msg .acc-p{color:var(--peach);}
+  .bootline .msg .acc-g{color:var(--green);}
+  .bootline .msg .acc-t{color:var(--teal);}
+
+  /* ================= HERO ================= */
+  .hero{margin-top:14px;margin-bottom:64px;}
+  .prompt{
+    font-family:var(--mono);font-size:13px;
+    margin-bottom:14px;
+    opacity:0;transform:translateY(4px);
+  }
+  .prompt.in{opacity:1;transform:none;transition:opacity .2s ease-out, transform .2s ease-out;}
+  .prompt .u{color:var(--green);}
+  .prompt .at{color:var(--sub);}
+  .prompt .h{color:var(--mauve);}
+  .prompt .p{color:var(--sub);}
+  .prompt .d{color:var(--blue);}
+  .prompt .s{color:var(--text);margin-left:4px;}
+
+  h1.title{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:clamp(22px,3vw,30px);
+    line-height:1.3;
+    color:var(--text);
+    margin:0 0 18px;
+    letter-spacing:-.005em;
+    min-height:1.3em;
+  }
+  h1.title .typed{white-space:pre-wrap;}
+  .cursor{
+    display:inline-block;width:.55em;height:1em;background:var(--text);
+    vertical-align:-2px;margin-left:2px;
+    animation:blink 1s steps(2) infinite;
+  }
+  @keyframes blink{50%{opacity:0;}}
+
+  .subtitle{
+    font-family:var(--mono);font-size:13px;color:var(--sub);
+    max-width:720px;margin:0 0 22px;
+    opacity:0;transform:translateY(6px);
+  }
+  .subtitle.in{opacity:1;transform:none;transition:opacity .35s ease-out, transform .35s ease-out;}
+  .subtitle .hl{color:var(--text);}
+
+  .tags{display:flex;flex-wrap:wrap;gap:8px;opacity:0;transform:translateY(6px);}
+  .tags.in{opacity:1;transform:none;transition:opacity .35s ease-out .1s, transform .35s ease-out .1s;}
+  .tag{
+    font-family:var(--mono);font-size:11px;font-weight:500;
+    letter-spacing:.04em;text-transform:lowercase;
+    padding:3px 8px;
+    border:1px solid var(--col,var(--teal));
+    color:var(--col,var(--teal));
+    background:color-mix(in oklab, var(--col,var(--teal)) 10%, transparent);
+  }
+
+  /* ================= ABOUT / WHOAMI ================= */
+  .about{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:32px;
+    padding:24px;
+    background:var(--mantle);
+    border:1px solid var(--surface1);
+    border-left:2px solid var(--mauve);
+    margin-top:20px;
+    opacity:0;transform:translateY(10px);
+  }
+  .about.in{opacity:1;transform:none;transition:opacity .4s ease-out, transform .4s ease-out;}
+  .about .photo{
+    width:220px;height:260px;
+    background:var(--base);
+    border:1px solid var(--surface1);
+    position:relative;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .about .photo::before{
+    /* subtly-striped placeholder */
+    content:"";position:absolute;inset:0;
+    background-image:
+      repeating-linear-gradient(135deg, color-mix(in oklab, var(--surface0) 60%, transparent) 0 2px, transparent 2px 10px);
+    opacity:.8;
+  }
+  .about .photo .corner{
+    position:absolute;font-family:var(--mono);font-size:10px;color:var(--dim);
+    padding:5px 7px;letter-spacing:.05em;
+  }
+  .about .photo .corner.tl{top:0;left:0;color:var(--mauve);}
+  .about .photo .corner.br{bottom:0;right:0;}
+  .about .photo .label{
+    position:relative;z-index:1;
+    font-family:var(--mono);font-size:11px;color:var(--sub);
+    text-align:center;padding:0 12px;letter-spacing:.04em;
+  }
+  .about .photo .label .sub{display:block;color:var(--dim);font-size:10px;margin-top:6px;}
+  .about .photo .frame{
+    position:absolute;inset:8px;border:1px dashed var(--surface1);pointer-events:none;
+  }
+
+  .about .info{display:flex;flex-direction:column;gap:18px;min-width:0;}
+  .about .line{
+    display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:baseline;
+    font-family:var(--mono);font-size:12.5px;
+    padding-bottom:8px;border-bottom:1px dashed color-mix(in oklab, var(--surface1) 60%, transparent);
+  }
+  .about .line:last-child{border-bottom:none;padding-bottom:0;}
+  .about .line .k{color:var(--dim);letter-spacing:.02em;}
+  .about .line .k::before{content:"$ ";color:var(--green);}
+  .about .line .v{color:var(--text);line-height:1.6;}
+  .about .line .v .muted{color:var(--sub);}
+  .about .line .v .dim{color:var(--dim);}
+  .about .line .v a{color:var(--blue);border-bottom:1px dotted var(--blue);transition:color .15s, border-color .15s;}
+  .about .line .v a:hover{color:var(--mauve);border-color:var(--mauve);}
+  .about .line .v .kbd{
+    display:inline-block;padding:1px 6px;
+    border:1px solid var(--surface1);background:var(--base);
+    color:var(--sub);font-size:11px;margin-right:5px;margin-bottom:4px;
+  }
+  .about .line .v .sep{color:var(--surface1);margin:0 6px;}
+
+  .about .edu{display:flex;flex-direction:column;gap:10px;}
+  .about .edu .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline;}
+  .about .edu .row .school{color:var(--text);}
+  .about .edu .row .degree{color:var(--sub);font-size:12px;}
+  .about .edu .row .when{color:var(--dim);font-size:11px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .about .edu .row .gpa{color:var(--green);font-size:11px;margin-left:6px;}
+
+  @media (max-width:680px){
+    .about{grid-template-columns:1fr;gap:20px;padding:18px;}
+    .about .photo{width:100%;height:220px;}
+    .about .line{grid-template-columns:1fr;gap:4px;}
+  }
+
+  /* ================= SECTION HEAD ================= */
+  .section-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin:56px 0 20px;
+    border-bottom:1px dashed var(--surface1);
+    padding-bottom:10px;
+  }
+  .section-head h2{
+    font-family:var(--mono);font-weight:600;font-size:13px;
+    color:var(--sub);margin:0;letter-spacing:.04em;
+  }
+  .section-head h2 .sym{color:var(--mauve);margin-right:8px;}
+  .section-head h2 .slash{color:var(--dim);}
+  .section-head .meta{font-family:var(--mono);font-size:11px;color:var(--dim);}
+  .section-head .meta .dot{color:var(--green);margin-right:6px;}
+
+  /* ================= POST CARDS ================= */
+  .posts{display:flex;flex-direction:column;}
+  .post{
+    display:grid;
+    grid-template-columns:148px 1fr auto;
+    gap:28px;align-items:flex-start;
+    padding:18px 20px 18px 18px;
+    background:var(--mantle);
+    border-left:2px solid var(--cat, var(--mauve));
+    transition:background .15s;
+    margin-bottom:10px;
+    opacity:0;transform:translateX(-18px);
+  }
+  .post.in{opacity:1;transform:none;transition:opacity .35s ease-out, transform .35s ease-out, background .15s;}
+  .post:hover{background:#1f1f2e;}
+  .post .meta{
+    font-family:var(--mono);font-size:11px;color:var(--dim);
+    display:flex;flex-direction:column;gap:3px;
+    padding-top:3px;font-variant-numeric:tabular-nums;
+  }
+  .post .meta .dt{color:var(--sub);}
+  .post .body .cat{
+    font-family:var(--mono);font-size:10.5px;font-weight:600;
+    letter-spacing:.12em;text-transform:uppercase;
+    color:var(--cat, var(--mauve));
+    margin-bottom:6px;display:inline-flex;align-items:center;gap:8px;
+  }
+  .post .body .cat::before{
+    content:"";display:inline-block;width:6px;height:6px;background:currentColor;
+  }
+  .post .body h3{
+    font-family:var(--sans);font-weight:600;font-size:17px;
+    color:var(--text);margin:0 0 6px;line-height:1.35;letter-spacing:-.01em;
+  }
+  .post .body p{
+    font-family:var(--mono);font-size:12px;color:var(--dim);
+    margin:0;line-height:1.6;max-width:70ch;
+  }
+  .post .arrow{
+    font-family:var(--mono);font-size:18px;color:var(--dim);
+    padding-top:2px;transition:color .15s, transform .15s;
+  }
+  .post:hover .arrow{color:var(--cat,var(--mauve));transform:translateX(3px);}
+
+  /* ================= TOOLS ================= */
+  .tools{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:14px;
+    opacity:0;transform:translateY(10px);
+  }
+  .tools.in{opacity:1;transform:none;transition:opacity .5s ease-out, transform .5s ease-out;}
+  .tool{
+    background:var(--base);
+    border:1px solid var(--surface1);
+    border-top:2px solid var(--cat,var(--teal));
+    border-radius:4px;
+    padding:16px 16px 14px;
+    display:flex;flex-direction:column;gap:8px;
+    transition:transform .15s, border-color .15s;
+  }
+  .tool:hover{transform:translateY(-2px);}
+  .tool .head{display:flex;justify-content:space-between;align-items:baseline;}
+  .tool .name{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--text);}
+  .tool .ver{font-family:var(--mono);font-size:10.5px;color:var(--dim);}
+  .tool .desc{font-family:var(--mono);font-size:11.5px;color:var(--dim);line-height:1.55;}
+  .tool .foot{
+    margin-top:6px;display:flex;gap:12px;
+    font-family:var(--mono);font-size:10.5px;color:var(--sub);
+  }
+  .tool .foot span{display:inline-flex;align-items:center;gap:5px;}
+  .tool .foot .sym{color:var(--dim);}
+
+  /* ================= STATUS BAR + FOOTER ================= */
+  .statusbar{
+    margin-top:60px;
+    background:var(--surface0);
+    border-top:1px solid var(--surface1);
+    border-bottom:1px solid var(--surface1);
+    opacity:0;
+  }
+  .statusbar.in{opacity:1;transition:opacity .4s ease-out;}
+  .statusbar-inner{
+    max-width:1120px;margin:0 auto;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 28px;
+    font-family:var(--mono);font-size:11px;color:var(--sub);
+  }
+  .statusbar .left{display:flex;align-items:center;gap:14px;}
+  .statusbar .dot{
+    width:7px;height:7px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 6px var(--green);
+    display:inline-block;
+  }
+  .statusbar .right{display:flex;gap:18px;align-items:center;}
+  .statusbar .k{color:var(--dim);}
+  .statusbar .v{color:var(--text);}
+  .statusbar .v.mauve{color:var(--mauve);}
+  .statusbar .v.blue{color:var(--blue);}
+  .statusbar .v.peach{color:var(--peach);}
+
+  footer{
+    background:var(--mantle);
+    border-top:1px solid var(--surface1);
+    opacity:0;
+  }
+  footer.in{opacity:1;transition:opacity .4s ease-out .1s;}
+  .foot-inner{
+    max-width:1120px;margin:0 auto;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:18px 28px;
+    font-family:var(--mono);font-size:11px;color:var(--dim);
+  }
+  .foot-inner .l span.sep{color:var(--surface1);margin:0 10px;}
+  .foot-inner .r{display:flex;gap:20px;}
+  .foot-inner .r a{color:var(--sub);transition:color .15s;}
+  .foot-inner .r a:hover{color:var(--mauve);}
+  .foot-inner .r a .slash{color:var(--dim);margin-right:2px;}
+
+  /* ================= TWEAKS PANEL ================= */
+  .tweaks{
+    position:fixed;right:20px;bottom:20px;z-index:100;
+    width:280px;
+    background:var(--base);
+    border:1px solid var(--surface1);
+    font-family:var(--mono);font-size:11px;
+    display:none;
+    box-shadow:0 8px 30px rgba(0,0,0,.5);
+  }
+  .tweaks.open{display:block;}
+  .tweaks header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:9px 12px;background:var(--surface0);border-bottom:1px solid var(--surface1);
+    color:var(--mauve);font-weight:600;letter-spacing:.04em;
+  }
+  .tweaks header .dots{display:flex;gap:5px;}
+  .tweaks header .dots span{width:8px;height:8px;border-radius:50%;display:inline-block;}
+  .tweaks header .dots span:nth-child(1){background:var(--red);}
+  .tweaks header .dots span:nth-child(2){background:var(--yellow);}
+  .tweaks header .dots span:nth-child(3){background:var(--green);}
+  .tweaks .body{padding:12px;display:flex;flex-direction:column;gap:14px;}
+  .tweaks label{display:flex;flex-direction:column;gap:6px;color:var(--sub);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;}
+  .tweaks .row{display:flex;gap:6px;flex-wrap:wrap;}
+  .tweaks button.opt{
+    flex:1;min-width:0;background:var(--mantle);color:var(--sub);border:1px solid var(--surface1);
+    padding:6px 8px;font-family:var(--mono);font-size:11px;cursor:pointer;text-transform:lowercase;
+  }
+  .tweaks button.opt.on{border-color:var(--mauve);color:var(--mauve);background:color-mix(in oklab, var(--mauve) 12%, transparent);}
+  .tweaks button.opt:hover{color:var(--text);}
+  .tweaks input[type=range]{width:100%;accent-color:var(--mauve);}
+  .tweaks .val{color:var(--text);font-weight:500;text-transform:none;}
+  .tweaks button.replay{
+    background:transparent;border:1px solid var(--surface1);color:var(--green);
+    padding:7px;font-family:var(--mono);font-size:11px;cursor:pointer;
+  }
+  .tweaks button.replay:hover{border-color:var(--green);}
+
+  /* ================= RESPONSIVE ================= */
+  @media (max-width:680px){
+    .nav-links{gap:12px;font-size:12px;}
+    .nav-links a span.label{display:none;}
+    .post{grid-template-columns:1fr;gap:10px;}
+    .post .meta{flex-direction:row;gap:10px;}
+    .tools{grid-template-columns:1fr;}
+    .statusbar-inner,.foot-inner{flex-direction:column;gap:8px;align-items:flex-start;}
+    .bootline{white-space:normal;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <div class="brand"><span class="caret">&gt;</span> nyx@void</div>
+    <div class="nav-links">
+      <a href="#" class="active"><span class="slash">./</span><span class="label">index</span></a>
+      <a href="writeups.html"><span class="slash">./</span><span class="label">writeups</span></a>
+      <a href="research.html"><span class="slash">./</span><span class="label">research</span></a>
+      <a href="tools.html"><span class="slash">./</span><span class="label">tools</span></a>
+      <a href="skills.html"><span class="slash">./</span><span class="label">skills</span></a>
+      <a href="about.html"><span class="slash">./</span><span class="label">about</span></a>
+      <a href="rss.html"><span class="slash">./</span><span class="label">rss</span></a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+  <section class="bootlog" id="bootlog" aria-hidden="true"></section>
+
+  <section class="hero">
+    <div class="prompt" id="prompt">
+      <span class="u">nyx</span><span class="at">@</span><span class="h">void</span><span class="p">:</span><span class="d">~</span><span class="s">$</span>
+      <span class="s" style="color:var(--sub);">whoami --long</span>
+    </div>
+    <h1 class="title"><span class="typed" id="typed"></span><span class="cursor" id="cursor"></span></h1>
+    <p class="subtitle" id="subtitle">
+      offensive security researcher. i break <span class="hl">kernels</span>, <span class="hl">hypervisors</span>, and occasionally my own laptop.
+      notes below are from engagements i can talk about, CTFs, and side-quests into firmware nobody asked me to audit.
+    </p>
+    <div class="tags" id="tags">
+      <span class="tag" style="--col:var(--mauve);">binary-exploitation</span>
+      <span class="tag" style="--col:var(--blue);">linux-kernel</span>
+      <span class="tag" style="--col:var(--peach);">fuzzing</span>
+      <span class="tag" style="--col:var(--green);">v8</span>
+      <span class="tag" style="--col:var(--teal);">reversing</span>
+      <span class="tag" style="--col:var(--yellow);">red-team</span>
+    </div>
+  </section>
+
+  <div class="section-head" id="sh-about">
+    <h2><span class="sym">▸</span>cat <span class="slash">/</span> <span style="color:var(--text);">whoami.txt</span></h2>
+    <div class="meta"><span class="dot">●</span>last updated 2d ago · verified pgp</div>
+  </div>
+
+  <section class="about" id="about" data-screen-label="About">
+    <div class="photo" aria-label="Photo placeholder">
+      <div class="frame"></div>
+      <span class="corner tl">[ photo ]</span>
+      <span class="corner br">240×280</span>
+      <span class="label">drop headshot here<span class="sub">./assets/nyx.jpg</span></span>
+    </div>
+    <div class="info">
+      <div class="line">
+        <span class="k">name</span>
+        <span class="v">Nyx Aren <span class="dim">// handle: nyx@void</span></span>
+      </div>
+      <div class="line">
+        <span class="k">role</span>
+        <span class="v">Senior Offensive Security Researcher <span class="muted">— vulnerability research, red team, exploit dev</span></span>
+      </div>
+      <div class="line">
+        <span class="k">experience</span>
+        <span class="v"><span class="muted">6+ years in offensive security</span> <span class="dim">· 4 yrs vuln research · 3 yrs red-team · open to senior IC and lead roles</span></span>
+      </div>
+      <div class="line">
+        <span class="k">status</span>
+        <span class="v"><span style="color:var(--green);">● open to opportunities</span> <span class="dim">· EU work auth · willing to relocate (EU/UK/CH) · clearance-eligible</span></span>
+      </div>
+      <div class="line">
+        <span class="k">location</span>
+        <span class="v">Berlin, DE <span class="dim">· remote-friendly · GMT+1</span></span>
+      </div>
+      <div class="line">
+        <span class="k">spoken</span>
+        <span class="v"><span class="muted">English (native)</span><span class="sep">·</span><span class="muted">German (C1)</span><span class="sep">·</span><span class="muted">Dutch (B2)</span><span class="sep">·</span><span class="muted">French (A2)</span></span>
+      </div>
+      <div class="line">
+        <span class="k">education</span>
+        <span class="v">
+          <div class="edu">
+            <div class="row">
+              <div>
+                <div class="school">TU Delft</div>
+                <div class="degree">M.Sc. Computer Science — Cyber Security track</div>
+              </div>
+              <div class="when">2023 — 2025<span class="gpa">· cum laude</span></div>
+            </div>
+            <div class="row">
+              <div>
+                <div class="school">University of Edinburgh</div>
+                <div class="degree">B.Sc. (Hons) Computer Science</div>
+              </div>
+              <div class="when">2019 — 2023<span class="gpa">· 1st class</span></div>
+            </div>
+          </div>
+        </span>
+      </div>
+      <div class="line">
+        <span class="k">thesis</span>
+        <span class="v"><span class="muted">"Structure-aware grammar fuzzing of the Linux eBPF verifier" — supervised by Prof. H. van Wees, awarded best-thesis nomination (2025).</span></span>
+      </div>
+      <div class="line">
+        <span class="k">certs</span>
+        <span class="v">
+          <span class="kbd">OSCP</span><span class="kbd">OSED</span><span class="kbd">OSEP</span><span class="kbd">CRTO</span>
+          <span class="kbd" style="color:var(--peach);border-color:color-mix(in oklab, var(--peach) 50%, var(--surface1));">OSEE · in progress 47%</span>
+        </span>
+      </div>
+      <div class="line">
+        <span class="k">skills</span>
+        <span class="v">
+          <span class="muted">binary exploitation</span><span class="sep">·</span>
+          <span class="muted">linux kernel</span><span class="sep">·</span>
+          <span class="muted">coverage-guided fuzzing</span><span class="sep">·</span>
+          <span class="muted">reverse engineering (x86/ARM/RISC-V)</span><span class="sep">·</span>
+          <span class="muted">V8 / JSC internals</span><span class="sep">·</span>
+          <span class="muted">red-team ops</span>
+        </span>
+      </div>
+      <div class="line">
+        <span class="k">languages</span>
+        <span class="v"><span class="muted">C · Rust · Python · Go · a regrettable amount of bash</span></span>
+      </div>
+      <div class="line">
+        <span class="k">cve</span>
+        <span class="v"><span class="muted">7 assigned</span> <span class="dim">(3 kernel · 2 hypervisor · 2 web)</span> <span class="sep">·</span> <span class="muted">9 bounties resolved across Google, Mozilla, and two undisclosed vendors.</span></span>
+      </div>
+      <div class="line">
+        <span class="k">contact</span>
+        <span class="v">
+          <a href="https://www.linkedin.com/in/nyx-aren" target="_blank" rel="noopener">linkedin.com/in/nyx-aren</a>
+          <span class="sep">·</span>
+          <a href="https://github.com/nyx-void" target="_blank" rel="noopener">github.com/nyx-void</a>
+          <span class="sep">·</span>
+          <a href="mailto:nyx@void.sh">nyx@void.sh</a>
+          <span class="sep">·</span>
+          <a href="#pgp">pgp: 0xA91F&nbsp;3C2D</a>
+          <span class="sep">·</span>
+          <a href="about.html" style="color:var(--mauve);border-bottom:1px dotted var(--mauve);">full cv →</a>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-head" id="sh-posts">
+    <h2><span class="sym">▸</span>recent <span class="slash">/</span> <span style="color:var(--text);">posts</span></h2>
+    <div class="meta"><span class="dot">●</span>14 entries · sorted desc</div>
+  </div>
+
+  <section class="posts" id="posts">
+    <!-- populated by JS to enable slide-in stagger -->
+  </section>
+
+  <div class="section-head" id="sh-tools">
+    <h2><span class="sym">▸</span>published <span class="slash">/</span> <span style="color:var(--text);">tools</span></h2>
+    <div class="meta">ci: <span style="color:var(--green);">passing</span> · 3 maintained</div>
+  </div>
+
+  <section class="tools" id="tools">
+    <div class="tool" style="--cat:var(--peach);">
+      <div class="head"><div class="name">pwn-husk</div><div class="ver">v0.8.2</div></div>
+      <div class="desc">ROP chain scaffolding for glibc 2.35+. reads /proc/maps, emits pwntools templates, handles stack pivot math.</div>
+      <div class="foot">
+        <span><span class="sym">★</span> 1.4k</span>
+        <span><span class="sym">⑂</span> 87</span>
+        <span style="color:var(--green);">● active</span>
+      </div>
+    </div>
+    <div class="tool" style="--cat:var(--teal);">
+      <div class="head"><div class="name">sigma-snoop</div><div class="ver">v1.2.0</div></div>
+      <div class="desc">differential fuzzer for parser mismatches. diffs two parsers against shared corpora, triages divergences.</div>
+      <div class="foot">
+        <span><span class="sym">★</span> 612</span>
+        <span><span class="sym">⑂</span> 34</span>
+        <span style="color:var(--green);">● active</span>
+      </div>
+    </div>
+    <div class="tool" style="--cat:var(--mauve);">
+      <div class="head"><div class="name">thinwire</div><div class="ver">v0.3.0</div></div>
+      <div class="desc">L2 tap &amp; replay for low-level fuzzing of proprietary radio stacks. raw dump, field-aware mutation, goroutine-cheap.</div>
+      <div class="foot">
+        <span><span class="sym">★</span> 289</span>
+        <span><span class="sym">⑂</span> 11</span>
+        <span style="color:var(--yellow);">● beta</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="statusbar" id="statusbar">
+  <div class="statusbar-inner">
+    <div class="left">
+      <span><span class="dot"></span> <span class="k">system:</span> <span class="v" style="color:var(--green);">operational</span></span>
+      <span><span class="k">uptime:</span> <span class="v">14d 02:11</span></span>
+      <span><span class="k">last_push:</span> <span class="v">2h ago</span></span>
+    </div>
+    <div class="right">
+      <span><span class="k">OSEE:</span> <span class="v peach">47%</span></span>
+      <span><span class="k">HTB:</span> <span class="v blue">guru · 312 boxes</span></span>
+      <span><span class="k">bounties:</span> <span class="v mauve">9 resolved</span></span>
+    </div>
+  </div>
+</div>
+
+<footer id="footer">
+  <div class="foot-inner">
+    <div class="l">
+      <span style="color:var(--sub);">nyx@void</span>
+      <span class="sep">|</span>
+      <span>&copy; 2026</span>
+      <span class="sep">|</span>
+      <span>built in vim, served from a pi</span>
+    </div>
+    <div class="r">
+      <a href="#"><span class="slash">./</span>github</a>
+      <a href="#"><span class="slash">./</span>linkedin</a>
+      <a href="#"><span class="slash">./</span>pgp</a>
+      <a href="#"><span class="slash">./</span>mail</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ TWEAKS PANEL ============ -->
+<div class="tweaks" id="tweaks">
+  <header>
+    <span>▸ tweaks.sh</span>
+    <span class="dots"><span></span><span></span><span></span></span>
+  </header>
+  <div class="body">
+    <label>
+      primary accent
+      <div class="row" data-key="primary">
+        <button class="opt" data-val="mauve">mauve</button>
+        <button class="opt" data-val="blue">blue</button>
+        <button class="opt" data-val="peach">peach</button>
+        <button class="opt" data-val="green">green</button>
+        <button class="opt" data-val="teal">teal</button>
+      </div>
+    </label>
+    <label>
+      boot speed <span class="val" id="speedVal">1.0×</span>
+      <input type="range" min="0.2" max="2.5" step="0.1" value="1" id="speedSlider">
+    </label>
+    <label>
+      density
+      <div class="row" data-key="density">
+        <button class="opt" data-val="compact">compact</button>
+        <button class="opt" data-val="cozy">cozy</button>
+        <button class="opt" data-val="roomy">roomy</button>
+      </div>
+    </label>
+    <label>
+      scanlines
+      <div class="row" data-key="scanlines">
+        <button class="opt" data-val="off">off</button>
+        <button class="opt" data-val="on">on</button>
+      </div>
+    </label>
+    <button class="replay" id="replay">▶ replay boot sequence</button>
+  </div>
+</div>
+
+<script>
+/* ============ TWEAKABLE DEFAULTS ============ */
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "primary": "green",
+  "speed": 1,
+  "density": "roomy",
+  "scanlines": "off"
+}/*EDITMODE-END*/;
+
+/* ============ DATA ============ */
+const POSTS = [
+  { dt:"2026-04-12", read:"14 min", cat:"research", accent:"mauve",
+    title:"Exorcising a use-after-free in the io_uring subsystem",
+    desc:"a long crawl through refcount races in io_uring worker pools, ending in a clean LPE on 6.6 and a patch you can read."},
+  { dt:"2026-03-29", read:"08 min", cat:"writeup",  accent:"blue",
+    title:"HTB :: Intrinsic — abusing a misrouted OCSP responder",
+    desc:"pro lab box. misconfigured OCSP gave us a forged cert chain; from there a small pivot through an internal jumpbox got us DA."},
+  { dt:"2026-03-11", read:"22 min", cat:"research", accent:"mauve",
+    title:"Fuzzing eBPF verifier transitions with structure-aware grammars",
+    desc:"coverage-guided grammar fuzzing of the verifier's state transitions. three memory-safety bugs, one still embargoed."},
+  { dt:"2026-02-24", read:"05 min", cat:"tooling",  accent:"peach",
+    title:"pwn-husk 0.8 — ROP scaffolding that finally handles PIE properly",
+    desc:"quick release notes. added auto-leak templates for glibc 2.35-2.38, fixed the stack pivot arithmetic, dropped python 3.9 support."},
+  { dt:"2026-02-02", read:"11 min", cat:"writeup",  accent:"blue",
+    title:"GoogleCTF 2026 — notes on the `scarab` pwn chain",
+    desc:"4-stage heap chain through a custom slab allocator. the tcache smashing trick at the end is cute; writeup is all gdb scripts."},
+  { dt:"2026-01-18", read:"09 min", cat:"research", accent:"mauve",
+    title:"A half-failure: trying to reach ring-0 through a buggy Nvidia shim",
+    desc:"didn't land a full exploit. documenting the dead ends anyway — the shim's ioctl table is a horror show and someone should finish this."},
+  { dt:"2026-01-04", read:"06 min", cat:"tooling",  accent:"peach",
+    title:"thinwire: a tiny L2 tap I keep reaching for",
+    desc:"how it works, why scapy wasn't enough, and the three radio stacks i used it to fuzz before it was good enough to publish."},
+  { dt:"2025-12-20", read:"18 min", cat:"writeup",  accent:"blue",
+    title:"Red-team diary: phishing a SOC that knew we were coming",
+    desc:"engagement debrief (sanitized). the trick wasn't the payload — it was convincing the SOC our sender was a vendor they already trusted."}
+];
+
+/* ============ ANIMATION SEQUENCE ============ */
+const BOOT_LINES = [
+  { t:"[  0.000012]", badge:"OK",   cls:"ok",   msg:'reached target <b>local-fs.target</b>.' },
+  { t:"[  0.041820]", badge:"OK",   cls:"ok",   msg:'started <span class="acc-m">nyx-identity.service</span> — operator authenticated.' },
+  { t:"[  0.118440]", badge:"INFO", cls:"info", msg:'mounting <b>/dev/nvme0n1p2</b> on <span class="acc-b">/home/nyx</span>' },
+  { t:"[  0.239001]", badge:"OK",   cls:"ok",   msg:'loaded writeups module (14 entries indexed, 0 embargoed)' },
+  { t:"[  0.402771]", badge:"WARN", cls:"warn", msg:'<span class="acc-p">research/</span> contains 1 CVE draft pending vendor response' },
+  { t:"[  0.613098]", badge:"OK",   cls:"ok",   msg:'tools: <span class="acc-p">pwn-husk</span>, <span class="acc-t">sigma-snoop</span>, <span class="acc-m">thinwire</span> — binaries verified' },
+  { t:"[  0.887240]", badge:"INFO", cls:"info", msg:'coffee.service <span style="color:var(--green);">● active</span> · PGP agent forwarded · wireguard up' },
+  { t:"[  1.051003]", badge:"OK",   cls:"ok",   msg:'spawning shell on /dev/tty1 ...' }
+];
+
+const TITLE_TEXT = "i break software so you don't have to learn the hard way.";
+
+function applyTweaks(){
+  document.documentElement.style.setProperty('--primary', `var(--${TWEAKS.primary})`);
+  // repaint buttons
+  document.querySelectorAll('.tweaks .row').forEach(row=>{
+    const k = row.dataset.key;
+    row.querySelectorAll('.opt').forEach(b=>{
+      b.classList.toggle('on', String(TWEAKS[k])===b.dataset.val);
+    });
+  });
+  document.getElementById('speedVal').textContent = TWEAKS.speed.toFixed(1)+"×";
+  document.getElementById('speedSlider').value = TWEAKS.speed;
+  // density
+  const dens = TWEAKS.density;
+  document.querySelectorAll('.post').forEach(p=>{
+    p.style.paddingTop = dens==='compact'?'12px':dens==='roomy'?'26px':'18px';
+    p.style.paddingBottom = dens==='compact'?'12px':dens==='roomy'?'26px':'18px';
+  });
+  // scanlines
+  document.body.style.backgroundImage = TWEAKS.scanlines==='on'
+    ? 'repeating-linear-gradient(180deg, rgba(205,214,244,0.015) 0 1px, transparent 1px 3px)'
+    : 'none';
+}
+
+function persistTweak(key, val){
+  TWEAKS[key] = val;
+  applyTweaks();
+  try { window.parent.postMessage({type:'__edit_mode_set_keys', edits:{[key]:val}}, '*'); } catch(e){}
+}
+
+/* ============ RENDER POSTS ============ */
+function renderPosts(){
+  const container = document.getElementById('posts');
+  container.innerHTML = POSTS.map(p=>`
+    <article class="post" style="--cat:var(--${p.accent});">
+      <div class="meta">
+        <span class="dt">${p.dt}</span>
+        <span>read ${p.read}</span>
+      </div>
+      <div class="body">
+        <div class="cat">${p.cat}</div>
+        <h3>${p.title}</h3>
+        <p>${p.desc}</p>
+      </div>
+      <div class="arrow">→</div>
+    </article>
+  `).join('');
+}
+
+/* ============ BOOT SEQUENCE ============ */
+let bootTimers = [];
+function clearTimers(){ bootTimers.forEach(t=>clearTimeout(t)); bootTimers = []; }
+
+function runBootSequence(){
+  clearTimers();
+  const s = Math.max(0.05, TWEAKS.speed);
+  const inv = 1/s;
+  const stagger = 260 * inv;
+
+  // reset nodes
+  const bootEl = document.getElementById('bootlog');
+  bootEl.innerHTML = '';
+  BOOT_LINES.forEach((L,i)=>{
+    const line = document.createElement('div');
+    line.className = 'bootline';
+    line.innerHTML = `<span class="t">${L.t}</span><span class="badge ${L.cls}">${L.badge}</span><span class="msg">${L.msg}</span>`;
+    bootEl.appendChild(line);
+  });
+  ['prompt','subtitle','tags','about','statusbar','footer'].forEach(id=>{
+    document.getElementById(id).classList.remove('in');
+  });
+  document.querySelectorAll('.post').forEach(p=>p.classList.remove('in'));
+  document.getElementById('typed').textContent = '';
+  document.getElementById('cursor').style.display='inline-block';
+
+  // clear any prior collapse state (for replay)
+  bootEl.classList.remove('collapsing');
+
+  // stagger boot lines
+  const lines = bootEl.querySelectorAll('.bootline');
+  let t0 = 150 * inv;
+  lines.forEach((ln,i)=>{
+    bootTimers.push(setTimeout(()=>ln.classList.add('in'), t0 + i*stagger));
+  });
+  const afterBoot = t0 + lines.length*stagger + 200*inv;
+
+  // prompt
+  bootTimers.push(setTimeout(()=>{
+    document.getElementById('prompt').classList.add('in');
+  }, afterBoot));
+
+  // typewriter title
+  const typed = document.getElementById('typed');
+  const startType = afterBoot + 350*inv;
+  const perChar = 28 * inv;
+  for (let i=0;i<=TITLE_TEXT.length;i++){
+    bootTimers.push(setTimeout(()=>{
+      typed.textContent = TITLE_TEXT.slice(0,i);
+    }, startType + i*perChar));
+  }
+  const endType = startType + TITLE_TEXT.length*perChar;
+
+  // subtitle + tags
+  bootTimers.push(setTimeout(()=>document.getElementById('subtitle').classList.add('in'), endType + 200*inv));
+  bootTimers.push(setTimeout(()=>document.getElementById('tags').classList.add('in'), endType + 400*inv));
+
+  // about
+  bootTimers.push(setTimeout(()=>document.getElementById('about').classList.add('in'), endType + 550*inv));
+
+  // posts slide in
+  const posts = document.querySelectorAll('.post');
+  const postStart = endType + 850*inv;
+  posts.forEach((p,i)=>{
+    bootTimers.push(setTimeout(()=>p.classList.add('in'), postStart + i*(230*inv)));
+  });
+  const postsEnd = postStart + posts.length*(230*inv);
+
+  // tools, status, footer
+  bootTimers.push(setTimeout(()=>document.getElementById('tools').classList.add('in'), postsEnd + 150*inv));
+  bootTimers.push(setTimeout(()=>document.getElementById('statusbar').classList.add('in'), postsEnd + 350*inv));
+  bootTimers.push(setTimeout(()=>document.getElementById('footer').classList.add('in'), postsEnd + 500*inv));
+
+  // collapse the boot log after the rest of the page has settled
+  bootTimers.push(setTimeout(()=>{
+    const el = document.getElementById('bootlog');
+    if (el) el.classList.add('collapsing');
+  }, postsEnd + 1200*inv));
+}
+
+/* ============ WIRE UP TWEAKS ============ */
+function initTweaksPanel(){
+  document.querySelectorAll('.tweaks .row').forEach(row=>{
+    row.addEventListener('click', e=>{
+      const btn = e.target.closest('.opt'); if(!btn) return;
+      persistTweak(row.dataset.key, btn.dataset.val);
+    });
+  });
+  const slider = document.getElementById('speedSlider');
+  slider.addEventListener('input', e=>{
+    const v = parseFloat(e.target.value);
+    persistTweak('speed', v);
+  });
+  document.getElementById('replay').addEventListener('click', runBootSequence);
+}
+
+/* ============ EDIT MODE PROTOCOL ============ */
+window.addEventListener('message', (e)=>{
+  const d = e.data||{};
+  if (d.type === '__activate_edit_mode') document.getElementById('tweaks').classList.add('open');
+  else if (d.type === '__deactivate_edit_mode') document.getElementById('tweaks').classList.remove('open');
+});
+// announce after listener is live
+window.parent.postMessage({type:'__edit_mode_available'}, '*');
+
+/* ============ GO ============ */
+renderPosts();
+initTweaksPanel();
+applyTweaks();
+runBootSequence();
+</script>
+</body>
+</html>

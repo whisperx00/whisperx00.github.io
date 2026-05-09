@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>nyx@void — rss / feed.xml</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --crust:#11111b;--mantle:#181825;--base:#1e1e2e;--surface0:#313244;--surface1:#45475a;
+    --text:#cdd6f4;--sub:#a6adc8;--dim:#6c7086;
+    --mauve:#cba6f7;--blue:#89b4fa;--peach:#fab387;--green:#a6e3a1;--teal:#94e2d5;--yellow:#f9e2af;--red:#f38ba8;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --sans:"Inter",system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--crust);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--mauve);color:var(--crust);}
+
+  nav.topnav{position:sticky;top:0;z-index:40;background:var(--mantle);border-bottom:1px solid var(--surface1);}
+  .nav-inner{max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;font-size:13px;}
+  .brand{font-weight:700;color:var(--mauve);}
+  .brand .caret{color:var(--green);margin-right:2px;}
+  .nav-links{display:flex;gap:22px;align-items:center;}
+  .nav-links a{color:var(--sub);padding:4px 0;border-bottom:1px solid transparent;transition:color .15s;}
+  .nav-links a .slash{color:var(--dim);margin-right:2px;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-links a.active{color:var(--blue);border-bottom-color:var(--blue);}
+  .nav-links a.active .slash{color:var(--blue);opacity:.6;}
+
+  main{max-width:1120px;margin:0 auto;padding:40px 28px 80px;}
+
+  /* ======== page header / command prompt ======== */
+  .cmd{font-size:13px;margin-bottom:24px;color:var(--sub);}
+  .cmd .u{color:var(--green);} .cmd .h{color:var(--mauve);} .cmd .d{color:var(--blue);} .cmd .s{color:var(--text);}
+  .cmd .arg{color:var(--peach);}
+  .cmd .flag{color:var(--yellow);}
+
+  h1.title{
+    font-family:var(--mono);font-weight:700;font-size:clamp(22px,3vw,30px);
+    color:var(--text);margin:0 0 10px;letter-spacing:-.005em;
+  }
+  h1 .slash{color:var(--dim);}
+  h1 .ext{color:var(--mauve);}
+
+  .lede{font-size:13px;color:var(--sub);max-width:80ch;margin:0 0 28px;}
+  .lede .hl{color:var(--text);}
+  .lede code{background:var(--surface0);padding:1px 6px;color:var(--peach);border:1px solid var(--surface1);}
+
+  /* ======== quick-actions bar ======== */
+  .actions{
+    display:flex;flex-wrap:wrap;gap:10px;margin:0 0 36px;
+  }
+  .action{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--mantle);border:1px solid var(--surface1);
+    padding:9px 13px;font-size:12px;color:var(--sub);
+    transition:border-color .15s,color .15s;
+    border-left:2px solid var(--col,var(--mauve));
+    cursor:pointer;
+  }
+  .action:hover{color:var(--text);border-color:var(--col,var(--mauve));}
+  .action .glyph{color:var(--col,var(--mauve));font-weight:700;}
+  .action .u{color:var(--text);}
+  .action.copied{color:var(--green);border-color:var(--green);}
+  .action.copied .glyph{color:var(--green);}
+
+  /* ======== feed url block ======== */
+  .urlblock{
+    display:flex;align-items:stretch;gap:0;margin-bottom:40px;
+    border:1px solid var(--surface1);background:var(--mantle);
+    border-left:2px solid var(--peach);
+  }
+  .urlblock .lab{
+    padding:12px 14px;background:var(--surface0);border-right:1px solid var(--surface1);
+    color:var(--peach);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;
+    display:flex;align-items:center;
+  }
+  .urlblock .url{
+    flex:1;padding:12px 14px;font-size:13px;color:var(--text);display:flex;align-items:center;
+    overflow-x:auto;white-space:nowrap;
+  }
+  .urlblock .url .proto{color:var(--dim);}
+  .urlblock .url .host{color:var(--blue);}
+  .urlblock .url .path{color:var(--sub);}
+  .urlblock .copy{
+    padding:0 16px;background:transparent;border:none;border-left:1px solid var(--surface1);
+    color:var(--sub);font-family:var(--mono);font-size:11px;cursor:pointer;transition:color .15s,background .15s;
+  }
+  .urlblock .copy:hover{color:var(--mauve);background:var(--base);}
+  .urlblock .copy.ok{color:var(--green);}
+
+  /* ======== sections ======== */
+  .section-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin:48px 0 18px;border-bottom:1px dashed var(--surface1);padding-bottom:10px;
+  }
+  .section-head h2{font-weight:600;font-size:13px;color:var(--sub);margin:0;letter-spacing:.04em;}
+  .section-head h2 .sym{color:var(--mauve);margin-right:8px;}
+  .section-head h2 .slash{color:var(--dim);}
+  .section-head .meta{font-size:11px;color:var(--dim);}
+  .section-head .meta .dot{color:var(--green);margin-right:6px;}
+
+  /* ======== filter tabs ======== */
+  .tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--surface1);}
+  .tabs button{
+    background:transparent;border:none;border-bottom:2px solid transparent;
+    color:var(--dim);font-family:var(--mono);font-size:12px;
+    padding:10px 14px;cursor:pointer;transition:color .15s,border-color .15s;
+    text-transform:lowercase;letter-spacing:.03em;
+  }
+  .tabs button .count{color:var(--surface1);margin-left:6px;font-size:10.5px;}
+  .tabs button:hover{color:var(--sub);}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--mauve);}
+  .tabs button.on .count{color:var(--mauve);}
+
+  /* ======== feed preview (XML-ish) ======== */
+  .feed{
+    background:var(--mantle);border:1px solid var(--surface1);
+    border-left:2px solid var(--mauve);
+    margin-bottom:40px;overflow:hidden;
+  }
+  .feed .fhead{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 14px;background:var(--surface0);border-bottom:1px solid var(--surface1);
+    font-size:11px;color:var(--sub);letter-spacing:.04em;
+  }
+  .feed .fhead .l{display:flex;gap:14px;align-items:center;}
+  .feed .fhead .dots{display:inline-flex;gap:5px;}
+  .feed .fhead .dots span{width:8px;height:8px;border-radius:50%;}
+  .feed .fhead .dots span:nth-child(1){background:var(--red);}
+  .feed .fhead .dots span:nth-child(2){background:var(--yellow);}
+  .feed .fhead .dots span:nth-child(3){background:var(--green);}
+  .feed .fhead .title{color:var(--text);font-weight:500;}
+  .feed .fhead .r{color:var(--dim);}
+  .feed .fbody{padding:18px 18px 8px;font-size:12.5px;line-height:1.65;overflow-x:auto;}
+  .feed pre{margin:0;font-family:var(--mono);white-space:pre;color:var(--sub);}
+  .feed .xtag{color:var(--blue);}
+  .feed .xattr{color:var(--peach);}
+  .feed .xstr{color:var(--green);}
+  .feed .xval{color:var(--text);}
+  .feed .xcom{color:var(--dim);}
+
+  /* ======== entries table ======== */
+  .entries{display:flex;flex-direction:column;}
+  .entry{
+    display:grid;grid-template-columns:150px 1fr auto auto;
+    gap:24px;align-items:center;
+    padding:14px 18px;
+    background:var(--mantle);
+    border-left:2px solid var(--cat,var(--mauve));
+    margin-bottom:8px;
+    transition:background .15s;
+  }
+  .entry:hover{background:#1f1f2e;}
+  .entry .meta{font-size:11px;color:var(--dim);display:flex;flex-direction:column;gap:2px;font-variant-numeric:tabular-nums;}
+  .entry .meta .dt{color:var(--sub);}
+  .entry .body{min-width:0;}
+  .entry .body .cat{
+    font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--cat,var(--mauve));margin-bottom:3px;display:inline-flex;align-items:center;gap:7px;
+  }
+  .entry .body .cat::before{content:"";display:inline-block;width:5px;height:5px;background:currentColor;}
+  .entry .body .t{font-family:var(--sans);font-weight:600;font-size:15px;color:var(--text);line-height:1.35;letter-spacing:-.005em;}
+  .entry .size{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;text-align:right;}
+  .entry .size .n{color:var(--sub);}
+  .entry a.xml{
+    font-size:11px;color:var(--blue);border:1px solid var(--surface1);
+    padding:4px 8px;letter-spacing:.04em;transition:border-color .15s,color .15s;
+  }
+  .entry a.xml:hover{border-color:var(--blue);color:var(--mauve);}
+
+  /* ======== readers grid ======== */
+  .readers{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:40px;}
+  .reader{
+    background:var(--base);border:1px solid var(--surface1);border-top:2px solid var(--col,var(--teal));
+    border-radius:4px;padding:14px 14px 12px;
+    display:flex;flex-direction:column;gap:8px;
+    transition:transform .15s;
+  }
+  .reader:hover{transform:translateY(-2px);}
+  .reader .name{font-weight:700;font-size:13px;color:var(--text);}
+  .reader .desc{font-size:11px;color:var(--dim);line-height:1.55;flex:1;}
+  .reader .go{font-size:10.5px;color:var(--col,var(--teal));margin-top:4px;letter-spacing:.04em;}
+
+  /* ======== man page / stats ======== */
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:40px;}
+  @media (max-width:800px){.two{grid-template-columns:1fr;}}
+  .block{
+    background:var(--mantle);border:1px solid var(--surface1);
+    padding:18px 20px;border-left:2px solid var(--accent,var(--teal));
+  }
+  .block h3{
+    margin:0 0 14px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--accent,var(--teal));display:flex;justify-content:space-between;align-items:baseline;
+  }
+  .block h3 .rt{color:var(--dim);font-weight:500;letter-spacing:.03em;text-transform:none;}
+  .man{display:flex;flex-direction:column;gap:10px;font-size:12px;}
+  .man .row{display:grid;grid-template-columns:70px 1fr;gap:14px;color:var(--sub);}
+  .man .row .k{color:var(--dim);}
+  .man .row code{background:var(--surface0);padding:1px 5px;color:var(--peach);border:1px solid var(--surface1);font-size:11.5px;}
+
+  .stats{display:flex;flex-direction:column;gap:9px;font-size:12px;}
+  .stats .row{display:flex;justify-content:space-between;gap:14px;padding-bottom:7px;border-bottom:1px dashed color-mix(in oklab,var(--surface1) 60%,transparent);}
+  .stats .row:last-child{border-bottom:none;}
+  .stats .row .k{color:var(--dim);}
+  .stats .row .v{color:var(--text);font-variant-numeric:tabular-nums;}
+  .stats .row .v .s{color:var(--green);}
+
+  /* ======== footer / status ======== */
+  .statusbar{margin-top:40px;background:var(--surface0);border-top:1px solid var(--surface1);border-bottom:1px solid var(--surface1);}
+  .statusbar-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:10px 28px;font-size:11px;color:var(--sub);}
+  .statusbar .left{display:flex;gap:14px;align-items:center;}
+  .statusbar .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);display:inline-block;margin-right:6px;}
+  .statusbar .right{display:flex;gap:18px;align-items:center;}
+  .statusbar .k{color:var(--dim);}
+  .statusbar .v{color:var(--text);}
+
+  footer{background:var(--mantle);border-top:1px solid var(--surface1);}
+  .foot-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:18px 28px;font-size:11px;color:var(--dim);}
+  .foot-inner .l span.sep{color:var(--surface1);margin:0 10px;}
+  .foot-inner .r{display:flex;gap:20px;}
+  .foot-inner .r a{color:var(--sub);}
+  .foot-inner .r a:hover{color:var(--mauve);}
+  .foot-inner .r a .slash{color:var(--dim);margin-right:2px;}
+
+  @media (max-width:680px){
+    .nav-links{gap:12px;font-size:12px;}
+    .nav-links a span.label{display:none;}
+    .entry{grid-template-columns:1fr;gap:6px;padding:14px;}
+    .entry .meta{flex-direction:row;gap:10px;}
+    .entry .size{text-align:left;}
+    .readers{grid-template-columns:1fr 1fr;}
+    .statusbar-inner,.foot-inner{flex-direction:column;gap:8px;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <div class="brand"><span class="caret">&gt;</span> nyx@void</div>
+    <div class="nav-links">
+      <a href="index.html"><span class="slash">./</span><span class="label">index</span></a>
+      <a href="writeups.html"><span class="slash">./</span><span class="label">writeups</span></a>
+      <a href="research.html"><span class="slash">./</span><span class="label">research</span></a>
+      <a href="tools.html"><span class="slash">./</span><span class="label">tools</span></a>
+      <a href="skills.html"><span class="slash">./</span><span class="label">skills</span></a>
+      <a href="about.html"><span class="slash">./</span><span class="label">about</span></a>
+      <a href="#" class="active"><span class="slash">./</span><span class="label">rss</span></a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+  <div class="cmd">
+    <span class="u">nyx</span>@<span class="h">void</span>:<span class="d">~</span><span class="s">$</span>
+    <span style="color:var(--text);">curl</span>
+    <span class="flag">-sL</span>
+    <span class="arg">https://nyx.void.sh/feed.xml</span>
+    <span style="color:var(--dim);">| head -40</span>
+  </div>
+
+  <h1 class="title">rss <span class="slash">/</span> <span class="ext">feed.xml</span></h1>
+  <p class="lede">
+    <span class="hl">One feed, no tracking, no newsletter.</span>
+    subscribe in your reader of choice — every writeup, tool release, and research post lands the moment it's published.
+    atom is preferred for strict parsers; use <code>feed.xml</code> for everything else. categories are filterable via tagged feeds below.
+  </p>
+
+  <!-- feed url + copy -->
+  <div class="urlblock">
+    <div class="lab">feed</div>
+    <div class="url">
+      <span class="proto">https://</span><span class="host">nyx.void.sh</span><span class="path">/feed.xml</span>
+    </div>
+    <button class="copy" data-copy="https://nyx.void.sh/feed.xml">cp</button>
+  </div>
+
+  <!-- quick actions -->
+  <div class="actions" id="actions">
+    <button class="action" style="--col:var(--peach);" data-copy="https://nyx.void.sh/feed.xml">
+      <span class="glyph">⟳</span> <span class="u">copy rss url</span>
+    </button>
+    <button class="action" style="--col:var(--blue);" data-copy="https://nyx.void.sh/atom.xml">
+      <span class="glyph">⟳</span> <span class="u">copy atom url</span>
+    </button>
+    <a class="action" style="--col:var(--green);" href="https://nyx.void.sh/feed.json">
+      <span class="glyph">{ }</span> <span class="u">json feed</span>
+    </a>
+    <a class="action" style="--col:var(--mauve);" href="feed://nyx.void.sh/feed.xml">
+      <span class="glyph">▸</span> <span class="u">open in default reader</span>
+    </a>
+    <a class="action" style="--col:var(--teal);" href="https://feedly.com/i/subscription/feed/https://nyx.void.sh/feed.xml">
+      <span class="glyph">+</span> <span class="u">add to feedly</span>
+    </a>
+  </div>
+
+  <!-- per-category feeds -->
+  <div class="section-head">
+    <h2><span class="sym">▸</span>filtered <span class="slash">/</span> <span style="color:var(--text);">feeds</span></h2>
+    <div class="meta"><span class="dot">●</span>4 tagged streams</div>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <button class="on" data-tab="all">all <span class="count">14</span></button>
+    <button data-tab="research">research <span class="count">5</span></button>
+    <button data-tab="writeup">writeups <span class="count">6</span></button>
+    <button data-tab="tooling">tooling <span class="count">3</span></button>
+  </div>
+
+  <div class="entries" id="entries"></div>
+
+  <!-- XML preview -->
+  <div class="section-head">
+    <h2><span class="sym">▸</span>preview <span class="slash">/</span> <span style="color:var(--text);">feed.xml</span></h2>
+    <div class="meta">application/atom+xml · utf-8 · 12.4 KB</div>
+  </div>
+
+  <div class="feed">
+    <div class="fhead">
+      <div class="l">
+        <span class="dots"><span></span><span></span><span></span></span>
+        <span class="title">~/www/feed.xml</span>
+      </div>
+      <div class="r">atom 1.0 · last-modified: 2h ago</div>
+    </div>
+    <div class="fbody">
+<pre><span class="xcom">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+<span class="xtag">&lt;feed</span> <span class="xattr">xmlns</span>=<span class="xstr">"http://www.w3.org/2005/Atom"</span><span class="xtag">&gt;</span>
+  <span class="xtag">&lt;title&gt;</span><span class="xval">nyx@void — offsec notes</span><span class="xtag">&lt;/title&gt;</span>
+  <span class="xtag">&lt;subtitle&gt;</span><span class="xval">vulnerability research, red-team diary, tool releases</span><span class="xtag">&lt;/subtitle&gt;</span>
+  <span class="xtag">&lt;link</span> <span class="xattr">href</span>=<span class="xstr">"https://nyx.void.sh/"</span><span class="xtag">/&gt;</span>
+  <span class="xtag">&lt;link</span> <span class="xattr">rel</span>=<span class="xstr">"self"</span> <span class="xattr">href</span>=<span class="xstr">"https://nyx.void.sh/feed.xml"</span><span class="xtag">/&gt;</span>
+  <span class="xtag">&lt;id&gt;</span><span class="xval">urn:uuid:5b8a9c44-7f2e-4a1d-b3c0-0f9d1e2a4817</span><span class="xtag">&lt;/id&gt;</span>
+  <span class="xtag">&lt;updated&gt;</span><span class="xval">2026-04-19T08:14:02Z</span><span class="xtag">&lt;/updated&gt;</span>
+  <span class="xtag">&lt;author&gt;</span>
+    <span class="xtag">&lt;name&gt;</span><span class="xval">Nyx Aren</span><span class="xtag">&lt;/name&gt;</span>
+    <span class="xtag">&lt;email&gt;</span><span class="xval">nyx@void.sh</span><span class="xtag">&lt;/email&gt;</span>
+  <span class="xtag">&lt;/author&gt;</span>
+
+  <span class="xtag">&lt;entry&gt;</span>
+    <span class="xtag">&lt;title&gt;</span><span class="xval">Exorcising a use-after-free in the io_uring subsystem</span><span class="xtag">&lt;/title&gt;</span>
+    <span class="xtag">&lt;link</span> <span class="xattr">href</span>=<span class="xstr">"https://nyx.void.sh/p/io-uring-uaf"</span><span class="xtag">/&gt;</span>
+    <span class="xtag">&lt;category</span> <span class="xattr">term</span>=<span class="xstr">"research"</span><span class="xtag">/&gt;</span>
+    <span class="xtag">&lt;published&gt;</span><span class="xval">2026-04-12T11:02:18Z</span><span class="xtag">&lt;/published&gt;</span>
+    <span class="xtag">&lt;summary&gt;</span><span class="xval">a long crawl through refcount races in io_uring worker pools, ending in a clean LPE on 6.6.</span><span class="xtag">&lt;/summary&gt;</span>
+  <span class="xtag">&lt;/entry&gt;</span>
+
+  <span class="xcom">&lt;!-- 13 more entries --&gt;</span>
+<span class="xtag">&lt;/feed&gt;</span></pre>
+    </div>
+  </div>
+
+  <!-- readers -->
+  <div class="section-head">
+    <h2><span class="sym">▸</span>one <span class="slash">/</span> <span style="color:var(--text);">click subscribe</span></h2>
+    <div class="meta">pick your poison</div>
+  </div>
+  <div class="readers">
+    <a class="reader" style="--col:var(--peach);" href="https://feedly.com/i/subscription/feed/https://nyx.void.sh/feed.xml">
+      <div class="name">Feedly</div>
+      <div class="desc">most common cloud reader. free tier is fine for one feed.</div>
+      <div class="go">add →</div>
+    </a>
+    <a class="reader" style="--col:var(--blue);" href="https://www.inoreader.com/?add_feed=https://nyx.void.sh/feed.xml">
+      <div class="name">Inoreader</div>
+      <div class="desc">power-user cloud reader. filter rules, search, rules by tag.</div>
+      <div class="go">add →</div>
+    </a>
+    <a class="reader" style="--col:var(--green);" href="https://theoldreader.com/feeds/subscribe?url=https://nyx.void.sh/feed.xml">
+      <div class="name">The Old Reader</div>
+      <div class="desc">spiritual successor to google reader. minimal, paced.</div>
+      <div class="go">add →</div>
+    </a>
+    <a class="reader" style="--col:var(--mauve);" href="https://netnewswire.com/">
+      <div class="name">NetNewsWire</div>
+      <div class="desc">free, native, mac + iOS. the one i actually use.</div>
+      <div class="go">open →</div>
+    </a>
+  </div>
+
+  <!-- man + stats -->
+  <div class="two">
+    <div class="block" style="--accent:var(--teal);">
+      <h3>man feed.xml <span class="rt">§1 · atom 1.0</span></h3>
+      <div class="man">
+        <div class="row"><span class="k">SYNOPSIS</span><span><code>GET https://nyx.void.sh/feed.xml</code></span></div>
+        <div class="row"><span class="k">ACCEPT</span><span>application/atom+xml, application/rss+xml, application/json</span></div>
+        <div class="row"><span class="k">CACHE</span><span>public, max-age=900 · etag + last-modified honored</span></div>
+        <div class="row"><span class="k">ENTRIES</span><span>latest 40 posts · full content, no tracking pixels</span></div>
+        <div class="row"><span class="k">TAGS</span><span><code>research</code> · <code>writeup</code> · <code>tooling</code></span></div>
+        <div class="row"><span class="k">SIGNED</span><span>signed with pgp key <code>0xA91F3C2D</code> — verify at <code>/feed.xml.asc</code></span></div>
+      </div>
+    </div>
+    <div class="block" style="--accent:var(--mauve);">
+      <h3>feed / stats <span class="rt">uptime 99.98%</span></h3>
+      <div class="stats">
+        <div class="row"><span class="k">last published</span><span class="v">2026-04-12 · <span class="s">7 days ago</span></span></div>
+        <div class="row"><span class="k">posts this year</span><span class="v">5</span></div>
+        <div class="row"><span class="k">avg. cadence</span><span class="v">~1 post / 22 days</span></div>
+        <div class="row"><span class="k">total subscribers</span><span class="v">2,184 <span style="color:var(--dim);">(self-reported from user-agent strings)</span></span></div>
+        <div class="row"><span class="k">top reader</span><span class="v">NetNewsWire · 28%</span></div>
+        <div class="row"><span class="k">feed size</span><span class="v">12.4 KB gzipped</span></div>
+        <div class="row"><span class="k">status</span><span class="v"><span style="color:var(--green);">● 200 OK</span> · validated w3c</span></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="statusbar">
+  <div class="statusbar-inner">
+    <div class="left">
+      <span><span class="dot"></span><span class="k">feed:</span> <span class="v" style="color:var(--green);">live</span></span>
+      <span><span class="k">format:</span> <span class="v">atom+xml</span></span>
+      <span><span class="k">validator:</span> <span class="v" style="color:var(--green);">pass</span></span>
+    </div>
+    <div class="right">
+      <span><span class="k">ttl:</span> <span class="v">900s</span></span>
+      <span><span class="k">etag:</span> <span class="v">W/"7e3f-2a"</span></span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="l">
+      <span style="color:var(--sub);">nyx@void</span>
+      <span class="sep">|</span>
+      <span>&copy; 2026</span>
+      <span class="sep">|</span>
+      <span>built in vim, served from a pi</span>
+    </div>
+    <div class="r">
+      <a href="#"><span class="slash">./</span>github</a>
+      <a href="#"><span class="slash">./</span>linkedin</a>
+      <a href="#"><span class="slash">./</span>pgp</a>
+      <a href="#"><span class="slash">./</span>mail</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const ENTRIES = [
+  { dt:"2026-04-12", cat:"research", accent:"mauve", size:"14.2 KB",
+    title:"Exorcising a use-after-free in the io_uring subsystem" },
+  { dt:"2026-03-29", cat:"writeup",  accent:"blue",  size:"08.1 KB",
+    title:"HTB :: Intrinsic — abusing a misrouted OCSP responder" },
+  { dt:"2026-03-11", cat:"research", accent:"mauve", size:"22.8 KB",
+    title:"Fuzzing eBPF verifier transitions with structure-aware grammars" },
+  { dt:"2026-02-24", cat:"tooling",  accent:"peach", size:"05.0 KB",
+    title:"pwn-husk 0.8 — ROP scaffolding that finally handles PIE properly" },
+  { dt:"2026-02-02", cat:"writeup",  accent:"blue",  size:"11.4 KB",
+    title:"GoogleCTF 2026 — notes on the `scarab` pwn chain" },
+  { dt:"2026-01-18", cat:"research", accent:"mauve", size:"09.6 KB",
+    title:"A half-failure: trying to reach ring-0 through a buggy Nvidia shim" },
+  { dt:"2026-01-04", cat:"tooling",  accent:"peach", size:"06.2 KB",
+    title:"thinwire: a tiny L2 tap I keep reaching for" },
+  { dt:"2025-12-20", cat:"writeup",  accent:"blue",  size:"18.5 KB",
+    title:"Red-team diary: phishing a SOC that knew we were coming" },
+  { dt:"2025-11-30", cat:"research", accent:"mauve", size:"16.1 KB",
+    title:"Notes on slab allocator quirks in 6.5-rc7" },
+  { dt:"2025-11-08", cat:"writeup",  accent:"blue",  size:"10.3 KB",
+    title:"DEF CON Quals — `mango` heap challenge, start to shell" },
+  { dt:"2025-10-19", cat:"tooling",  accent:"peach", size:"04.1 KB",
+    title:"sigma-snoop 1.2 — corpus minimizer got 6× faster" },
+  { dt:"2025-09-27", cat:"writeup",  accent:"blue",  size:"13.7 KB",
+    title:"Insomnihack — reversing a custom VM, line by line" },
+  { dt:"2025-09-03", cat:"research", accent:"mauve", size:"19.4 KB",
+    title:"V8 turbofan bounds-check elision: the bug, the fix, the patch diff" },
+  { dt:"2025-08-12", cat:"writeup",  accent:"blue",  size:"09.8 KB",
+    title:"HTB :: Basilisk — chaining an AD trust across two forests" }
+];
+
+function renderEntries(filter){
+  const host = document.getElementById('entries');
+  const rows = ENTRIES.filter(e => filter==='all' || e.cat===filter);
+  host.innerHTML = rows.map(e=>`
+    <div class="entry" style="--cat:var(--${e.accent});">
+      <div class="meta"><span class="dt">${e.dt}</span><span>pubdate</span></div>
+      <div class="body">
+        <div class="cat">${e.cat}</div>
+        <div class="t">${e.title}</div>
+      </div>
+      <div class="size"><span class="n">${e.size}</span></div>
+      <a class="xml" href="#">view xml →</a>
+    </div>
+  `).join('');
+}
+renderEntries('all');
+
+document.getElementById('tabs').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  renderEntries(b.dataset.tab);
+});
+
+// copy-to-clipboard for any [data-copy]
+document.addEventListener('click', async (e)=>{
+  const btn = e.target.closest('[data-copy]'); if(!btn) return;
+  const text = btn.dataset.copy;
+  try{
+    await navigator.clipboard.writeText(text);
+  }catch(_){
+    // fallback
+    const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(_){}ta.remove();
+  }
+  const prev = btn.textContent;
+  btn.classList.add('copied','ok');
+  if (btn.classList.contains('copy')) btn.textContent = '✓';
+  else {
+    const u = btn.querySelector('.u');
+    if (u){ const old = u.textContent; u.textContent = 'copied ✓'; setTimeout(()=>{u.textContent=old;btn.classList.remove('copied');}, 1400); return; }
+  }
+  setTimeout(()=>{ btn.classList.remove('copied','ok'); if (btn.classList.contains('copy')) btn.textContent='cp'; }, 1400);
+});
+</script>
+</body>
+</html>

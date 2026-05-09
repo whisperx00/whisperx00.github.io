@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>nyx@void — skill tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --crust:#11111b;--mantle:#181825;--base:#1e1e2e;--surface0:#313244;--surface1:#45475a;
+    --text:#cdd6f4;--sub:#a6adc8;--dim:#6c7086;
+    --mauve:#cba6f7;--blue:#89b4fa;--peach:#fab387;--green:#a6e3a1;--teal:#94e2d5;--yellow:#f9e2af;--red:#f38ba8;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --sans:"Inter",system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--crust);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--mauve);color:var(--crust);}
+
+  nav.topnav{position:sticky;top:0;z-index:40;background:var(--mantle);border-bottom:1px solid var(--surface1);}
+  .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;font-size:13px;}
+  .brand{font-weight:700;color:var(--mauve);}
+  .brand .caret{color:var(--green);margin-right:2px;}
+  .nav-links{display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+  .nav-links a{color:var(--sub);padding:4px 0;border-bottom:1px solid transparent;transition:color .15s;}
+  .nav-links a .slash{color:var(--dim);margin-right:2px;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-links a.active{color:var(--blue);border-bottom-color:var(--blue);}
+  .nav-links a.active .slash{color:var(--blue);opacity:.6;}
+
+  main{max-width:1200px;margin:0 auto;padding:36px 28px 70px;}
+
+  .cmd{font-size:13px;margin-bottom:16px;color:var(--sub);}
+  .cmd .u{color:var(--green);} .cmd .h{color:var(--mauve);} .cmd .d{color:var(--blue);}
+  .cmd .arg{color:var(--peach);} .cmd .flag{color:var(--yellow);}
+
+  h1.title{font-family:var(--mono);font-weight:700;font-size:clamp(22px,3vw,30px);color:var(--text);margin:0 0 8px;letter-spacing:-.005em;}
+  h1 .slash{color:var(--dim);}
+  h1 .ext{color:var(--green);}
+
+  .lede{font-size:13px;color:var(--sub);max-width:80ch;margin:0 0 22px;}
+  .lede .hl{color:var(--text);}
+  .lede code{background:var(--surface0);padding:1px 6px;color:var(--peach);border:1px solid var(--surface1);}
+
+  /* ================ HUD bar ================ */
+  .hud{
+    display:grid;grid-template-columns:1.1fr 1fr 1fr 1fr;gap:10px;margin:0 0 22px;
+  }
+  .hud .cell{
+    background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--col,var(--mauve));
+    padding:11px 14px;
+  }
+  .hud .cell .k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);}
+  .hud .cell .v{font-weight:700;font-size:18px;color:var(--col,var(--text));letter-spacing:-.005em;font-variant-numeric:tabular-nums;margin-top:4px;}
+  .hud .cell .s{font-size:10.5px;color:var(--sub);margin-top:2px;}
+  .hud .lvlbar{margin-top:6px;height:5px;background:var(--surface0);position:relative;overflow:hidden;}
+  .hud .lvlbar > span{display:block;height:100%;background:var(--col,var(--mauve));width:var(--p,75%);}
+  .hud .lvlbar .ticks{position:absolute;inset:0;display:flex;}
+  .hud .lvlbar .ticks i{flex:1;border-right:1px solid var(--mantle);}
+
+  /* ================ legend / class strip ================ */
+  .legend{
+    display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px;
+    background:var(--mantle);border:1px solid var(--surface1);padding:10px 14px;
+    align-items:center;font-size:11px;color:var(--sub);
+  }
+  .legend .group{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+  .legend .lab{color:var(--dim);letter-spacing:.06em;text-transform:uppercase;font-size:10px;}
+  .legend .pip{display:inline-flex;align-items:center;gap:6px;}
+  .legend .pip::before{content:"";width:9px;height:9px;display:inline-block;}
+  .legend .pip.unlocked::before{background:var(--green);box-shadow:0 0 6px var(--green);}
+  .legend .pip.mastered::before{background:var(--mauve);box-shadow:0 0 6px var(--mauve);}
+  .legend .pip.training::before{background:var(--yellow);}
+  .legend .pip.locked::before{background:var(--dim);opacity:.5;}
+  .legend .sep{color:var(--surface1);}
+
+  /* ================ class tabs ================ */
+  .classes{display:flex;gap:0;background:var(--mantle);border:1px solid var(--surface1);margin-bottom:14px;overflow-x:auto;}
+  .classes button{
+    background:transparent;border:0;border-right:1px solid var(--surface1);
+    color:var(--dim);font-family:var(--mono);font-size:12px;padding:11px 16px;cursor:pointer;
+    white-space:nowrap;letter-spacing:.04em;
+    transition:color .15s, background .15s;
+    display:flex;align-items:center;gap:8px;
+  }
+  .classes button:last-child{border-right:0;}
+  .classes button:hover{color:var(--text);}
+  .classes button.on{color:var(--text);background:var(--surface0);}
+  .classes button .glyph{
+    width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;
+    color:var(--col,var(--mauve));font-size:13px;
+  }
+  .classes button.on .glyph{filter:drop-shadow(0 0 4px var(--col,var(--mauve)));}
+  .classes button .pts{margin-left:6px;font-size:10px;color:var(--dim);}
+  .classes button.on .pts{color:var(--col,var(--mauve));}
+
+  /* ================ tree canvas ================ */
+  .canvas{
+    position:relative;background:
+      radial-gradient(ellipse at 50% 0%, color-mix(in oklab, var(--col,var(--mauve)) 16%, transparent) 0%, transparent 60%),
+      var(--mantle);
+    border:1px solid var(--surface1);
+    border-top:2px solid var(--col,var(--mauve));
+    overflow:hidden;
+    min-height:780px;
+  }
+  .canvas .grid-bg{
+    position:absolute;inset:0;pointer-events:none;
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--surface1) 50%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--surface1) 50%, transparent) 1px, transparent 1px);
+    background-size:32px 32px;
+    mask-image:radial-gradient(ellipse at 50% 30%, #000 0%, #000 60%, transparent 100%);
+    opacity:.4;
+  }
+
+  /* svg edges sit behind nodes but above grid */
+  .canvas svg.links{
+    position:absolute;inset:0;width:100%;height:100%;pointer-events:none;
+  }
+  .canvas svg.links path{
+    fill:none;stroke-width:2;stroke-linecap:round;
+  }
+  .canvas svg.links path.unlocked{stroke:color-mix(in oklab,var(--green) 70%, transparent);}
+  .canvas svg.links path.mastered{stroke:color-mix(in oklab,var(--mauve) 80%, transparent);filter:drop-shadow(0 0 5px color-mix(in oklab,var(--mauve) 60%, transparent));}
+  .canvas svg.links path.training{stroke:color-mix(in oklab,var(--yellow) 70%, transparent);stroke-dasharray:5 4;animation:dash 22s linear infinite;}
+  .canvas svg.links path.locked{stroke:var(--surface1);stroke-dasharray:3 5;}
+  @keyframes dash{ to { stroke-dashoffset:-200; } }
+
+  /* nodes */
+  .nodes{position:absolute;inset:0;}
+  .node{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    width:120px;
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+    cursor:pointer;
+    transition:transform .15s;
+  }
+  .node:hover{transform:translate(-50%,-50%) scale(1.04);}
+  .node.selected{transform:translate(-50%,-50%) scale(1.08);}
+  .node .badge{
+    width:54px;height:54px;
+    background:var(--mantle);
+    border:2px solid var(--state,var(--dim));
+    display:flex;align-items:center;justify-content:center;
+    color:var(--state,var(--dim));
+    font-family:var(--mono);font-weight:700;font-size:18px;
+    position:relative;
+    transition:box-shadow .2s,background .15s;
+  }
+  /* hexagon shape via clip-path */
+  .node .badge{
+    clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+    border:0;
+    box-shadow:
+      inset 0 0 0 2px var(--state,var(--dim)),
+      0 0 0 4px var(--mantle),
+      inset 0 0 0 6px color-mix(in oklab,var(--state,var(--dim)) 35%, var(--mantle));
+  }
+  .node:hover .badge{
+    box-shadow:
+      inset 0 0 0 2px var(--state,var(--dim)),
+      0 0 0 4px var(--mantle),
+      inset 0 0 0 6px color-mix(in oklab,var(--state,var(--dim)) 35%, var(--mantle)),
+      0 0 16px color-mix(in oklab,var(--state,var(--dim)) 70%, transparent);
+  }
+  .node.selected .badge{
+    box-shadow:
+      inset 0 0 0 2px var(--state,var(--dim)),
+      0 0 0 4px var(--mantle),
+      inset 0 0 0 6px color-mix(in oklab,var(--state,var(--dim)) 50%, var(--mantle)),
+      0 0 22px color-mix(in oklab,var(--state,var(--dim)) 90%, transparent);
+  }
+  .node[data-state="locked"]{opacity:.55;}
+  .node[data-state="locked"] .badge{filter:saturate(.3);}
+  .node[data-state="mastered"] .badge{
+    background:color-mix(in oklab,var(--mauve) 18%, var(--mantle));
+  }
+  .node[data-state="mastered"] .badge::after{
+    content:"★";position:absolute;top:-9px;right:-9px;
+    font-size:11px;color:var(--mauve);background:var(--crust);
+    width:18px;height:18px;display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--mauve);
+    box-shadow:0 0 8px color-mix(in oklab,var(--mauve) 60%, transparent);
+  }
+  .node[data-state="training"] .badge::after{
+    content:"";position:absolute;top:-7px;right:-7px;
+    width:12px;height:12px;border-radius:50%;
+    background:var(--yellow);border:2px solid var(--crust);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.25);opacity:.6;} }
+
+  .node .badge .ico{font-size:20px;line-height:1;color:inherit;font-weight:700;}
+  .node .label{
+    margin-top:8px;font-size:11px;color:var(--text);font-weight:600;letter-spacing:.01em;
+    line-height:1.25;
+    text-shadow:0 1px 2px var(--crust),0 0 6px var(--crust);
+  }
+  .node[data-state="locked"] .label{color:var(--dim);}
+  .node .lvl{
+    margin-top:3px;font-size:10px;color:var(--state,var(--dim));
+    letter-spacing:.06em;font-variant-numeric:tabular-nums;
+    background:var(--crust);padding:1px 6px;border:1px solid var(--surface1);
+  }
+
+  /* state colors */
+  .node[data-state="mastered"]  { --state:var(--mauve); }
+  .node[data-state="unlocked"]  { --state:var(--green); }
+  .node[data-state="training"]  { --state:var(--yellow); }
+  .node[data-state="locked"]    { --state:var(--dim); }
+
+  /* origin (root) */
+  .node.origin .badge{
+    width:72px;height:72px;
+    box-shadow:
+      inset 0 0 0 2px var(--col,var(--mauve)),
+      0 0 0 5px var(--mantle),
+      inset 0 0 0 8px color-mix(in oklab,var(--col,var(--mauve)) 50%, var(--mantle)),
+      0 0 26px color-mix(in oklab,var(--col,var(--mauve)) 60%, transparent);
+    color:var(--col,var(--mauve));
+  }
+  .node.origin .badge .ico{font-size:24px;}
+  .node.origin .label{font-size:13px;color:var(--col,var(--mauve));}
+  .node.origin .lvl{color:var(--col,var(--mauve));border-color:color-mix(in oklab,var(--col,var(--mauve)) 50%, var(--surface1));}
+  .node.origin{ width:140px; }
+
+  /* path-bottom labels (the three branches) */
+  .branch-label{
+    position:absolute;bottom:14px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--dim);
+    padding:5px 12px;background:var(--crust);border:1px solid var(--surface1);
+    transform:translateX(-50%);
+  }
+  .branch-label .accent{color:var(--c,var(--mauve));margin-right:6px;}
+
+  /* ================ side panel ================ */
+  .layout{
+    display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start;
+  }
+  @media (max-width:1024px){ .layout{grid-template-columns:1fr;} }
+  .sidepanel{
+    background:var(--mantle);border:1px solid var(--surface1);
+    border-left:2px solid var(--col,var(--mauve));
+    padding:18px 20px;font-size:12px;
+    position:sticky;top:80px;
+  }
+  .sidepanel .head{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px;
+  }
+  .sidepanel .name{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--text);letter-spacing:-.005em;line-height:1.3;}
+  .sidepanel .lvl-pill{
+    font-size:10px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;
+    padding:2px 7px;border:1px solid currentColor;color:var(--state,var(--mauve));
+    white-space:nowrap;
+  }
+  .sidepanel[data-state="mastered"] .lvl-pill{ --state:var(--mauve); }
+  .sidepanel[data-state="unlocked"] .lvl-pill{ --state:var(--green); }
+  .sidepanel[data-state="training"] .lvl-pill{ --state:var(--yellow); }
+  .sidepanel[data-state="locked"]   .lvl-pill{ --state:var(--dim); }
+
+  .sidepanel .meta{font-size:10.5px;color:var(--dim);letter-spacing:.04em;margin-bottom:14px;}
+  .sidepanel .meta .b{color:var(--col,var(--mauve));}
+  .sidepanel .desc{color:var(--sub);font-size:12px;line-height:1.7;margin-bottom:14px;}
+  .sidepanel .desc .hl{color:var(--text);}
+
+  .sidepanel .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:14px;}
+  .sidepanel .stats .r{display:flex;justify-content:space-between;font-size:11px;border-bottom:1px dashed color-mix(in oklab,var(--surface1) 50%,transparent);padding-bottom:4px;}
+  .sidepanel .stats .r .k{color:var(--dim);}
+  .sidepanel .stats .r .v{color:var(--text);font-variant-numeric:tabular-nums;}
+
+  .sidepanel h4{
+    margin:14px 0 6px;font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--col,var(--mauve));
+  }
+  .sidepanel ul.tags{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-wrap:wrap;gap:5px;}
+  .sidepanel ul.tags li{font-size:10.5px;color:var(--sub);background:var(--base);border:1px solid var(--surface1);padding:1px 7px;}
+  .sidepanel .proofs{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;}
+  .sidepanel .proofs li{font-size:11px;color:var(--sub);display:flex;gap:8px;align-items:flex-start;}
+  .sidepanel .proofs li::before{content:"▸";color:var(--col,var(--mauve));margin-top:1px;}
+  .sidepanel .proofs li a{color:var(--sub);border-bottom:1px dashed var(--surface1);}
+  .sidepanel .proofs li a:hover{color:var(--col,var(--mauve));border-color:currentColor;}
+
+  .sidepanel .reqs{font-size:11px;color:var(--dim);margin-bottom:6px;}
+  .sidepanel .reqs .satisfied{color:var(--green);}
+  .sidepanel .reqs .missing{color:var(--red);}
+  .sidepanel .empty{color:var(--dim);font-size:11px;font-style:italic;}
+
+  /* hint when nothing selected */
+  .sidepanel.idle{border-left-color:var(--surface1);}
+  .sidepanel.idle .name{color:var(--dim);}
+
+  /* ================ legend bottom: branches preview ================ */
+  .branchcards{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px;
+  }
+  @media (max-width:820px){ .branchcards{grid-template-columns:1fr;} }
+  .bc{
+    background:var(--mantle);border:1px solid var(--surface1);
+    border-top:2px solid var(--c,var(--green));
+    padding:14px 16px;font-size:11.5px;
+  }
+  .bc h4{margin:0 0 5px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--c,var(--green));}
+  .bc p{margin:0 0 6px;color:var(--sub);line-height:1.55;font-size:11px;}
+  .bc .key{font-size:10px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;}
+  .bc .key b{color:var(--text);font-weight:600;}
+
+  /* status/footer (same as siblings) */
+  .statusbar{margin-top:32px;background:var(--surface0);border-top:1px solid var(--surface1);border-bottom:1px solid var(--surface1);}
+  .statusbar-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:10px 28px;font-size:11px;color:var(--sub);}
+  .statusbar .left{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+  .statusbar .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);display:inline-block;margin-right:6px;}
+  .statusbar .right{display:flex;gap:18px;align-items:center;flex-wrap:wrap;}
+  .statusbar .k{color:var(--dim);} .statusbar .v{color:var(--text);}
+
+  footer{background:var(--mantle);border-top:1px solid var(--surface1);}
+  .foot-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:18px 28px;font-size:11px;color:var(--dim);}
+  .foot-inner .l span.sep{color:var(--surface1);margin:0 10px;}
+  .foot-inner .r{display:flex;gap:20px;}
+  .foot-inner .r a{color:var(--sub);}
+  .foot-inner .r a:hover{color:var(--mauve);}
+  .foot-inner .r a .slash{color:var(--dim);margin-right:2px;}
+
+  @media (max-width:680px){
+    .nav-links{gap:12px;font-size:12px;}
+    .nav-links a span.label{display:none;}
+    .hud{grid-template-columns:1fr 1fr;}
+    .canvas{min-height:1100px;}
+    .statusbar-inner,.foot-inner{flex-direction:column;gap:8px;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <div class="brand"><span class="caret">&gt;</span> nyx@void</div>
+    <div class="nav-links">
+      <a href="index.html"><span class="slash">./</span><span class="label">index</span></a>
+      <a href="writeups.html"><span class="slash">./</span><span class="label">writeups</span></a>
+      <a href="research.html"><span class="slash">./</span><span class="label">research</span></a>
+      <a href="tools.html"><span class="slash">./</span><span class="label">tools</span></a>
+      <a href="#" class="active"><span class="slash">./</span><span class="label">skills</span></a>
+      <a href="about.html"><span class="slash">./</span><span class="label">about</span></a>
+      <a href="rss.html"><span class="slash">./</span><span class="label">rss</span></a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+  <div class="cmd">
+    <span class="u">nyx</span>@<span class="h">void</span>:<span class="d">~/skills</span>
+    <span style="color:var(--text);">$</span>
+    <span style="color:var(--text);">cat</span>
+    <span class="arg">./tree.json</span>
+    <span style="color:var(--text);">|</span>
+    <span style="color:var(--text);">jq</span>
+    <span class="flag">'.classes[]'</span>
+  </div>
+
+  <h1 class="title">skill tree <span class="slash">/</span> <span class="ext">v1.0</span></h1>
+  <p class="lede">
+    <span class="hl">A talent tree for offensive security.</span>
+    branches diverge from each class's <code>origin</code> node — pick a path and you'll see the prerequisites, proof artifacts, and time-on-task light up. <span style="color:var(--mauve);">★ mastered</span>, <span style="color:var(--green);">● unlocked</span>, <span style="color:var(--yellow);">● training</span>, <span style="color:var(--dim);">○ locked</span>.
+  </p>
+
+  <!-- HUD -->
+  <section class="hud">
+    <div class="cell" style="--col:var(--mauve);">
+      <div class="k">profile · level</div>
+      <div class="v">15 <span style="font-size:11px;color:var(--dim);font-weight:500;">/ 40</span></div>
+      <div class="lvlbar"><span style="--p:38%;background:var(--mauve);"></span><span class="ticks"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+      <div class="s">XP 8,750 · next: <span style="color:var(--text);">+1,250</span></div>
+    </div>
+    <div class="cell" style="--col:var(--green);">
+      <div class="k">talent points</div>
+      <div class="v">15 / 29</div>
+      <div class="s">spent across 4 classes</div>
+    </div>
+    <div class="cell" style="--col:var(--peach);">
+      <div class="k">mastered</div>
+      <div class="v">7</div>
+      <div class="s">★ module complete + lab proof</div>
+    </div>
+    <div class="cell" style="--col:var(--yellow);">
+      <div class="k">in training</div>
+      <div class="v">6</div>
+      <div class="s">currently grinding</div>
+    </div>
+  </section>
+
+  <!-- legend -->
+  <div class="legend">
+    <div class="group">
+      <span class="lab">states:</span>
+      <span class="pip mastered">mastered</span>
+      <span class="pip unlocked">unlocked</span>
+      <span class="pip training">training</span>
+      <span class="pip locked">locked</span>
+    </div>
+    <span class="sep">|</span>
+    <div class="group">
+      <span class="lab">controls:</span>
+      <span>click a node for proof &amp; reqs</span>
+      <span class="sep">·</span>
+      <span>switch class with the tabs above the tree</span>
+    </div>
+  </div>
+
+  <!-- class tabs -->
+  <div class="classes" id="classTabs"></div>
+
+  <!-- main layout -->
+  <div class="layout">
+    <div class="canvas" id="canvas">
+      <div class="grid-bg"></div>
+      <svg class="links" id="links" preserveAspectRatio="none"></svg>
+      <div class="nodes" id="nodes"></div>
+    </div>
+
+    <aside class="sidepanel idle" id="panel" data-state="">
+      <div class="head">
+        <div class="name">select a node</div>
+      </div>
+      <div class="meta">click any hex on the tree to open its dossier — proofs, prereqs, time-on-task and notable artifacts.</div>
+    </aside>
+  </div>
+
+  <!-- branch summary cards -->
+  <section class="branchcards" id="branchcards"></section>
+
+</main>
+
+<div class="statusbar">
+  <div class="statusbar-inner">
+    <div class="left">
+      <span><span class="dot"></span><span class="k">tree:</span> <span class="v" style="color:var(--green);">in progress · v1</span></span>
+      <span><span class="k">classes:</span> <span class="v">4</span></span>
+      <span><span class="k">nodes:</span> <span class="v">29</span></span>
+      <span><span class="k">last respec:</span> <span class="v">never · do not respec</span></span>
+    </div>
+    <div class="right">
+      <span><span class="k">tooltip:</span> <span class="v">click hex → side panel</span></span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="l">
+      <span style="color:var(--sub);">nyx@void</span>
+      <span class="sep">|</span>
+      <span>&copy; 2026</span>
+      <span class="sep">|</span>
+      <span>built in vim, served from a pi</span>
+    </div>
+    <div class="r">
+      <a href="#"><span class="slash">./</span>github</a>
+      <a href="#"><span class="slash">./</span>linkedin</a>
+      <a href="#"><span class="slash">./</span>pgp</a>
+      <a href="#"><span class="slash">./</span>mail</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+   SKILL TREE — data
+   Each class has: origin node + 3 branches (paths) of nodes.
+   Nodes are positioned on a 1000x780 canvas (responsive scaled).
+   x,y are percentages so it scales fluidly.
+   ========================================================= */
+
+const CLASSES = [
+  {
+    id:"foundations", name:"Foundations", glyph:"◈", color:"blue", points:"6/8",
+    origin:{ id:"fd-root", label:"Cybersecurity Foundations", lvl:"core", state:"mastered",
+             desc:"Where everything starts — threat models, the kill chain, the tooling baseline. The module that gives every later attack its vocabulary.",
+             tags:["intro","killchain","mindset"], proofs:["self-study · lab proof"],
+             stat:{xp:"600",time:"2 wks"} },
+    branches:[
+      { name:"Methodology · comms", color:"mauve", labelX:18,
+        nodes:[
+          { id:"fd-learn", label:"Effective Learning", lvl:"core", state:"mastered", parent:"fd-root",
+            desc:"Note-taking systems, deliberate practice, how to fail-fast inside a lab without losing the day.",
+            tags:["learning","notes","obsidian"], proofs:["self-study · lab proof","personal lab journal"],
+            stat:{xp:"400",time:"1 wk"} },
+          { id:"fd-report", label:"Report Writing", lvl:"core", state:"mastered", parent:"fd-learn",
+            desc:"How to write a pentest report that actually gets read — exec summary, repro steps, screenshots that don't lie.",
+            tags:["reports","pentest","writing"], proofs:["self-study · lab proof","2 lab reports"],
+            stat:{xp:"500",time:"1 wk"} },
+        ]
+      },
+      { name:"Recon · enumeration", color:"green", labelX:50,
+        nodes:[
+          { id:"fd-info", label:"Information Gathering", lvl:"core", state:"mastered", parent:"fd-root",
+            desc:"Passive + active recon: DNS, OSINT, port scanning, service fingerprinting. The patient half of every engagement.",
+            tags:["nmap","osint","dns"], proofs:["self-study · lab proof","HTB starting boxes"],
+            stat:{xp:"700",time:"2 wks"} },
+          { id:"fd-vuln", label:"Vulnerability Scanning", lvl:"core", state:"unlocked", parent:"fd-info",
+            desc:"Nessus, OpenVAS, scripted nmap, when scanners lie and how to triage their output by hand.",
+            tags:["nessus","openvas","triage"], proofs:["self-study · lab proof"],
+            stat:{xp:"500",time:"1 wk"} },
+        ]
+      },
+      { name:"Exploit sourcing · RE", color:"peach", labelX:82,
+        nodes:[
+          { id:"fd-pubexp", label:"Locating Public Exploits", lvl:"core", state:"unlocked", parent:"fd-root",
+            desc:"ExploitDB, GitHub, searchsploit; reading PoCs critically before running them on a target you care about.",
+            tags:["exploitdb","searchsploit","poc"], proofs:["self-study · lab proof"],
+            stat:{xp:"400",time:"3 days"} },
+          { id:"fd-fix", label:"Fixing Exploits", lvl:"core", state:"training", parent:"fd-pubexp",
+            desc:"Why public PoCs break — offsets, shellcode encoding, language/runtime mismatch. The grind that separates copy-paste from operator.",
+            tags:["debug","shellcode","offsets"], proofs:["lab work · in progress"],
+            stat:{xp:"250",time:"ongoing"} },
+          { id:"fd-re", label:"Reverse Engineering", lvl:"adv", state:"training", parent:"fd-fix",
+            desc:"Beyond PEN-200: Ghidra/IDA basics, static + dynamic analysis, reading disassembly to understand a binary you can't run.",
+            tags:["ghidra","ida","static"], proofs:["self-study · CrackMes 0.protostar"],
+            stat:{xp:"200",time:"ongoing"} },
+        ]
+      }
+    ]
+  },
+  {
+    id:"webclient", name:"Web & Client-Side", glyph:"⌖", color:"green", points:"3/8",
+    origin:{ id:"wc-root", label:"Web Applications", lvl:"core", state:"mastered",
+             desc:"HTTP semantics, sessions, identity, the parser footguns. Web is where most external footholds happen — start here.",
+             tags:["http","cookies","oauth"], proofs:["self-study · lab proof"],
+             stat:{xp:"600",time:"1.5 wks"} },
+    branches:[
+      { name:"Server-side · injection", color:"green", labelX:18,
+        nodes:[
+          { id:"wc-common", label:"Common Web Attacks", lvl:"core", state:"unlocked", parent:"wc-root",
+            desc:"XSS, CSRF, IDOR, file upload, directory traversal — the OWASP-Top-10-style classics, learned by hand before learning Burp shortcuts.",
+            tags:["xss","csrf","idor","upload"], proofs:["self-study · lab proof","portswigger labs"],
+            stat:{xp:"700",time:"2 wks"} },
+          { id:"wc-sqli", label:"SQL Injection", lvl:"core", state:"unlocked", parent:"wc-common",
+            desc:"Inband, blind, time-based, OOB. Manual UNION-based extraction, then sqlmap when you've earned it.",
+            tags:["sqli","union","blind","sqlmap"], proofs:["self-study · lab proof","portswigger SQLi all-labs"],
+            stat:{xp:"800",time:"2 wks"} },
+        ]
+      },
+      { name:"Client-side · evasion", color:"yellow", labelX:50,
+        nodes:[
+          { id:"wc-client", label:"Client-Side Attacks", lvl:"core", state:"training", parent:"wc-root",
+            desc:"Phishing payloads, HTA, ISO-mounted droppers, macro chains, LNK abuse — getting code to run when the human is the perimeter.",
+            tags:["phishing","hta","macros","lnk"], proofs:["lab work · in progress"],
+            stat:{xp:"300",time:"ongoing"} },
+          { id:"wc-av", label:"Antivirus Evasion", lvl:"core", state:"training", parent:"wc-client",
+            desc:"Static signature dodges, encryption, AMSI bypass basics. The art of getting your shellcode past Defender on a stock Win10 box.",
+            tags:["amsi","defender","shellcode"], proofs:["lab work · in progress"],
+            stat:{xp:"250",time:"ongoing"} },
+        ]
+      },
+      { name:"Specialized targets", color:"blue", labelX:82,
+        nodes:[
+          { id:"wc-android", label:"Android App Security", lvl:"adv", state:"training", parent:"wc-root",
+            desc:"APK static analysis with <span class='hl'>jadx / apktool / MobSF</span>; runtime hooking with <span class='hl'>Frida + Objection</span>; SSL-pinning bypass, deep-link &amp; intent abuse, insecure WebView configs, exported-component takeovers, and Android <span class='hl'>keystore / biometric</span> trust-boundary failures.",
+            tags:["apk","frida","jadx","intents","webview","ssl-pinning"], proofs:["DIVA · 8/10 challenges","InsecureBankv2 walkthrough","OWASP MASVS L1 self-assessment"],
+            stat:{xp:"450",time:"3 mo"} },
+          { id:"wc-winapp", label:"Windows App Attacks", lvl:"adv", state:"training", parent:"wc-android",
+            desc:"Local-app surface on Windows: <span class='hl'>arbitrary file delete → SYSTEM</span> via symbolic-link / junction abuse, <span class='hl'>DLL hijacking</span>, named-pipe impersonation, registry-permission misconfig, and the <span class='hl'>SeImpersonate / Potato</span> family. Following James Forshaw's playbook on NT object manipulation.",
+            tags:["arbitrary-delete","symlink","dll-hijack","named-pipe","potato"], proofs:["hollowsmurf · arbitrary-delete PoC","3 HTB-windows boxes via DLL hijack","reading: Forshaw — Windows Security Internals"],
+            stat:{xp:"380",time:"2 mo"} },
+          { id:"wc-browser", label:"Browser Exploitation", lvl:"adv", state:"locked", parent:"wc-android",
+            desc:"V8/JSC internals, type-confusion in turbofan, JIT-spray, sandbox-escape primitives. Long-term goal — currently the wall I'm walking toward.",
+            tags:["v8","jsc","jit","sandbox"], proofs:["—"],
+            stat:{xp:"0",time:"queued"} },
+        ]
+      }
+    ]
+  },
+  {
+    id:"access", name:"Access & Post-Ex", glyph:"⎈", color:"peach", points:"4/6",
+    origin:{ id:"ax-root", label:"Initial Access", lvl:"core", state:"mastered",
+             desc:"Password attacks: spraying, stuffing, hash cracking, kerberos pre-auth dumps. The credentials half of getting in.",
+             tags:["spray","hashcat","john"], proofs:["self-study · lab proof"],
+             stat:{xp:"600",time:"1.5 wks"} },
+    branches:[
+      { name:"Windows · privesc", color:"blue", labelX:18,
+        nodes:[
+          { id:"ax-winpe", label:"Windows Privesc", lvl:"core", state:"unlocked", parent:"ax-root",
+            desc:"Service misconfigs, unquoted paths, AlwaysInstallElevated, token impersonation, SeImpersonate-class abuses.",
+            tags:["winpeas","tokens","services"], proofs:["self-study · lab proof","HTB easy/med boxes"],
+            stat:{xp:"800",time:"2 wks"} },
+          { id:"ax-winarb2", label:"Arbitrary Delete → SYSTEM", lvl:"adv", state:"training", parent:"ax-winpe",
+            desc:"Turning a write-anywhere or delete-anywhere primitive into <span class='hl'>NT AUTHORITY\\SYSTEM</span>: junction redirects against <code>C:\\Config.Msi</code>, MSI rollback abuse, DLL hijack into a SYSTEM-loaded path, and service-config corruption when ACLs slip.",
+            tags:["arbitrary-delete","junction","config.msi","dll-hijack"], proofs:["hollowsmurf PoC (sanitized)","CVE-2023-36874 follow-along","3 lab repros"],
+            stat:{xp:"320",time:"2 mo"} },
+        ]
+      },
+      { name:"Linux · privesc", color:"yellow", labelX:50,
+        nodes:[
+          { id:"ax-linpe", label:"Linux Privesc", lvl:"core", state:"unlocked", parent:"ax-root",
+            desc:"SUID hunting, sudo misconfig, cron races, capability abuse, kernel-exploit picking when the box is old enough to allow it.",
+            tags:["suid","sudo","caps","cron"], proofs:["self-study · lab proof","HTB linux boxes"],
+            stat:{xp:"700",time:"2 wks"} },
+        ]
+      },
+      { name:"Pivot · frameworks", color:"mauve", labelX:82,
+        nodes:[
+          { id:"ax-tunnel", label:"Advanced Tunneling", lvl:"core", state:"training", parent:"ax-root",
+            desc:"chisel, ligolo, ssh dynamic forwarding, reaching dual-homed boxes through a foothold without losing the foothold.",
+            tags:["chisel","ligolo","ssh"], proofs:["lab work · in progress"],
+            stat:{xp:"300",time:"ongoing"} },
+          { id:"ax-msf", label:"Metasploit Framework", lvl:"core", state:"unlocked", parent:"ax-tunnel",
+            desc:"Knowing MSF deeply enough to know when not to use it. Custom modules, pivoting through meterpreter, post-exploit scripts.",
+            tags:["msf","meterpreter","post"], proofs:["self-study · lab proof"],
+            stat:{xp:"500",time:"1.5 wks"} },
+        ]
+      }
+    ]
+  },
+  {
+    id:"ad", name:"Active Directory", glyph:"⎘", color:"mauve", points:"2/7",
+    origin:{ id:"ad-root", label:"AD Intro & Enumeration", lvl:"core", state:"mastered",
+             desc:"How AD actually works — domains, trusts, GPOs, ACLs — and how to enumerate it without getting caught by a stock SOC.",
+             tags:["bloodhound","ldap","gpos"], proofs:["self-study · lab proof"],
+             stat:{xp:"700",time:"2 wks"} },
+    branches:[
+      { name:"Authentication", color:"red", labelX:18,
+        nodes:[
+          { id:"ad-auth", label:"Attacking AD Auth", lvl:"core", state:"unlocked", parent:"ad-root",
+            desc:"asreproast, kerberoast, pre-auth abuses, NTLM relay basics. The bag of tricks that turns a foothold into domain influence.",
+            tags:["kerberoast","asreproast","ntlm"], proofs:["self-study · lab proof","HTB AD boxes"],
+            stat:{xp:"600",time:"2 wks"} },
+          { id:"ad-kerb", label:"Kerberos Deep Dive", lvl:"adv", state:"locked", parent:"ad-auth",
+            desc:"S4U2self/proxy, golden &amp; silver tickets, unconstrained delegation, trust hops. The OSEP-track followup.",
+            tags:["kerberos","delegation","tickets"], proofs:["—"],
+            stat:{xp:"0",time:"queued"} },
+        ]
+      },
+      { name:"Lateral movement", color:"green", labelX:50,
+        nodes:[
+          { id:"ad-lat", label:"Lateral Movement in AD", lvl:"core", state:"training", parent:"ad-root",
+            desc:"Pass-the-hash, pass-the-ticket, WMI/WinRM/PSExec, evading EDR while hopping. The exam-relevant grind.",
+            tags:["pth","ptt","winrm","wmi"], proofs:["lab work · in progress"],
+            stat:{xp:"350",time:"ongoing"} },
+          { id:"ad-pth", label:"Hash &amp; Token Reuse", lvl:"adv", state:"locked", parent:"ad-lat",
+            desc:"Building muscle memory for impacket-suite tooling and quiet token impersonation chains.",
+            tags:["impacket","mimikatz"], proofs:["—"],
+            stat:{xp:"0",time:"queued"} },
+        ]
+      },
+      { name:"Persistence", color:"yellow", labelX:82,
+        nodes:[
+          { id:"ad-dcsync", label:"DCSync / NTDS", lvl:"adv", state:"locked", parent:"ad-root",
+            desc:"Replication-rights abuse, NTDS dumping, the boring-but-essential close once you have DA-equivalent rights.",
+            tags:["dcsync","ntds","replication"], proofs:["—"],
+            stat:{xp:"0",time:"queued"} },
+          { id:"ad-persist", label:"Domain Persistence", lvl:"adv", state:"locked", parent:"ad-dcsync",
+            desc:"Skeleton key, AdminSDHolder, ACL backdoors. Long-term hold tradecraft — for after the OSCP.",
+            tags:["adminsd","skeleton","acl"], proofs:["—"],
+            stat:{xp:"0",time:"queued"} },
+        ]
+      }
+    ]
+  }
+];
+
+
+/* =========================================================
+   POSITIONING
+   - Origin is centered at top.
+   - Each branch occupies a vertical column (labelX %).
+   - Within a branch, nodes lay out top-to-bottom with optional
+     left/right offset for tree-shape via the `parent` field.
+   ========================================================= */
+const W = 1000, H = 780;
+function layout(klass){
+  const positioned = {};
+  // origin
+  positioned[klass.origin.id] = { x:50, y:12, node:klass.origin, branchColor:klass.color, isOrigin:true };
+
+  klass.branches.forEach((br, bi)=>{
+    // branch column anchor
+    const cx = br.labelX;
+    // For 4..6 nodes, lay out from y=26 to y=88
+    const n = br.nodes.length;
+    const yStart = 28, yEnd = 84;
+    br.nodes.forEach((nd, i)=>{
+      const t = n===1 ? 0 : i/(n-1);
+      // gentle zig-zag offset to feel like a tree
+      const offset = (i%2===0 ? -7 : 7) * (i>0?1:0);
+      // first node closer to center (so it links visually back to origin)
+      const x = i===0 ? lerp(cx, 50, 0.18) : cx + offset;
+      const y = yStart + t*(yEnd-yStart);
+      positioned[nd.id] = { x, y, node:nd, branchColor:br.color };
+    });
+  });
+  return positioned;
+}
+function lerp(a,b,t){ return a + (b-a)*t; }
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+const tabsHost = document.getElementById('classTabs');
+const canvas   = document.getElementById('canvas');
+const linksSvg = document.getElementById('links');
+const nodesEl  = document.getElementById('nodes');
+const panel    = document.getElementById('panel');
+const branchHost = document.getElementById('branchcards');
+
+let active = CLASSES[0].id;
+let selected = null;
+
+// build tabs
+tabsHost.innerHTML = CLASSES.map(c=>`
+  <button data-id="${c.id}" class="${c.id===active?'on':''}" style="--col:var(--${c.color});">
+    <span class="glyph">${c.glyph}</span>
+    <span>${c.name}</span>
+    <span class="pts">${c.points}</span>
+  </button>
+`).join('');
+tabsHost.addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  active = b.dataset.id;
+  document.querySelectorAll('#classTabs button').forEach(x=>x.classList.toggle('on', x.dataset.id===active));
+  selected = null;
+  render();
+});
+
+function lookupNode(klass, id){
+  if (klass.origin.id === id) return klass.origin;
+  for (const br of klass.branches){
+    for (const n of br.nodes) if (n.id===id) return n;
+  }
+  return null;
+}
+
+function render(){
+  const klass = CLASSES.find(c=>c.id===active);
+  const pos = layout(klass);
+  // set color
+  canvas.style.setProperty('--col', `var(--${klass.color})`);
+
+  // render links
+  const links = [];
+  klass.branches.forEach(br=>{
+    br.nodes.forEach(nd=>{
+      const a = pos[nd.parent];
+      const b = pos[nd.id];
+      if (!a || !b) return;
+      links.push({ a, b, state:nd.state });
+    });
+  });
+
+  // svg
+  linksSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  linksSvg.innerHTML = links.map(L=>{
+    const x1 = L.a.x*W/100, y1 = L.a.y*H/100;
+    const x2 = L.b.x*W/100, y2 = L.b.y*H/100;
+    // gentle bezier
+    const my = (y1+y2)/2;
+    const d = `M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}`;
+    return `<path class="${L.state}" d="${d}" />`;
+  }).join('');
+
+  // branch labels
+  const branchLabels = klass.branches.map(br=>`
+    <div class="branch-label" style="left:${br.labelX}%;--c:var(--${br.color});">
+      <span class="accent">▸</span>${br.name}
+    </div>
+  `).join('');
+
+  // nodes html
+  const nodesHTML = Object.values(pos).map(p=>{
+    const isOrigin = p.isOrigin;
+    const ico = isOrigin ? klass.glyph : (p.node.label[0]||'?');
+    const isSel = selected===p.node.id;
+    return `
+      <div class="node ${isOrigin?'origin':''} ${isSel?'selected':''}"
+           data-state="${p.node.state}"
+           data-id="${p.node.id}"
+           style="left:${p.x}%;top:${p.y}%;--col:var(--${isOrigin?klass.color:p.branchColor});">
+        <div class="badge"><span class="ico">${ico}</span></div>
+        <div class="label">${p.node.label}</div>
+        <div class="lvl">${p.node.lvl}</div>
+      </div>
+    `;
+  }).join('');
+
+  nodesEl.innerHTML = nodesHTML + branchLabels;
+
+  // attach click
+  nodesEl.querySelectorAll('.node').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      selected = el.dataset.id;
+      // toggle selected class
+      nodesEl.querySelectorAll('.node').forEach(x=>x.classList.toggle('selected', x.dataset.id===selected));
+      renderPanel();
+    });
+  });
+
+  // branch summary cards
+  branchHost.innerHTML = klass.branches.map(br=>{
+    const m = br.nodes.filter(n=>n.state==='mastered').length;
+    const t = br.nodes.length;
+    return `
+      <article class="bc" style="--c:var(--${br.color});">
+        <h4>▸ ${br.name}</h4>
+        <p>${m} of ${t} nodes mastered · path entry from <b style="color:var(--${br.color});">${klass.origin.label}</b>.</p>
+        <div class="key"><b>${br.nodes[0]?.label||''}</b> → ${br.nodes.slice(1).map(n=>n.label).join(' → ')||'—'}</div>
+      </article>
+    `;
+  }).join('');
+
+  renderPanel();
+}
+
+function renderPanel(){
+  if (!selected){
+    panel.classList.add('idle');
+    panel.dataset.state = '';
+    panel.innerHTML = `
+      <div class="head"><div class="name">select a node</div></div>
+      <div class="meta">click any hex on the tree to open its dossier — proofs, prereqs, time-on-task and notable artifacts.</div>
+    `;
+    return;
+  }
+  const klass = CLASSES.find(c=>c.id===active);
+  const n = lookupNode(klass, selected);
+  if (!n){ selected=null; renderPanel(); return; }
+
+  const branchOf = klass.origin.id===n.id ? null : klass.branches.find(br=>br.nodes.some(x=>x.id===n.id));
+  const col = branchOf ? branchOf.color : klass.color;
+
+  // satisfied prereqs?
+  let reqs = '';
+  if (n.parent){
+    const parent = lookupNode(klass, n.parent);
+    const ok = parent && (parent.state==='mastered' || parent.state==='unlocked');
+    reqs = `<div class="reqs">requires <b style="color:var(--text);">${parent?.label||'—'}</b> · <span class="${ok?'satisfied':'missing'}">${ok?'✓ satisfied':'✗ missing'}</span></div>`;
+  } else {
+    reqs = `<div class="reqs">root node · <span class="satisfied">no prerequisites</span></div>`;
+  }
+
+  panel.classList.remove('idle');
+  panel.style.setProperty('--col', `var(--${col})`);
+  panel.dataset.state = n.state;
+  panel.innerHTML = `
+    <div class="head">
+      <div class="name">${n.label}</div>
+      <div class="lvl-pill">${n.lvl} · ${n.state}</div>
+    </div>
+    <div class="meta">
+      <span class="b">${branchOf ? branchOf.name : 'origin'}</span>
+      &nbsp;·&nbsp; class: ${klass.name}
+    </div>
+    <div class="desc">${n.desc}</div>
+    ${reqs}
+    <div class="stats">
+      ${Object.entries(n.stat).map(([k,v])=>`<div class="r"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}
+    </div>
+    <h4>tags</h4>
+    <ul class="tags">${(n.tags||[]).map(t=>`<li>#${t}</li>`).join('')}</ul>
+    <h4>proof / artifacts</h4>
+    <ul class="proofs">
+      ${(n.proofs||[]).map(p=>`<li><a href="#">${p}</a></li>`).join('') || '<li class="empty">no public artifacts</li>'}
+    </ul>
+  `;
+}
+
+render();
+</script>
+</body>
+</html>

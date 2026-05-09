@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>nyx@void — research</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --crust:#11111b;--mantle:#181825;--base:#1e1e2e;--surface0:#313244;--surface1:#45475a;
+    --text:#cdd6f4;--sub:#a6adc8;--dim:#6c7086;
+    --mauve:#cba6f7;--blue:#89b4fa;--peach:#fab387;--green:#a6e3a1;--teal:#94e2d5;--yellow:#f9e2af;--red:#f38ba8;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --sans:"Inter",system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--crust);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--mauve);color:var(--crust);}
+
+  nav.topnav{position:sticky;top:0;z-index:40;background:var(--mantle);border-bottom:1px solid var(--surface1);}
+  .nav-inner{max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;font-size:13px;}
+  .brand{font-weight:700;color:var(--mauve);}
+  .brand .caret{color:var(--green);margin-right:2px;}
+  .nav-links{display:flex;gap:22px;align-items:center;}
+  .nav-links a{color:var(--sub);padding:4px 0;border-bottom:1px solid transparent;transition:color .15s;}
+  .nav-links a .slash{color:var(--dim);margin-right:2px;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-links a.active{color:var(--blue);border-bottom-color:var(--blue);}
+  .nav-links a.active .slash{color:var(--blue);opacity:.6;}
+
+  main{max-width:1120px;margin:0 auto;padding:40px 28px 80px;}
+
+  .cmd{font-size:13px;margin-bottom:20px;color:var(--sub);}
+  .cmd .u{color:var(--green);} .cmd .h{color:var(--mauve);} .cmd .d{color:var(--blue);}
+  .cmd .arg{color:var(--peach);} .cmd .flag{color:var(--yellow);}
+
+  h1.title{font-family:var(--mono);font-weight:700;font-size:clamp(22px,3vw,30px);color:var(--text);margin:0 0 10px;letter-spacing:-.005em;}
+  h1 .slash{color:var(--dim);}
+  h1 .ext{color:var(--mauve);}
+
+  .lede{font-size:13px;color:var(--sub);max-width:80ch;margin:0 0 28px;}
+  .lede .hl{color:var(--text);}
+  .lede code{background:var(--surface0);padding:1px 6px;color:var(--peach);border:1px solid var(--surface1);}
+
+  /* ======= CVE stat strip ======= */
+  .stripe{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:0 0 36px;}
+  .stat{background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--col,var(--mauve));padding:13px 14px;}
+  .stat .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;}
+  .stat .v{font-weight:700;font-size:20px;color:var(--col,var(--text));letter-spacing:-.01em;}
+  .stat .s{font-size:10.5px;color:var(--sub);margin-top:3px;}
+
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin:44px 0 18px;border-bottom:1px dashed var(--surface1);padding-bottom:10px;}
+  .section-head h2{font-weight:600;font-size:13px;color:var(--sub);margin:0;letter-spacing:.04em;}
+  .section-head h2 .sym{color:var(--mauve);margin-right:8px;}
+  .section-head h2 .slash{color:var(--dim);}
+  .section-head .meta{font-size:11px;color:var(--dim);}
+  .section-head .meta .dot{color:var(--green);margin-right:6px;}
+
+  /* ======= featured paper / banner card ======= */
+  .featured{
+    background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--mauve);
+    display:grid;grid-template-columns:1.4fr 1fr;gap:0;margin-bottom:32px;
+  }
+  @media (max-width:820px){ .featured{grid-template-columns:1fr;} }
+  .featured .left{padding:22px 26px;}
+  .featured .label{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mauve);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .featured .label::before{content:"";width:6px;height:6px;background:currentColor;}
+  .featured h2{font-family:var(--sans);font-weight:700;font-size:24px;color:var(--text);margin:0 0 10px;line-height:1.25;letter-spacing:-.01em;}
+  .featured .abs{font-size:12.5px;color:var(--sub);line-height:1.7;margin:0 0 14px;}
+  .featured .abs .hl{color:var(--text);}
+  .featured .authors{font-size:11.5px;color:var(--dim);margin-bottom:14px;}
+  .featured .authors .me{color:var(--mauve);}
+  .featured .ctas{display:flex;flex-wrap:wrap;gap:8px;}
+  .featured .cta{font-size:11.5px;color:var(--sub);border:1px solid var(--surface1);padding:6px 10px;transition:color .15s,border-color .15s;display:inline-flex;align-items:center;gap:6px;}
+  .featured .cta:hover{color:var(--mauve);border-color:var(--mauve);}
+  .featured .cta.primary{color:var(--mauve);border-color:var(--mauve);}
+  .featured .cta .gl{color:var(--dim);}
+  .featured .cta.primary .gl{color:var(--mauve);}
+
+  .featured .right{
+    background:var(--base);border-left:1px solid var(--surface1);
+    padding:22px 24px;display:flex;flex-direction:column;gap:10px;
+    font-size:12px;
+  }
+  .featured .kv{display:flex;justify-content:space-between;gap:12px;padding-bottom:8px;border-bottom:1px dashed color-mix(in oklab,var(--surface1) 60%,transparent);}
+  .featured .kv:last-child{border-bottom:none;}
+  .featured .kv .k{color:var(--dim);}
+  .featured .kv .v{color:var(--text);text-align:right;}
+  .featured .kv .v .acc{color:var(--peach);}
+  .featured .kv .v .acc.g{color:var(--green);}
+
+  /* ======= CVE table ======= */
+  .cves{
+    background:var(--mantle);border:1px solid var(--surface1);overflow:hidden;
+  }
+  .cves .row{
+    display:grid;grid-template-columns:140px 90px 1fr 90px 110px 90px;gap:16px;align-items:center;
+    padding:12px 18px;border-bottom:1px dashed var(--surface1);font-size:12px;
+  }
+  .cves .row:last-child{border-bottom:none;}
+  .cves .row.head{background:var(--surface0);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--surface1);padding:9px 18px;}
+  .cves .id{color:var(--mauve);font-weight:600;}
+  .cves .sev{display:inline-block;padding:1px 7px;border:1px solid currentColor;font-size:10.5px;letter-spacing:.05em;font-weight:600;text-transform:uppercase;text-align:center;}
+  .cves .sev.crit{color:var(--red);}
+  .cves .sev.high{color:var(--peach);}
+  .cves .sev.med{color:var(--yellow);}
+  .cves .sev.low{color:var(--teal);}
+  .cves .target{color:var(--sub);}
+  .cves .title{color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;}
+  .cves .cvss{color:var(--sub);font-variant-numeric:tabular-nums;}
+  .cves .cvss .n{color:var(--text);font-weight:600;}
+  .cves .when{color:var(--dim);font-variant-numeric:tabular-nums;font-size:11px;}
+  .cves .st{font-size:10.5px;letter-spacing:.04em;}
+  .cves .st .p{color:var(--green);}
+  .cves .st .e{color:var(--yellow);}
+  .cves .st .x{color:var(--dim);}
+
+  /* ======= papers ======= */
+  .papers{display:flex;flex-direction:column;gap:12px;margin-bottom:36px;}
+  .paper{
+    background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--col,var(--blue));
+    padding:18px 22px;
+    display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start;
+    transition:background .15s;
+  }
+  .paper:hover{background:#1f1f2e;}
+  .paper .hdr{font-size:11px;color:var(--dim);margin-bottom:6px;display:flex;gap:12px;flex-wrap:wrap;}
+  .paper .hdr .venue{color:var(--col,var(--blue));font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:10.5px;}
+  .paper .hdr .yr{font-variant-numeric:tabular-nums;}
+  .paper h3{font-family:var(--sans);font-weight:600;font-size:16px;color:var(--text);margin:0 0 6px;line-height:1.35;letter-spacing:-.005em;}
+  .paper .auth{font-size:11px;color:var(--dim);margin-bottom:8px;}
+  .paper .auth .me{color:var(--col,var(--blue));}
+  .paper .desc{font-size:12px;color:var(--sub);line-height:1.65;max-width:80ch;margin:0;}
+  .paper .side{
+    text-align:right;min-width:110px;font-size:11px;color:var(--dim);
+    display:flex;flex-direction:column;gap:8px;align-items:flex-end;
+  }
+  .paper .side .cite{font-size:18px;color:var(--col,var(--blue));font-weight:700;line-height:1;}
+  .paper .side .cite small{display:block;font-size:10px;color:var(--dim);font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-top:3px;}
+  .paper .side a.pdf{font-size:11px;color:var(--sub);border:1px solid var(--surface1);padding:4px 10px;transition:color .15s,border-color .15s;}
+  .paper .side a.pdf:hover{color:var(--col,var(--blue));border-color:currentColor;}
+
+  /* ======= talks ======= */
+  .talks{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  @media (max-width:820px){ .talks{grid-template-columns:1fr;} }
+  .talk{
+    background:var(--mantle);border:1px solid var(--surface1);border-top:2px solid var(--col,var(--teal));
+    border-radius:4px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;
+    transition:transform .15s;
+  }
+  .talk:hover{transform:translateY(-2px);}
+  .talk .row1{display:flex;justify-content:space-between;align-items:baseline;font-size:10.5px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase;}
+  .talk .row1 .venue{color:var(--col,var(--teal));font-weight:600;}
+  .talk h3{font-family:var(--sans);font-weight:600;font-size:14.5px;color:var(--text);margin:4px 0 6px;line-height:1.35;letter-spacing:-.005em;}
+  .talk .desc{font-size:11.5px;color:var(--sub);line-height:1.6;}
+  .talk .meta{margin-top:4px;font-size:11px;color:var(--dim);display:flex;gap:14px;}
+  .talk .meta .k{color:var(--dim);margin-right:4px;}
+  .talk .meta .v{color:var(--sub);}
+  .talk .ctas{margin-top:10px;display:flex;gap:6px;}
+  .talk .ctas a{font-size:10.5px;color:var(--sub);border:1px solid var(--surface1);padding:3px 8px;letter-spacing:.04em;transition:color .15s,border-color .15s;}
+  .talk .ctas a:hover{color:var(--col,var(--teal));border-color:currentColor;}
+
+  /* ======= disclosure policy block ======= */
+  .disclosure{
+    background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--peach);
+    padding:18px 22px;margin-bottom:28px;
+    display:grid;grid-template-columns:180px 1fr;gap:22px;
+  }
+  @media (max-width:820px){ .disclosure{grid-template-columns:1fr;} }
+  .disclosure h3{margin:0;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--peach);display:flex;flex-direction:column;gap:4px;}
+  .disclosure h3 small{font-size:10px;color:var(--dim);font-weight:500;letter-spacing:.06em;text-transform:none;}
+  .disclosure .body{font-size:12px;color:var(--sub);line-height:1.65;display:flex;flex-direction:column;gap:10px;}
+  .disclosure .body code{background:var(--surface0);color:var(--text);padding:1px 6px;border:1px solid var(--surface1);}
+  .disclosure ol{margin:0;padding-left:18px;}
+  .disclosure ol li{margin-bottom:4px;}
+  .disclosure .kb{display:inline-block;padding:1px 6px;border:1px solid var(--surface1);color:var(--sub);background:var(--base);font-size:10.5px;margin:0 4px 4px 0;}
+
+  .statusbar{margin-top:40px;background:var(--surface0);border-top:1px solid var(--surface1);border-bottom:1px solid var(--surface1);}
+  .statusbar-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:10px 28px;font-size:11px;color:var(--sub);}
+  .statusbar .left{display:flex;gap:14px;align-items:center;}
+  .statusbar .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);display:inline-block;margin-right:6px;}
+  .statusbar .right{display:flex;gap:18px;align-items:center;}
+  .statusbar .k{color:var(--dim);} .statusbar .v{color:var(--text);}
+
+  footer{background:var(--mantle);border-top:1px solid var(--surface1);}
+  .foot-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:18px 28px;font-size:11px;color:var(--dim);}
+  .foot-inner .l span.sep{color:var(--surface1);margin:0 10px;}
+  .foot-inner .r{display:flex;gap:20px;}
+  .foot-inner .r a{color:var(--sub);}
+  .foot-inner .r a:hover{color:var(--mauve);}
+  .foot-inner .r a .slash{color:var(--dim);margin-right:2px;}
+
+  @media (max-width:680px){
+    .nav-links{gap:12px;font-size:12px;}
+    .nav-links a span.label{display:none;}
+    .stripe{grid-template-columns:1fr 1fr;}
+    .cves .row{grid-template-columns:1fr;gap:4px;padding:12px 14px;}
+    .cves .row.head{display:none;}
+    .paper{grid-template-columns:1fr;} .paper .side{text-align:left;align-items:flex-start;flex-direction:row;}
+    .statusbar-inner,.foot-inner{flex-direction:column;gap:8px;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <div class="brand"><span class="caret">&gt;</span> nyx@void</div>
+    <div class="nav-links">
+      <a href="index.html"><span class="slash">./</span><span class="label">index</span></a>
+      <a href="writeups.html"><span class="slash">./</span><span class="label">writeups</span></a>
+      <a href="#" class="active"><span class="slash">./</span><span class="label">research</span></a>
+      <a href="tools.html"><span class="slash">./</span><span class="label">tools</span></a>
+      <a href="skills.html"><span class="slash">./</span><span class="label">skills</span></a>
+      <a href="about.html"><span class="slash">./</span><span class="label">about</span></a>
+      <a href="rss.html"><span class="slash">./</span><span class="label">rss</span></a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+  <div class="cmd">
+    <span class="u">nyx</span>@<span class="h">void</span>:<span class="d">~/research</span>
+    <span style="color:var(--text);">$</span>
+    <span style="color:var(--text);">find</span>
+    <span class="arg">.</span>
+    <span class="flag">-name</span>
+    <span class="arg">'*.{pdf,md}'</span>
+    <span class="flag">-mtime</span>
+    <span class="arg">-365</span>
+  </div>
+
+  <h1 class="title">research <span class="slash">/</span> <span class="ext">papers + cves</span></h1>
+  <p class="lede">
+    <span class="hl">Publications, CVEs, and conference talks.</span>
+    everything i've either published, presented, or reported through a proper CVD process.
+    all advisories follow a <code>90-day embargo</code> (or until patch ships, whichever comes first). bug-bounty work is listed
+    only where disclosure was approved — redacted where it wasn't.
+  </p>
+
+  <!-- stats -->
+  <section class="stripe">
+    <div class="stat" style="--col:var(--mauve);"><div class="k">papers</div><div class="v">6</div><div class="s">2 top-tier · 1 workshop</div></div>
+    <div class="stat" style="--col:var(--red);"><div class="k">cves assigned</div><div class="v">7</div><div class="s">3 kernel · 2 hypervisor · 2 web</div></div>
+    <div class="stat" style="--col:var(--peach);"><div class="k">avg. cvss</div><div class="v">7.9</div><div class="s">range 5.4 — 9.8</div></div>
+    <div class="stat" style="--col:var(--teal);"><div class="k">talks</div><div class="v">9</div><div class="s">def con · nullcon · osdi</div></div>
+    <div class="stat" style="--col:var(--green);"><div class="k">patched</div><div class="v">6/7</div><div class="s">1 embargoed · 0 unfixed</div></div>
+  </section>
+
+  <!-- featured paper -->
+  <div class="section-head">
+    <h2><span class="sym">▸</span>featured <span class="slash">/</span> <span style="color:var(--text);">most recent paper</span></h2>
+    <div class="meta"><span class="dot">●</span>presented usenix security '26</div>
+  </div>
+  <section class="featured">
+    <div class="left">
+      <div class="label">paper · usenix security 2026</div>
+      <h2>Structure-aware grammar fuzzing of the Linux eBPF verifier</h2>
+      <p class="abs">
+        We present a grammar-based, coverage-guided fuzzer for the <span class="hl">eBPF verifier's state-machine transitions</span>,
+        discovering three memory-safety bugs (two CVEs, one embargoed) in kernels 6.2–6.8.
+        Our approach models the verifier's register-type lattice as a context-free grammar and uses typed mutations
+        to stay on the in-distribution side of valid programs while still exercising transition edges rarely hit by libfuzzer.
+      </p>
+      <div class="authors"><span class="me">N. Aren</span>, H. van Wees, P. Okonkwo — <span style="color:var(--sub);">TU Delft · Systems Security Group</span></div>
+      <div class="ctas">
+        <a class="cta primary" href="#"><span class="gl">▸</span>read pdf</a>
+        <a class="cta" href="#"><span class="gl">⬇</span>artifact</a>
+        <a class="cta" href="#"><span class="gl">▸</span>slides</a>
+        <a class="cta" href="#"><span class="gl">▸</span>bibtex</a>
+        <a class="cta" href="#"><span class="gl">●</span>talk recording</a>
+      </div>
+    </div>
+    <div class="right">
+      <div class="kv"><span class="k">venue</span><span class="v">USENIX Security '26 · <span class="acc">distinguished paper</span></span></div>
+      <div class="kv"><span class="k">accept rate</span><span class="v">17.1%</span></div>
+      <div class="kv"><span class="k">pages</span><span class="v">18 + 4 appendix</span></div>
+      <div class="kv"><span class="k">artifact</span><span class="v"><span class="acc g">evaluated &amp; reproducible</span></span></div>
+      <div class="kv"><span class="k">cves found</span><span class="v">CVE-2025-48811 · CVE-2025-49203 · <span style="color:var(--dim);">(1 embargoed)</span></span></div>
+      <div class="kv"><span class="k">citations</span><span class="v">14 · <span style="color:var(--dim);">(as of apr 2026)</span></span></div>
+      <div class="kv"><span class="k">code</span><span class="v">github.com/nyx-void/crispr</span></div>
+    </div>
+  </section>
+
+  <!-- CVE table -->
+  <div class="section-head">
+    <h2><span class="sym">▸</span>advisories <span class="slash">/</span> <span style="color:var(--text);">assigned cves</span></h2>
+    <div class="meta">full details on request · pgp 0xA91F3C2D</div>
+  </div>
+  <section class="cves">
+    <div class="row head">
+      <span>cve id</span><span>severity</span><span>title</span><span>cvss v3.1</span><span>disclosed</span><span>status</span>
+    </div>
+    <div class="row">
+      <span class="id">CVE-2025-48811</span>
+      <span><span class="sev high">HIGH</span></span>
+      <span><span class="target">linux kernel · bpf</span><div class="title">register-type confusion in eBPF verifier allows OOB read</div></span>
+      <span class="cvss"><span class="n">8.1</span> / 10</span>
+      <span class="when">2025-11-14</span>
+      <span class="st"><span class="p">● patched</span></span>
+    </div>
+    <div class="row">
+      <span class="id">CVE-2025-49203</span>
+      <span><span class="sev crit">CRITICAL</span></span>
+      <span><span class="target">linux kernel · io_uring</span><div class="title">use-after-free in worker pool refcount path</div></span>
+      <span class="cvss"><span class="n">9.8</span> / 10</span>
+      <span class="when">2025-12-02</span>
+      <span class="st"><span class="p">● patched</span></span>
+    </div>
+    <div class="row">
+      <span class="id">CVE-2026-????</span>
+      <span><span class="sev high">HIGH</span></span>
+      <span><span class="target">linux kernel · bpf</span><div class="title"><em style="color:var(--dim);font-style:normal;">[under embargo — vendor CVD window]</em></div></span>
+      <span class="cvss"><span class="n">—</span></span>
+      <span class="when">pending</span>
+      <span class="st"><span class="e">● embargoed</span></span>
+    </div>
+    <div class="row">
+      <span class="id">CVE-2025-31104</span>
+      <span><span class="sev high">HIGH</span></span>
+      <span><span class="target">qemu · virtio-net</span><div class="title">missing bounds check on rx ring wrap enables host RCE</div></span>
+      <span class="cvss"><span class="n">8.6</span> / 10</span>
+      <span class="when">2025-07-08</span>
+      <span class="st"><span class="p">● patched</span></span>
+    </div>
+    <div class="row">
+      <span class="id">CVE-2025-22417</span>
+      <span><span class="sev med">MEDIUM</span></span>
+      <span><span class="target">xen · grant table</span><div class="title">refcount imbalance on error path in grant-map v2</div></span>
+      <span class="cvss"><span class="n">6.5</span> / 10</span>
+      <span class="when">2025-04-19</span>
+      <span class="st"><span class="p">● patched</span></span>
+    </div>
+    <div class="row">
+      <span class="id">CVE-2024-59881</span>
+      <span><span class="sev high">HIGH</span></span>
+      <span><span class="target">v8 · turbofan</span><div class="title">bounds-check elision under speculative type narrowing</div></span>
+      <span class="cvss"><span class="n">8.3</span> / 10</span>
+      <span class="when">2024-09-03</span>
+      <span class="st"><span class="p">● patched</span></span>
+    </div>
+    <div class="row">
+      <span class="id">CVE-2024-47290</span>
+      <span><span class="sev low">LOW</span></span>
+      <span><span class="target">nginx · mirror module</span><div class="title">request-smuggling via CRLF in mirrored body</div></span>
+      <span class="cvss"><span class="n">5.4</span> / 10</span>
+      <span class="when">2024-06-21</span>
+      <span class="st"><span class="p">● patched</span></span>
+    </div>
+  </section>
+
+  <!-- papers -->
+  <div class="section-head">
+    <h2><span class="sym">▸</span>papers <span class="slash">/</span> <span style="color:var(--text);">peer-reviewed</span></h2>
+    <div class="meta">ordered by venue · 6 entries</div>
+  </div>
+  <section class="papers">
+    <article class="paper" style="--col:var(--mauve);">
+      <div>
+        <div class="hdr"><span class="venue">USENIX Security</span><span class="yr">2026</span><span>peer-reviewed · 17.1% accept</span></div>
+        <h3>Structure-aware grammar fuzzing of the Linux eBPF verifier</h3>
+        <div class="auth"><span class="me">N. Aren</span>, H. van Wees, P. Okonkwo</div>
+        <p class="desc">Grammar-based fuzzer for the eBPF verifier's state transitions; 3 memory-safety bugs found, 2 CVEs assigned. Artifact evaluated &amp; reproducible.</p>
+      </div>
+      <div class="side">
+        <div class="cite">14<small>citations</small></div>
+        <a class="pdf" href="#">pdf →</a>
+      </div>
+    </article>
+    <article class="paper" style="--col:var(--blue);">
+      <div>
+        <div class="hdr"><span class="venue">OSDI</span><span class="yr">2025</span><span>peer-reviewed · short paper</span></div>
+        <h3>Reasoning about io_uring reference-count races with a lightweight temporal logic</h3>
+        <div class="auth">M. Haidari, <span class="me">N. Aren</span>, H. van Wees</div>
+        <p class="desc">A small TL model of io_uring refcount transitions; discharged with Lean4. Found one real UAF (CVE-2025-49203) while proving four others safe.</p>
+      </div>
+      <div class="side">
+        <div class="cite">6<small>citations</small></div>
+        <a class="pdf" href="#">pdf →</a>
+      </div>
+    </article>
+    <article class="paper" style="--col:var(--peach);">
+      <div>
+        <div class="hdr"><span class="venue">WOOT</span><span class="yr">2025</span><span>workshop</span></div>
+        <h3>Notes from the field: differential fuzzing of TLS parsers under real network conditions</h3>
+        <div class="auth"><span class="me">N. Aren</span>, R. Takeda</div>
+        <p class="desc">sigma-snoop's design document, dressed up as a paper. mostly how we minimized divergence traces without a reference parser.</p>
+      </div>
+      <div class="side">
+        <div class="cite">3<small>citations</small></div>
+        <a class="pdf" href="#">pdf →</a>
+      </div>
+    </article>
+    <article class="paper" style="--col:var(--teal);">
+      <div>
+        <div class="hdr"><span class="venue">NDSS Poster</span><span class="yr">2024</span><span>poster</span></div>
+        <h3>Slab allocator bitmap races in 6.5-rc kernels</h3>
+        <div class="auth"><span class="me">N. Aren</span></div>
+        <p class="desc">One-pager on a class of bitmap races in the slab allocator; later became the basis for half of my masters thesis.</p>
+      </div>
+      <div class="side">
+        <div class="cite">2<small>citations</small></div>
+        <a class="pdf" href="#">pdf →</a>
+      </div>
+    </article>
+    <article class="paper" style="--col:var(--green);">
+      <div>
+        <div class="hdr"><span class="venue">arXiv (preprint)</span><span class="yr">2024</span><span>not peer-reviewed</span></div>
+        <h3>On the detectability of inline-hook evasion in commercial EDR</h3>
+        <div class="auth"><span class="me">N. Aren</span>, L. Koenig</div>
+        <p class="desc">empirical study across 9 EDR products. no flashy technique — just measurement. useful as a reference for red-team planning.</p>
+      </div>
+      <div class="side">
+        <div class="cite">9<small>citations</small></div>
+        <a class="pdf" href="#">pdf →</a>
+      </div>
+    </article>
+    <article class="paper" style="--col:var(--yellow);">
+      <div>
+        <div class="hdr"><span class="venue">MSc Thesis</span><span class="yr">2025</span><span>TU Delft · cum laude</span></div>
+        <h3>Typed grammar mutations for kernel-verifier fuzzing</h3>
+        <div class="auth"><span class="me">N. Aren</span>, supervised by H. van Wees</div>
+        <p class="desc">precursor to the USENIX paper. best-thesis nomination (2025). full manuscript + artifact mirror on the group's website.</p>
+      </div>
+      <div class="side">
+        <div class="cite">—<small>—</small></div>
+        <a class="pdf" href="#">pdf →</a>
+      </div>
+    </article>
+  </section>
+
+  <!-- talks -->
+  <div class="section-head">
+    <h2><span class="sym">▸</span>talks <span class="slash">/</span> <span style="color:var(--text);">conferences &amp; meetups</span></h2>
+    <div class="meta">9 talks · last 3 years</div>
+  </div>
+  <section class="talks">
+    <article class="talk" style="--col:var(--teal);">
+      <div class="row1"><span class="venue">DEF CON 33</span><span>Las Vegas · aug 2025</span></div>
+      <h3>Fuzzing the eBPF verifier: a love letter to typed mutations</h3>
+      <p class="desc">45-min track talk. grammar, lattice modeling, three live crashes. q&amp;a got into kernel lockdown for 20 minutes afterwards.</p>
+      <div class="meta"><span><span class="k">audience:</span><span class="v">~900</span></span><span><span class="k">track:</span><span class="v">main</span></span></div>
+      <div class="ctas"><a href="#">slides</a><a href="#">recording</a><a href="#">demo repo</a></div>
+    </article>
+    <article class="talk" style="--col:var(--mauve);">
+      <div class="row1"><span class="venue">Nullcon Goa</span><span>goa · mar 2025</span></div>
+      <h3>How I spent a month in io_uring's refcount code and what I got for it</h3>
+      <p class="desc">walkthrough of CVE-2025-49203 from suspicion to patch. heavy on diffs, light on slides.</p>
+      <div class="meta"><span><span class="k">audience:</span><span class="v">~450</span></span><span><span class="k">track:</span><span class="v">offensive</span></span></div>
+      <div class="ctas"><a href="#">slides</a><a href="#">recording</a></div>
+    </article>
+    <article class="talk" style="--col:var(--peach);">
+      <div class="row1"><span class="venue">Hexacon</span><span>paris · oct 2024</span></div>
+      <h3>Escaping a hypervisor in three broken moves — virtio-net, bounds, and luck</h3>
+      <p class="desc">CVE-2025-31104 reveal. interactive demo, no slides during the exploit segment.</p>
+      <div class="meta"><span><span class="k">audience:</span><span class="v">~700</span></span><span><span class="k">track:</span><span class="v">main</span></span></div>
+      <div class="ctas"><a href="#">slides</a><a href="#">recording</a></div>
+    </article>
+    <article class="talk" style="--col:var(--blue);">
+      <div class="row1"><span class="venue">OSDI'25 · short</span><span>boston · jul 2025</span></div>
+      <h3>A lightweight temporal logic for refcount reasoning</h3>
+      <p class="desc">academic cut of the same work. shorter, stricter, more proofs on screen.</p>
+      <div class="meta"><span><span class="k">audience:</span><span class="v">~300</span></span><span><span class="k">track:</span><span class="v">reliability</span></span></div>
+      <div class="ctas"><a href="#">slides</a></div>
+    </article>
+    <article class="talk" style="--col:var(--green);">
+      <div class="row1"><span class="venue">Ekoparty</span><span>buenos aires · nov 2024</span></div>
+      <h3>sigma-snoop: differential fuzzing without a reference parser</h3>
+      <p class="desc">how you triage divergence traces when neither side is authoritative. tool demo + war stories.</p>
+      <div class="meta"><span><span class="k">audience:</span><span class="v">~500</span></span><span><span class="k">track:</span><span class="v">tools</span></span></div>
+      <div class="ctas"><a href="#">slides</a><a href="#">recording</a></div>
+    </article>
+    <article class="talk" style="--col:var(--yellow);">
+      <div class="row1"><span class="venue">Berlin Offsec Meetup</span><span>berlin · monthly</span></div>
+      <h3>Local meetup — rolling technical talks</h3>
+      <p class="desc">i co-host the monthly berlin offsec meetup. past topics: kernel heap grooming, v8 turbofan internals, pgp hygiene for pentesters.</p>
+      <div class="meta"><span><span class="k">cadence:</span><span class="v">1st thursday</span></span><span><span class="k">audience:</span><span class="v">40–80</span></span></div>
+      <div class="ctas"><a href="#">upcoming</a><a href="#">archive</a></div>
+    </article>
+  </section>
+
+  <!-- disclosure policy -->
+  <div class="section-head">
+    <h2><span class="sym">▸</span>disclosure <span class="slash">/</span> <span style="color:var(--text);">responsible &amp; coordinated</span></h2>
+    <div class="meta">pgp required for sensitive reports</div>
+  </div>
+  <section class="disclosure">
+    <h3>disclosure policy
+      <small>vendor &amp; research</small>
+    </h3>
+    <div class="body">
+      <p>i follow a <span style="color:var(--text);">coordinated vulnerability disclosure</span> process with a default <span style="color:var(--peach);">90-day embargo</span>, extendable once by 30 days with a written timeline. public release happens at <code>min(patch_ship_date, embargo_end)</code>.</p>
+      <ol>
+        <li><span style="color:var(--text);">initial report</span> — pgp-encrypted to <code>0xA91F3C2D</code>, includes PoC and affected versions.</li>
+        <li><span style="color:var(--text);">triage window</span> — 7 days for vendor to acknowledge and assign a tracker.</li>
+        <li><span style="color:var(--text);">fix window</span> — 90 days default. if vendor is responsive and has a credible timeline, i'll extend.</li>
+        <li><span style="color:var(--text);">public writeup</span> — published here after patch ships or embargo ends, whichever is first.</li>
+      </ol>
+      <p>credits: <span class="kb">cve</span><span class="kb">advisory html</span><span class="kb">acks in release notes</span> accepted. thanks requested only where it's accurate.</p>
+    </div>
+  </section>
+
+</main>
+
+<div class="statusbar">
+  <div class="statusbar-inner">
+    <div class="left">
+      <span><span class="dot"></span><span class="k">disclosures:</span> <span class="v" style="color:var(--green);">all coordinated</span></span>
+      <span><span class="k">embargoed:</span> <span class="v" style="color:var(--yellow);">1 active</span></span>
+      <span><span class="k">last advisory:</span> <span class="v">64d ago</span></span>
+    </div>
+    <div class="right">
+      <span><span class="k">pgp:</span> <span class="v">0xA91F 3C2D</span></span>
+      <span><span class="k">mirror:</span> <span class="v">orcid.org/0009-0000-0000</span></span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="l">
+      <span style="color:var(--sub);">nyx@void</span>
+      <span class="sep">|</span>
+      <span>&copy; 2026</span>
+      <span class="sep">|</span>
+      <span>built in vim, served from a pi</span>
+    </div>
+    <div class="r">
+      <a href="#"><span class="slash">./</span>github</a>
+      <a href="#"><span class="slash">./</span>linkedin</a>
+      <a href="#"><span class="slash">./</span>pgp</a>
+      <a href="#"><span class="slash">./</span>mail</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

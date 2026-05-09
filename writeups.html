@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>nyx@void — writeups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --crust:#11111b;--mantle:#181825;--base:#1e1e2e;--surface0:#313244;--surface1:#45475a;
+    --text:#cdd6f4;--sub:#a6adc8;--dim:#6c7086;
+    --mauve:#cba6f7;--blue:#89b4fa;--peach:#fab387;--green:#a6e3a1;--teal:#94e2d5;--yellow:#f9e2af;--red:#f38ba8;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --sans:"Inter",system-ui,sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--crust);color:var(--text);font-family:var(--mono);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+  ::selection{background:var(--mauve);color:var(--crust);}
+
+  nav.topnav{position:sticky;top:0;z-index:40;background:var(--mantle);border-bottom:1px solid var(--surface1);}
+  .nav-inner{max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;font-size:13px;}
+  .brand{font-weight:700;color:var(--mauve);}
+  .brand .caret{color:var(--green);margin-right:2px;}
+  .nav-links{display:flex;gap:22px;align-items:center;}
+  .nav-links a{color:var(--sub);padding:4px 0;border-bottom:1px solid transparent;transition:color .15s;}
+  .nav-links a .slash{color:var(--dim);margin-right:2px;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-links a.active{color:var(--blue);border-bottom-color:var(--blue);}
+  .nav-links a.active .slash{color:var(--blue);opacity:.6;}
+
+  main{max-width:1120px;margin:0 auto;padding:40px 28px 80px;}
+
+  .cmd{font-size:13px;margin-bottom:20px;color:var(--sub);}
+  .cmd .u{color:var(--green);} .cmd .h{color:var(--mauve);} .cmd .d{color:var(--blue);}
+  .cmd .arg{color:var(--peach);} .cmd .flag{color:var(--yellow);}
+
+  h1.title{font-family:var(--mono);font-weight:700;font-size:clamp(22px,3vw,30px);color:var(--text);margin:0 0 10px;letter-spacing:-.005em;}
+  h1 .slash{color:var(--dim);}
+  h1 .ext{color:var(--blue);}
+
+  .lede{font-size:13px;color:var(--sub);max-width:80ch;margin:0 0 28px;}
+  .lede .hl{color:var(--text);}
+  .lede code{background:var(--surface0);padding:1px 6px;color:var(--peach);border:1px solid var(--surface1);}
+
+  /* ======== stat strip ======== */
+  .stripe{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 36px;
+  }
+  .stat{
+    background:var(--mantle);border:1px solid var(--surface1);
+    border-left:2px solid var(--col,var(--mauve));
+    padding:14px 16px;
+  }
+  .stat .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:6px;}
+  .stat .v{font-family:var(--mono);font-weight:700;font-size:22px;color:var(--col,var(--text));letter-spacing:-.01em;}
+  .stat .s{font-size:11px;color:var(--sub);margin-top:4px;}
+  .stat .s .up{color:var(--green);}
+
+  /* ======== toolbar (search + filters + sort) ======== */
+  .toolbar{
+    display:grid;grid-template-columns:1fr auto auto;gap:10px;
+    margin-bottom:18px;
+  }
+  .search{
+    display:flex;align-items:center;gap:10px;padding:0 12px;
+    background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--blue);
+  }
+  .search .p{color:var(--green);font-size:12px;}
+  .search input{
+    flex:1;background:transparent;border:0;outline:0;color:var(--text);
+    font-family:var(--mono);font-size:13px;padding:10px 0;
+  }
+  .search input::placeholder{color:var(--dim);}
+  .search .hint{color:var(--dim);font-size:11px;border:1px solid var(--surface1);padding:1px 6px;}
+  .tb-group{display:flex;background:var(--mantle);border:1px solid var(--surface1);}
+  .tb-group button{
+    background:transparent;border:0;border-right:1px solid var(--surface1);
+    color:var(--dim);font-family:var(--mono);font-size:12px;padding:10px 14px;cursor:pointer;
+    transition:color .15s,background .15s;
+  }
+  .tb-group button:last-child{border-right:0;}
+  .tb-group button:hover{color:var(--text);}
+  .tb-group button.on{color:var(--text);background:var(--surface0);}
+  .tb-group button.on .cat-dot{background:currentColor;}
+  .tb-group .cat-dot{display:inline-block;width:6px;height:6px;margin-right:6px;background:var(--dim);transition:background .15s;}
+  .tb-group .c-all{color:var(--sub);}
+  .tb-group .c-htb{color:var(--green);}
+  .tb-group .c-ctf{color:var(--peach);}
+  .tb-group .c-rt{color:var(--red);}
+  .tb-group .c-pro{color:var(--blue);}
+  .tb-group.on-hover button.on{}
+
+  /* ======== filter chips row ======== */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;}
+  .chip{
+    font-size:11px;padding:3px 9px;border:1px solid var(--surface1);
+    color:var(--dim);background:var(--mantle);cursor:pointer;
+    text-transform:lowercase;letter-spacing:.03em;
+  }
+  .chip:hover{color:var(--text);}
+  .chip.on{color:var(--text);border-color:currentColor;}
+  .chip.on.mauve{color:var(--mauve);background:color-mix(in oklab,var(--mauve) 12%,transparent);}
+  .chip.on.blue{color:var(--blue);background:color-mix(in oklab,var(--blue) 12%,transparent);}
+  .chip.on.peach{color:var(--peach);background:color-mix(in oklab,var(--peach) 12%,transparent);}
+  .chip.on.teal{color:var(--teal);background:color-mix(in oklab,var(--teal) 12%,transparent);}
+  .chip.on.green{color:var(--green);background:color-mix(in oklab,var(--green) 12%,transparent);}
+
+  /* ======== writeup list ======== */
+  .list{display:flex;flex-direction:column;}
+  .wr{
+    display:grid;grid-template-columns:64px 1fr auto;gap:18px;align-items:stretch;
+    background:var(--mantle);
+    border-left:2px solid var(--cat,var(--blue));
+    margin-bottom:10px;
+    transition:background .15s;
+    cursor:pointer;
+  }
+  .wr:hover{background:#1f1f2e;}
+  .wr.open{background:#1f1f2e;}
+  .wr .left{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:14px 0;border-right:1px solid var(--surface1);background:color-mix(in oklab,var(--cat,var(--blue)) 6%,transparent);
+    font-family:var(--mono);
+  }
+  .wr .left .rank{font-size:10px;color:var(--dim);letter-spacing:.08em;}
+  .wr .left .diff{font-size:12px;font-weight:700;color:var(--cat,var(--blue));margin-top:2px;}
+  .wr .left .diff.easy{color:var(--green);}
+  .wr .left .diff.med{color:var(--yellow);}
+  .wr .left .diff.hard{color:var(--peach);}
+  .wr .left .diff.insane{color:var(--red);}
+  .wr .body{padding:14px 14px 14px 2px;min-width:0;}
+  .wr .body .row1{
+    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:4px;
+    font-size:11px;color:var(--dim);
+  }
+  .wr .body .row1 .cat{
+    font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--cat,var(--blue));display:inline-flex;align-items:center;gap:6px;
+  }
+  .wr .body .row1 .cat::before{content:"";display:inline-block;width:5px;height:5px;background:currentColor;}
+  .wr .body .row1 .dt{font-variant-numeric:tabular-nums;}
+  .wr .body .row1 .rt{}
+  .wr .body .row1 .src{}
+  .wr .body .row1 .src .pipe{color:var(--surface1);margin:0 8px;}
+  .wr .body h3{font-family:var(--sans);font-weight:600;font-size:17px;color:var(--text);margin:0 0 6px;line-height:1.35;letter-spacing:-.01em;}
+  .wr .body p{font-size:12px;color:var(--sub);margin:0 0 8px;max-width:76ch;line-height:1.6;}
+  .wr .body .tags{display:flex;flex-wrap:wrap;gap:6px;}
+  .wr .body .tags .t{font-size:10.5px;color:var(--dim);background:var(--base);border:1px solid var(--surface1);padding:1px 7px;letter-spacing:.02em;}
+
+  .wr .right{
+    padding:14px 18px 14px 10px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;
+    font-family:var(--mono);font-size:11px;color:var(--dim);min-width:130px;
+  }
+  .wr .right .pts{font-size:20px;font-weight:700;color:var(--cat,var(--blue));line-height:1;letter-spacing:-.01em;}
+  .wr .right .pts small{font-size:10px;font-weight:500;color:var(--dim);display:block;margin-top:4px;letter-spacing:.08em;text-transform:uppercase;}
+  .wr .right .go{
+    margin-top:10px;font-size:11px;color:var(--sub);border:1px solid var(--surface1);padding:4px 9px;
+    transition:color .15s,border-color .15s;
+  }
+  .wr:hover .right .go{color:var(--cat,var(--blue));border-color:currentColor;}
+
+  /* collapsible preview */
+  .wr .preview{
+    grid-column:1 / -1;
+    display:none;
+    border-top:1px solid var(--surface1);
+    background:var(--base);
+    padding:16px 18px;
+    font-size:12px;line-height:1.7;color:var(--sub);
+  }
+  .wr.open .preview{display:block;}
+  .wr .preview h4{
+    margin:0 0 10px;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mauve);
+  }
+  .wr .preview .kvs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 24px;margin-bottom:14px;}
+  .wr .preview .kvs .r{display:flex;gap:10px;}
+  .wr .preview .kvs .k{color:var(--dim);min-width:90px;}
+  .wr .preview .kvs .v{color:var(--text);}
+  .wr .preview pre{
+    margin:0;padding:12px 14px;background:var(--crust);border:1px solid var(--surface1);
+    overflow-x:auto;font-family:var(--mono);font-size:11.5px;color:var(--sub);
+    border-left:2px solid var(--green);
+  }
+  .wr .preview pre .p{color:var(--green);}
+  .wr .preview pre .out{color:var(--dim);}
+  .wr .preview pre .hit{color:var(--peach);}
+  .wr .preview pre .flag{color:var(--red);font-weight:600;}
+  .wr .preview .actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
+  .wr .preview .actions a{
+    font-size:11px;color:var(--sub);border:1px solid var(--surface1);padding:5px 10px;
+    transition:color .15s,border-color .15s;
+  }
+  .wr .preview .actions a:hover{color:var(--mauve);border-color:var(--mauve);}
+  .wr .preview .actions a .gl{color:var(--dim);margin-right:6px;}
+
+  .empty{
+    padding:40px 20px;text-align:center;color:var(--dim);font-size:12px;
+    border:1px dashed var(--surface1);
+  }
+
+  /* ======== timeline rail ======== */
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin:48px 0 18px;border-bottom:1px dashed var(--surface1);padding-bottom:10px;}
+  .section-head h2{font-weight:600;font-size:13px;color:var(--sub);margin:0;letter-spacing:.04em;}
+  .section-head h2 .sym{color:var(--mauve);margin-right:8px;}
+  .section-head h2 .slash{color:var(--dim);}
+  .section-head .meta{font-size:11px;color:var(--dim);}
+
+  .timeline{
+    display:grid;grid-template-columns:repeat(12,1fr);gap:4px;
+    background:var(--mantle);border:1px solid var(--surface1);padding:14px;
+    margin-bottom:40px;
+  }
+  .tl-cell{
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:8px 4px;
+    font-size:10px;color:var(--dim);
+  }
+  .tl-cell .bar{width:100%;height:40px;background:var(--base);border:1px solid var(--surface1);display:flex;flex-direction:column-reverse;overflow:hidden;}
+  .tl-cell .bar .seg{width:100%;}
+  .tl-cell .bar .seg.htb{background:var(--green);}
+  .tl-cell .bar .seg.ctf{background:var(--peach);}
+  .tl-cell .bar .seg.rt{background:var(--red);}
+  .tl-cell .bar .seg.pro{background:var(--blue);}
+  .tl-cell .lb{margin-top:3px;font-variant-numeric:tabular-nums;}
+  .tl-cell .n{color:var(--text);font-weight:600;font-size:11px;}
+
+  /* ======== footer status ======== */
+  .statusbar{margin-top:40px;background:var(--surface0);border-top:1px solid var(--surface1);border-bottom:1px solid var(--surface1);}
+  .statusbar-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:10px 28px;font-size:11px;color:var(--sub);}
+  .statusbar .left{display:flex;gap:14px;align-items:center;}
+  .statusbar .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);display:inline-block;margin-right:6px;}
+  .statusbar .right{display:flex;gap:18px;align-items:center;}
+  .statusbar .k{color:var(--dim);} .statusbar .v{color:var(--text);}
+
+  footer{background:var(--mantle);border-top:1px solid var(--surface1);}
+  .foot-inner{max-width:1120px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:18px 28px;font-size:11px;color:var(--dim);}
+  .foot-inner .l span.sep{color:var(--surface1);margin:0 10px;}
+  .foot-inner .r{display:flex;gap:20px;}
+  .foot-inner .r a{color:var(--sub);}
+  .foot-inner .r a:hover{color:var(--mauve);}
+  .foot-inner .r a .slash{color:var(--dim);margin-right:2px;}
+
+  @media (max-width:900px){
+    .stripe{grid-template-columns:repeat(2,1fr);}
+    .toolbar{grid-template-columns:1fr;}
+    .tb-group{overflow-x:auto;}
+  }
+  @media (max-width:680px){
+    .nav-links{gap:12px;font-size:12px;}
+    .nav-links a span.label{display:none;}
+    .wr{grid-template-columns:48px 1fr;}
+    .wr .right{grid-column:2;border-top:1px dashed var(--surface1);flex-direction:row;align-items:center;justify-content:space-between;padding:10px 14px;}
+    .timeline{grid-template-columns:repeat(6,1fr);}
+    .statusbar-inner,.foot-inner{flex-direction:column;gap:8px;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="nav-inner">
+    <div class="brand"><span class="caret">&gt;</span> nyx@void</div>
+    <div class="nav-links">
+      <a href="index.html"><span class="slash">./</span><span class="label">index</span></a>
+      <a href="#" class="active"><span class="slash">./</span><span class="label">writeups</span></a>
+      <a href="research.html"><span class="slash">./</span><span class="label">research</span></a>
+      <a href="tools.html"><span class="slash">./</span><span class="label">tools</span></a>
+      <a href="skills.html"><span class="slash">./</span><span class="label">skills</span></a>
+      <a href="about.html"><span class="slash">./</span><span class="label">about</span></a>
+      <a href="rss.html"><span class="slash">./</span><span class="label">rss</span></a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+  <div class="cmd">
+    <span class="u">nyx</span>@<span class="h">void</span>:<span class="d">~/writeups</span>
+    <span style="color:var(--text);">$</span>
+    <span style="color:var(--text);">ls</span>
+    <span class="flag">-lah</span>
+    <span class="flag">--sort=time</span>
+    <span class="arg">./</span>
+  </div>
+
+  <h1 class="title">writeups <span class="slash">/</span> <span class="ext">*.md</span></h1>
+  <p class="lede">
+    <span class="hl">Sanitized, ordered by date, tagged by source.</span>
+    every box i've fully rooted, every CTF chain i've written up, and every engagement debrief that made it past legal.
+    use <code>/</code> to search, click a row to expand the boot-to-root tldr. entries with <span style="color:var(--red);">●</span> are red-team engagements — company names redacted.
+  </p>
+
+  <!-- stat strip -->
+  <section class="stripe">
+    <div class="stat" style="--col:var(--green);">
+      <div class="k">htb rank</div>
+      <div class="v">guru</div>
+      <div class="s">312 boxes · <span class="up">top 0.4%</span></div>
+    </div>
+    <div class="stat" style="--col:var(--peach);">
+      <div class="k">ctf events</div>
+      <div class="v">47</div>
+      <div class="s">team <span style="color:var(--text);">./hollowpoint</span> · 2024–now</div>
+    </div>
+    <div class="stat" style="--col:var(--red);">
+      <div class="k">red-team ops</div>
+      <div class="v">19</div>
+      <div class="s">14 DA · 3 partial · 2 detected early</div>
+    </div>
+    <div class="stat" style="--col:var(--blue);">
+      <div class="k">pro lab boxes</div>
+      <div class="v">84</div>
+      <div class="s">offshore · rastalabs · dante</div>
+    </div>
+  </section>
+
+  <!-- toolbar -->
+  <div class="toolbar">
+    <div class="search">
+      <span class="p">/</span>
+      <input id="q" placeholder="grep title, tag, or tech — e.g. 'kerberos', 'slab', 'ocsp'" autocomplete="off" />
+      <span class="hint">⌘K</span>
+    </div>
+    <div class="tb-group" id="catGroup">
+      <button class="on" data-cat="all"><span class="cat-dot c-all"></span>all</button>
+      <button data-cat="htb"><span class="cat-dot c-htb"></span>htb</button>
+      <button data-cat="ctf"><span class="cat-dot c-ctf"></span>ctf</button>
+      <button data-cat="pro"><span class="cat-dot c-pro"></span>pro-lab</button>
+      <button data-cat="rt"><span class="cat-dot c-rt"></span>red-team</button>
+    </div>
+    <div class="tb-group" id="sortGroup">
+      <button class="on" data-sort="date">sort: date</button>
+      <button data-sort="difficulty">difficulty</button>
+      <button data-sort="points">points</button>
+    </div>
+  </div>
+
+  <!-- tag chips -->
+  <div class="chips" id="chips">
+    <span class="chip on mauve" data-tag="all">all tags</span>
+    <span class="chip" data-tag="linux">linux</span>
+    <span class="chip" data-tag="windows">windows</span>
+    <span class="chip" data-tag="ad">active-dir</span>
+    <span class="chip" data-tag="web">web</span>
+    <span class="chip" data-tag="pwn">pwn</span>
+    <span class="chip" data-tag="rev">rev</span>
+    <span class="chip" data-tag="crypto">crypto</span>
+    <span class="chip" data-tag="kerberos">kerberos</span>
+    <span class="chip" data-tag="kernel">kernel</span>
+    <span class="chip" data-tag="heap">heap</span>
+    <span class="chip" data-tag="ocsp">ocsp</span>
+    <span class="chip" data-tag="vm-escape">vm-escape</span>
+  </div>
+
+  <section class="list" id="list"></section>
+
+  <!-- timeline -->
+  <div class="section-head">
+    <h2><span class="sym">▸</span>activity <span class="slash">/</span> <span style="color:var(--text);">12-month rolling</span></h2>
+    <div class="meta">boxes + events per month</div>
+  </div>
+  <div class="timeline" id="timeline"></div>
+
+</main>
+
+<div class="statusbar">
+  <div class="statusbar-inner">
+    <div class="left">
+      <span><span class="dot"></span><span class="k">writeups:</span> <span class="v" style="color:var(--green);">all green</span></span>
+      <span><span class="k">shown:</span> <span class="v" id="shownCount">—</span></span>
+      <span><span class="k">hidden:</span> <span class="v" id="hiddenCount">—</span></span>
+    </div>
+    <div class="right">
+      <span><span class="k">shortcut:</span> <span class="v">/ search · j/k navigate · enter expand</span></span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="l">
+      <span style="color:var(--sub);">nyx@void</span>
+      <span class="sep">|</span>
+      <span>&copy; 2026</span>
+      <span class="sep">|</span>
+      <span>built in vim, served from a pi</span>
+    </div>
+    <div class="r">
+      <a href="#"><span class="slash">./</span>github</a>
+      <a href="#"><span class="slash">./</span>linkedin</a>
+      <a href="#"><span class="slash">./</span>pgp</a>
+      <a href="#"><span class="slash">./</span>mail</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const DATA = [
+  { id:"intrinsic", dt:"2026-03-29", rt:"08 min", cat:"pro", catLabel:"pro-lab", src:"Offshore", diff:"hard", diffLabel:"hard", pts:60, accent:"blue",
+    title:"Intrinsic — abusing a misrouted OCSP responder",
+    desc:"misconfigured OCSP gave us a forged cert chain; from there a small pivot through an internal jumpbox got us DA in under three hours.",
+    tags:["windows","ad","ocsp","kerberos"],
+    tldr:{ entry:"OCSP responder reachable from DMZ", piv:"Forged sub-CA → internal RDP", goal:"Domain Admin" },
+    term:[
+      { t:"p", s:"nmap -sV 10.10.110.42"},
+      { t:"out", s:"80/tcp open http    openssl-ocsp 1.1.1"},
+      { t:"p", s:"python3 forge_ocsp.py --ca leaked.pem --target internal-ca.offshore.htb"},
+      { t:"hit", s:"[+] signed response written to forged.der (valid 24h)"},
+      { t:"p", s:"evil-winrm -i 10.10.110.23 -u 'svc_pki' -c forged.pem"},
+      { t:"flag", s:"root.txt  ::  e2b9..f0c1"}
+    ]
+  },
+  { id:"basilisk", dt:"2025-08-12", rt:"09 min", cat:"htb", catLabel:"htb", src:"HackTheBox", diff:"insane", diffLabel:"insane", pts:50, accent:"green",
+    title:"Basilisk — chaining an AD trust across two forests",
+    desc:"forest A's krbtgt hash leaked via a service account misconfig; pivot through a transitive trust into forest B, then abuse SeImpersonate for SYSTEM.",
+    tags:["windows","ad","kerberos"],
+    tldr:{ entry:"LDAP anon bind → svc creds", piv:"krbtgt → golden ticket → trust hop", goal:"SYSTEM across 2 forests" },
+    term:[
+      { t:"p", s:"impacket-GetNPUsers forest-a.htb/ -no-pass -usersfile users.txt"},
+      { t:"hit", s:"$krb5asrep$23$svc_backup@FOREST-A.HTB: ..."},
+      { t:"p", s:"impacket-ticketer -nthash <krbtgt> -domain-sid S-1-5-21-... -domain FOREST-A.HTB administrator"},
+      { t:"flag", s:"user.txt  ::  a1..2e  /  root.txt  ::  99..cf"}
+    ]
+  },
+  { id:"scarab", dt:"2026-02-02", rt:"11 min", cat:"ctf", catLabel:"ctf", src:"GoogleCTF 2026", diff:"hard", diffLabel:"hard", pts:491, accent:"peach",
+    title:"scarab — 4-stage heap chain through a custom slab allocator",
+    desc:"UAF in a custom slab → arbitrary write → tcache smashing into a GOT overwrite. the cute part is how the slab's bitmap races the free path.",
+    tags:["pwn","heap","linux"],
+    tldr:{ entry:"UAF on note delete", piv:"Arb read via tcache poisoning", goal:"RCE → flag file" },
+    term:[
+      { t:"p", s:"./scarab"},
+      { t:"out", s:"> new note(idx, size): 0 0x80"},
+      { t:"out", s:"> free(0); free(0);   # double-free in slab bitmap"},
+      { t:"hit", s:"[*] tcache head poisoned → 0x4050e0 (__free_hook)"},
+      { t:"flag", s:"CTF{sl4b_n3v3r_f0rg3ts}"}
+    ]
+  },
+  { id:"mango", dt:"2025-11-08", rt:"10 min", cat:"ctf", catLabel:"ctf", src:"DEF CON Quals", diff:"med", diffLabel:"medium", pts:250, accent:"peach",
+    title:"mango — heap challenge, start to shell",
+    desc:"straightforward house-of-botcake variant, but with a twist in how the challenge serializes order IDs. walkthrough is heavy on gdb.",
+    tags:["pwn","heap","linux"],
+    tldr:{ entry:"Off-by-null in parser", piv:"Unsorted bin leak → tcache", goal:"RCE" },
+    term:[
+      { t:"p", s:"checksec ./mango"},
+      { t:"out", s:"RELRO: Full  CANARY: yes  NX: yes  PIE: yes"},
+      { t:"p", s:"python3 exploit.py REMOTE mango.ctf 31337"},
+      { t:"flag", s:"DEFCON{fruit_salad_of_tcache_bins}"}
+    ]
+  },
+  { id:"insomni-vm", dt:"2025-09-27", rt:"13 min", cat:"ctf", catLabel:"ctf", src:"Insomnihack", diff:"hard", diffLabel:"hard", pts:400, accent:"peach",
+    title:"Reversing a custom VM, line by line",
+    desc:"17-instruction VM with a constant-folding pass you have to invert. writing a decompiler was faster than pattern-matching by eye.",
+    tags:["rev","crypto"],
+    tldr:{ entry:"VM decompilation", piv:"Constraint solver over ops", goal:"Recover flag bytes" },
+    term:[
+      { t:"p", s:"python3 vm_decomp.py challenge.bin > trace.asm"},
+      { t:"out", s:"// 1,204 instructions · 4 branches"},
+      { t:"p", s:"z3-solver constraints.smt2"},
+      { t:"flag", s:"INS{v1rtu4l_m4ch1n3s_4r3_just_l00ps}"}
+    ]
+  },
+  { id:"soc-phish", dt:"2025-12-20", rt:"18 min", cat:"rt", catLabel:"red-team", src:"REDACTED", diff:"med", diffLabel:"medium", pts:null, accent:"red",
+    title:"Red-team diary: phishing a SOC that knew we were coming",
+    desc:"engagement debrief (sanitized). the trick wasn't the payload — it was convincing the SOC our sender was a vendor they already trusted.",
+    tags:["windows","web"],
+    tldr:{ entry:"Vendor-impersonation pretext", piv:"C2 via trusted TLS origin", goal:"Beacon on 14 workstations" },
+    term:[
+      { t:"p", s:"# REDACTED // sanitized timeline"},
+      { t:"out", s:"t+00:00  payload delivered (14 opens)"},
+      { t:"out", s:"t+00:07  beacon → trusted-vendor.example:443"},
+      { t:"out", s:"t+01:22  SOC alert (late); op continued"},
+      { t:"flag", s:"[engagement objectives met]"}
+    ]
+  },
+  { id:"salt-tower", dt:"2025-10-03", rt:"12 min", cat:"rt", catLabel:"red-team", src:"REDACTED", diff:"hard", diffLabel:"hard", pts:null, accent:"red",
+    title:"salt-tower — bypassing EDR via an inline hook drop",
+    desc:"walks through the hook-drop technique we landed on after two other loaders got caught. full timeline + what the EDR vendor patched after.",
+    tags:["windows","kernel"],
+    tldr:{ entry:"Phishing → signed loader", piv:"ntdll inline-hook removal", goal:"SYSTEM, lateral" },
+    term:[
+      { t:"p", s:"# sanitized"},
+      { t:"out", s:"loader: parent-pid spoof → explorer.exe"},
+      { t:"out", s:"ntdll!NtMapViewOfSection patched → cleaned"},
+      { t:"flag", s:"[dom admin · objective met]"}
+    ]
+  },
+  { id:"intrusion-rastalabs", dt:"2025-07-14", rt:"07 min", cat:"pro", catLabel:"pro-lab", src:"RastaLabs", diff:"hard", diffLabel:"hard", pts:40, accent:"blue",
+    title:"RastaLabs — five flags in a weekend",
+    desc:"notes on the cheat-free route: SQLi to foothold, kerberoast, silver ticket to MSSQL, DCSync. skipped the powershell-tutorial steps.",
+    tags:["windows","ad","web","kerberos"],
+    tldr:{ entry:"SQLi on internal portal", piv:"Kerberoast → silver ticket", goal:"DA + flag collection" },
+    term:[
+      { t:"p", s:"sqlmap -u https://portal/doc.aspx?id=1 --os-shell"},
+      { t:"hit", s:"[+] winexec context: IUSR_WEB"},
+      { t:"p", s:"rubeus kerberoast /format:hashcat"},
+      { t:"flag", s:"flags{1..5} collected"}
+    ]
+  },
+  { id:"driftnet", dt:"2025-05-22", rt:"15 min", cat:"htb", catLabel:"htb", src:"HackTheBox", diff:"insane", diffLabel:"insane", pts:50, accent:"green",
+    title:"Driftnet — VM escape through a broken virtio-net",
+    desc:"qemu virtio-net had a missing bounds check on the rx ring wrap. no public PoC at the time; this writeup is the full exploitation path.",
+    tags:["pwn","kernel","vm-escape","linux"],
+    tldr:{ entry:"Guest RCE on sshd", piv:"virtio-net OOB → host heap", goal:"host RCE / VM escape" },
+    term:[
+      { t:"p", s:"./driftnet --target virtio-net"},
+      { t:"out", s:"[*] rx ring wrap confused at idx 0x1ff"},
+      { t:"hit", s:"[+] host heap sprayed; fake fops written"},
+      { t:"flag", s:"root@host:~#  ::  flag captured"}
+    ]
+  },
+  { id:"azurite", dt:"2025-04-11", rt:"06 min", cat:"htb", catLabel:"htb", src:"HackTheBox", diff:"easy", diffLabel:"easy", pts:20, accent:"green",
+    title:"Azurite — SSRF to cloud metadata to keys",
+    desc:"box is easy but the writeup covers the cloud-metadata pivot properly: IMDSv1 vs v2, session tokens, and what the attacker actually sees.",
+    tags:["web","crypto"],
+    tldr:{ entry:"SSRF in image fetcher", piv:"IMDSv1 → role creds", goal:"Full read of storage" },
+    term:[
+      { t:"p", s:"curl 'https://app.azurite.htb/img?u=http://169.254.169.254/latest/meta-data/iam/security-credentials/role1'"},
+      { t:"hit", s:"{ \"AccessKeyId\": \"AKIA...\", \"Token\": \"FwoGZ...\" }"},
+      { t:"flag", s:"user.txt  /  root.txt"}
+    ]
+  }
+];
+
+const TIMELINE = [
+  { m:"may", htb:1, ctf:0, rt:1, pro:0 },
+  { m:"jun", htb:2, ctf:1, rt:0, pro:1 },
+  { m:"jul", htb:0, ctf:0, rt:1, pro:2 },
+  { m:"aug", htb:1, ctf:1, rt:0, pro:0 },
+  { m:"sep", htb:2, ctf:2, rt:1, pro:0 },
+  { m:"oct", htb:1, ctf:1, rt:2, pro:1 },
+  { m:"nov", htb:0, ctf:2, rt:1, pro:0 },
+  { m:"dec", htb:1, ctf:0, rt:2, pro:1 },
+  { m:"jan", htb:2, ctf:1, rt:0, pro:2 },
+  { m:"feb", htb:1, ctf:3, rt:0, pro:1 },
+  { m:"mar", htb:0, ctf:1, rt:1, pro:3 },
+  { m:"apr", htb:2, ctf:0, rt:1, pro:1 }
+];
+
+const diffOrder = { easy:1, med:2, medium:2, hard:3, insane:4 };
+let state = { q:"", cat:"all", sort:"date", tag:"all", openIds:new Set() };
+
+function render(){
+  let rows = DATA.slice();
+  if (state.cat !== "all") rows = rows.filter(r=>r.cat===state.cat);
+  if (state.tag !== "all") rows = rows.filter(r=>r.tags.includes(state.tag));
+  if (state.q){
+    const q = state.q.toLowerCase();
+    rows = rows.filter(r =>
+      r.title.toLowerCase().includes(q) ||
+      r.desc.toLowerCase().includes(q) ||
+      r.tags.join(" ").toLowerCase().includes(q) ||
+      r.src.toLowerCase().includes(q)
+    );
+  }
+  if (state.sort==="date")       rows.sort((a,b)=>b.dt.localeCompare(a.dt));
+  if (state.sort==="difficulty") rows.sort((a,b)=>(diffOrder[b.diff]||0)-(diffOrder[a.diff]||0));
+  if (state.sort==="points")     rows.sort((a,b)=>(b.pts||0)-(a.pts||0));
+
+  const host = document.getElementById('list');
+  if (!rows.length){
+    host.innerHTML = `<div class="empty">no writeups match <span style="color:var(--peach);">/${state.q||'…'}</span> — try clearing the filter.</div>`;
+  } else {
+    host.innerHTML = rows.map(r=>`
+      <article class="wr ${state.openIds.has(r.id)?'open':''}" data-id="${r.id}" style="--cat:var(--${r.accent});">
+        <div class="left">
+          <div class="rank">${r.pts!=null?('#'+String(r.pts).padStart(3,'0')):'OP'}</div>
+          <div class="diff ${r.diff}">${r.diffLabel}</div>
+        </div>
+        <div class="body">
+          <div class="row1">
+            <span class="cat">${r.catLabel}</span>
+            <span class="dt">${r.dt}</span>
+            <span class="rt">${r.rt} read</span>
+            <span class="src"><span class="pipe">|</span>src: ${r.src}</span>
+          </div>
+          <h3>${r.title}</h3>
+          <p>${r.desc}</p>
+          <div class="tags">${r.tags.map(t=>`<span class="t">#${t}</span>`).join('')}</div>
+        </div>
+        <div class="right">
+          <div>
+            ${r.pts!=null?`<div class="pts">${r.pts}<small>points</small></div>`:`<div class="pts" style="font-size:14px;">—<small>internal</small></div>`}
+          </div>
+          <div class="go">open →</div>
+        </div>
+        <div class="preview">
+          <h4>boot-to-root · tldr</h4>
+          <div class="kvs">
+            <div class="r"><span class="k">entry</span><span class="v">${r.tldr.entry}</span></div>
+            <div class="r"><span class="k">pivot</span><span class="v">${r.tldr.piv}</span></div>
+            <div class="r"><span class="k">goal</span><span class="v">${r.tldr.goal}</span></div>
+            <div class="r"><span class="k">tags</span><span class="v">${r.tags.map(t=>'#'+t).join(' · ')}</span></div>
+          </div>
+          <pre>${r.term.map(l=>{
+            if (l.t==='p')    return `<span class="p">$</span> ${l.s}`;
+            if (l.t==='out')  return `<span class="out">${l.s}</span>`;
+            if (l.t==='hit')  return `<span class="hit">${l.s}</span>`;
+            if (l.t==='flag') return `<span class="flag">${l.s}</span>`;
+            return l.s;
+          }).join('\n')}</pre>
+          <div class="actions">
+            <a href="#"><span class="gl">▸</span>full writeup</a>
+            <a href="#"><span class="gl">⬇</span>download .md</a>
+            <a href="#"><span class="gl">⎘</span>copy permalink</a>
+            ${r.cat==='rt'?'<a href="#" style="color:var(--red);border-color:color-mix(in oklab,var(--red) 40%,var(--surface1));"><span class="gl">●</span>sanitized · legal-cleared</a>':''}
+          </div>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  document.getElementById('shownCount').textContent = rows.length;
+  document.getElementById('hiddenCount').textContent = DATA.length - rows.length;
+}
+
+// interactions
+document.getElementById('list').addEventListener('click', e=>{
+  const wr = e.target.closest('.wr'); if(!wr) return;
+  if (e.target.closest('.actions a')) return;
+  const id = wr.dataset.id;
+  if (state.openIds.has(id)) state.openIds.delete(id); else state.openIds.add(id);
+  render();
+});
+
+document.getElementById('q').addEventListener('input', e=>{
+  state.q = e.target.value.trim(); render();
+});
+
+document.getElementById('catGroup').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#catGroup button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); state.cat = b.dataset.cat; render();
+});
+document.getElementById('sortGroup').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#sortGroup button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); state.sort = b.dataset.sort; render();
+});
+document.getElementById('chips').addEventListener('click', e=>{
+  const c = e.target.closest('.chip'); if(!c) return;
+  document.querySelectorAll('#chips .chip').forEach(x=>{
+    x.classList.remove('on','mauve','blue','peach','teal','green');
+  });
+  c.classList.add('on','mauve');
+  state.tag = c.dataset.tag; render();
+});
+
+// slash / cmd+k to focus search
+document.addEventListener('keydown', e=>{
+  if ((e.key==='/' || (e.key==='k' && (e.metaKey||e.ctrlKey))) && document.activeElement !== document.getElementById('q')){
+    e.preventDefault(); document.getElementById('q').focus();
+  } else if (e.key==='Escape' && document.activeElement===document.getElementById('q')){
+    e.target.blur();
+  }
+});
+
+// render timeline
+(function renderTL(){
+  const host = document.getElementById('timeline');
+  const max = Math.max(...TIMELINE.map(m=>m.htb+m.ctf+m.rt+m.pro));
+  host.innerHTML = TIMELINE.map(m=>{
+    const total = m.htb+m.ctf+m.rt+m.pro;
+    const scale = total/max;
+    const h = (n,cls)=>n?`<div class="seg ${cls}" style="height:${(n/total)*100*scale}%;"></div>`:'';
+    return `<div class="tl-cell">
+      <div class="bar">
+        ${h(m.pro,'pro')}${h(m.rt,'rt')}${h(m.ctf,'ctf')}${h(m.htb,'htb')}
+      </div>
+      <div class="lb">${m.m}</div>
+      <div class="n">${total}</div>
+    </div>`;
+  }).join('');
+})();
+
+render();
+</script>
+</body>
+</html>
