@@ -19,33 +19,36 @@ import Layout from '../../layouts/Layout.astro';
       </div>
       <div>
         <h1>Manoel Albino Coelho de Miranda Neto</h1>
-        <div class="role">Offensive Security Researcher · <span class="hl">windows &amp; AD · web exploitation · custom tooling</span></div>
+        <div class="role">
+          <span data-lang="en">Offensive Security Researcher · <span class="hl">windows &amp; AD · web exploitation · custom tooling</span></span>
+          <span data-lang="pt" hidden>Pesquisador de Segurança Ofensiva · <span class="hl">windows &amp; AD · exploração web · ferramentas</span></span>
+        </div>
         <div class="meta">
           <span><span class="k">📍</span><span class="v">brazil</span></span>
-          <span><span class="k">●</span><span class="v">open to remote &amp; relocation</span></span>
-          <span><span class="k">⚙</span><span class="v">remote-first ok</span></span>
-          <span><span class="k">🎓</span><span class="v">Software Engineering · PUC-Campinas</span></span>
+          <span><span class="k">●</span><span class="v"><span data-lang="en">open to remote &amp; relocation</span><span data-lang="pt" hidden>aberto a remoto e realocação</span></span></span>
+          <span><span class="k">⚙</span><span class="v"><span data-lang="en">remote-first ok</span><span data-lang="pt" hidden>prefiro remoto</span></span></span>
+          <span><span class="k">🎓</span><span class="v"><span data-lang="en">Software Engineering · PUC-Campinas</span><span data-lang="pt" hidden>Engenharia de Software · PUC-Campinas</span></span></span>
         </div>
       </div>
       <div class="open">
-        <div class="badge">OSCP full-time student</div>
+        <div class="badge"><span data-lang="en">OSCP full-time student</span><span data-lang="pt" hidden>estudante OSCP em tempo integral</span></div>
         <div class="ctas">
-          <a class="primary" href="mailto:gm.manoel.albino@proton.me">✉ contact</a>
+          <a class="primary" href="mailto:gm.manoel.albino@proton.me">✉ <span data-lang="en">contact</span><span data-lang="pt" hidden>contato</span></a>
           <a href="https://www.linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237" target="_blank" rel="noopener">linkedin</a>
           <a href="https://github.com/whisperx00" target="_blank" rel="noopener">github</a>
         </div>
-        <div style="font-size:10.5px;color:var(--dim);">avg response: under 24h</div>
+        <div style="font-size:10.5px;color:var(--dim);"><span data-lang="en">avg response: under 24h</span><span data-lang="pt" hidden>resposta média: menos de 24h</span></div>
       </div>
     </section>
 
     <!-- quick stats -->
     <section class="stripe">
-      <div class="qs" style="--col:var(--yellow);"><div class="k">current focus</div><div class="v">OSCP</div><div class="s">studying full-time</div></div>
-      <div class="qs" style="--col:var(--teal);"><div class="k">tools built</div><div class="v">2</div><div class="s">published · in use</div></div>
-      <div class="qs" style="--col:var(--blue);"><div class="k">primary focus</div><div class="v">AD / web</div><div class="s">windows · exploitation</div></div>
-      <div class="qs" style="--col:var(--peach);"><div class="k">assessments</div><div class="v">android</div><div class="s">web · windows · samsung</div></div>
-      <div class="qs" style="--col:var(--yellow);"><div class="k">OSCP</div><div class="v">in prog</div><div class="s">PEN-200 · target 2026</div></div>
-      <div class="qs" style="--col:var(--green);"><div class="k">status</div><div class="v">open</div><div class="s">remote ok · relocation ok</div></div>
+      <div class="qs" style="--col:var(--yellow);"><div class="k"><span data-lang="en">current focus</span><span data-lang="pt" hidden>foco atual</span></div><div class="v">OSCP</div><div class="s"><span data-lang="en">studying full-time</span><span data-lang="pt" hidden>tempo integral</span></div></div>
+      <div class="qs" style="--col:var(--teal);"><div class="k"><span data-lang="en">tools built</span><span data-lang="pt" hidden>ferramentas</span></div><div class="v">2</div><div class="s"><span data-lang="en">published · in use</span><span data-lang="pt" hidden>publicadas · em uso</span></div></div>
+      <div class="qs" style="--col:var(--blue);"><div class="k"><span data-lang="en">primary focus</span><span data-lang="pt" hidden>área principal</span></div><div class="v">AD / web</div><div class="s"><span data-lang="en">windows · exploitation</span><span data-lang="pt" hidden>windows · exploração</span></div></div>
+      <div class="qs" style="--col:var(--peach);"><div class="k"><span data-lang="en">assessments</span><span data-lang="pt" hidden>avaliações</span></div><div class="v">android</div><div class="s">web · windows · samsung</div></div>
+      <div class="qs" style="--col:var(--yellow);"><div class="k">OSCP</div><div class="v"><span data-lang="en">in prog</span><span data-lang="pt" hidden>em curso</span></div><div class="s"><span data-lang="en">PEN-200 · target 2026</span><span data-lang="pt" hidden>PEN-200 · meta 2026</span></div></div>
+      <div class="qs" style="--col:var(--green);"><div class="k">status</div><div class="v"><span data-lang="en">open</span><span data-lang="pt" hidden>aberto</span></div><div class="s"><span data-lang="en">remote ok · relocation ok</span><span data-lang="pt" hidden>remoto ok · realocação ok</span></div></div>
     </section>
 
     <!-- summary -->
@@ -54,8 +57,14 @@ import Layout from '../../layouts/Layout.astro';
       <div class="meta">~30 sec read</div>
     </div>
     <section class="summary">
-      <p>Offensive security researcher with a focus on <span class="hl">windows &amp; active directory exploitation</span>, web application attacks, and custom tooling. Previously interned at <span class="hl">SiDi</span> (Samsung's R&amp;D institute in Brazil), running security assessments across android, web, and windows surfaces — uncovering privilege escalation chains, arbitrary file delete bugs, and leading a phishing simulation campaign.</p>
-      <p>Currently studying <span class="hl">full-time for the OSCP (PEN-200)</span> and shipping offensive tools alongside it. Strong python and typescript, comfortable in linux and windows internals, fluent in AD attack paths (Kerberoasting, AS-REP, Pass-the-Hash, BloodHound enumeration). Looking for a junior offensive security role after certification — open to remote and relocation anywhere.</p>
+      <p>
+        <span data-lang="en">Offensive security researcher with a focus on <span class="hl">windows &amp; active directory exploitation</span>, web application attacks, and custom tooling. Previously interned at <span class="hl">SiDi</span> (Samsung's R&amp;D institute in Brazil), running security assessments across android, web, and windows surfaces — uncovering privilege escalation chains, arbitrary file delete bugs, and leading a phishing simulation campaign.</span>
+        <span data-lang="pt" hidden>Pesquisador de segurança ofensiva com foco em <span class="hl">exploração de windows &amp; active directory</span>, ataques a aplicações web e ferramentas customizadas. Ex-estagiário no <span class="hl">SiDi</span> (instituto de P&amp;D da Samsung no Brasil), realizando avaliações de segurança em plataformas android, web e windows — identificando cadeias de escalada de privilégios, bugs de exclusão arbitrária de arquivos e liderando uma campanha de simulação de phishing.</span>
+      </p>
+      <p>
+        <span data-lang="en">Currently studying <span class="hl">full-time for the OSCP (PEN-200)</span> and shipping offensive tools alongside it. Strong python, comfortable in linux and windows internals, fluent in AD attack paths (Kerberoasting, AS-REP, Pass-the-Hash, BloodHound enumeration). Looking for a junior offensive security role after certification — open to remote and relocation anywhere.</span>
+        <span data-lang="pt" hidden>Atualmente estudando <span class="hl">em tempo integral para o OSCP (PEN-200)</span> e desenvolvendo ferramentas ofensivas em paralelo. Sólido em python, confortável com internals de linux e windows, fluente em caminhos de ataque no AD (Kerberoasting, AS-REP, Pass-the-Hash, enumeração com BloodHound). Buscando uma vaga júnior em segurança ofensiva após a certificação — aberto a remoto e realocação.</span>
+      </p>
     </section>
 
     <!-- experience -->
@@ -140,7 +149,7 @@ import Layout from '../../layouts/Layout.astro';
           <div class="skill" style="--col:var(--mauve);"><span class="name">Windows privesc</span><div class="bar"><div class="fill" style="width:78%;"></div></div><span class="yrs">primary</span></div>
           <div class="skill" style="--col:var(--blue);"><span class="name">Web exploitation (OWASP)</span><div class="bar"><div class="fill" style="width:75%;"></div></div><span class="yrs">primary</span></div>
           <div class="skill" style="--col:var(--yellow);"><span class="name">Python</span><div class="bar"><div class="fill" style="width:88%;"></div></div><span class="yrs">3+ yrs</span></div>
-          <div class="skill" style="--col:var(--teal);"><span class="name">TypeScript / React</span><div class="bar"><div class="fill" style="width:70%;"></div></div><span class="yrs">2 yrs</span></div>
+
           <div class="skill" style="--col:var(--peach);"><span class="name">Burp Suite</span><div class="bar"><div class="fill" style="width:74%;"></div></div><span class="yrs">daily</span></div>
           <div class="skill" style="--col:var(--peach);"><span class="name">BloodHound / impacket</span><div class="bar"><div class="fill" style="width:72%;"></div></div><span class="yrs">daily</span></div>
           <div class="skill" style="--col:var(--green);"><span class="name">Linux fundamentals</span><div class="bar"><div class="fill" style="width:80%;"></div></div><span class="yrs">daily</span></div>

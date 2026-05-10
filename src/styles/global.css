@@ -129,6 +129,27 @@ footer { background: var(--mantle); border-top: 1px solid var(--surface1); }
 .foot-inner .r a:hover { color: var(--mauve); }
 .foot-inner .r a .slash { color: var(--dim); margin-right: 2px; }
 
+/* ================ Lang toggle ================ */
+.lang-toggle {
+  background: none;
+  border: 1px solid var(--surface1);
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  cursor: pointer;
+  padding: 3px 8px;
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  margin-left: 6px;
+  transition: border-color .15s;
+}
+.lang-toggle:hover { border-color: var(--sub); }
+.lang-toggle .lopt { color: var(--dim); transition: color .15s; }
+.lang-toggle .lopt.active { color: var(--blue); }
+.lang-toggle .lsep { color: var(--surface1); }
+
 /* ================ Responsive ================ */
 @media (max-width: 680px) {
   .nav-links { gap: 12px; font-size: 12px; }

@@ -17,22 +17,24 @@ const posts = (await getCollection('posts', p => !p.data.draft))
       </div>
       <h1 class="title"><span class="typed" id="typed"></span><span class="cursor" id="cursor"></span></h1>
       <p class="subtitle" id="subtitle">
-        focus on <span class="hl">windows &amp; active directory</span>, web exploitation, and custom tooling.
-        writeups from HTB labs, past work at SiDi, and anything else worth documenting.
+        <span data-lang="en">focus on <span class="hl">windows &amp; active directory</span>, web exploitation, and custom tooling.
+        writeups from HTB labs, past work at SiDi, and anything else worth documenting.</span>
+        <span data-lang="pt" hidden>foco em <span class="hl">windows &amp; active directory</span>, exploração web e ferramentas customizadas.
+        writeups do HTB, trabalho passado no SiDi e tudo que vale documentar.</span>
       </p>
       <div class="tags" id="tags">
         <span class="tag" style="--col:var(--mauve);">active-directory</span>
         <span class="tag" style="--col:var(--blue);">windows</span>
         <span class="tag" style="--col:var(--peach);">web-exploitation</span>
         <span class="tag" style="--col:var(--green);">python</span>
-        <span class="tag" style="--col:var(--teal);">typescript</span>
+
         <span class="tag" style="--col:var(--yellow);">oscp-in-progress</span>
       </div>
     </section>
 
     <div class="section-head" id="sh-about">
       <h2><span class="sym">▸</span>cat <span class="slash">/</span> <span style="color:var(--text);">whoami.txt</span></h2>
-      <div class="meta"><span class="dot">●</span>offensive security researcher</div>
+      <div class="meta"><span class="dot">●</span><span data-lang="en">offensive security researcher</span><span data-lang="pt" hidden>pesquisador de segurança ofensiva</span></div>
     </div>
 
     <section class="about" id="about">
@@ -43,28 +45,77 @@ const posts = (await getCollection('posts', p => !p.data.draft))
         <span class="lbl">drop headshot here<span class="sub">./assets/whisperx00.jpg</span></span>
       </div>
       <div class="info">
-        <div class="line"><span class="k">name</span><span class="v">Manoel Albino Coelho de Miranda Neto <span class="dim">// whisperx00@kali</span></span></div>
-        <div class="line"><span class="k">role</span><span class="v">offensive security researcher <span class="muted">— windows &amp; AD · web exploitation · custom tooling</span></span></div>
-        <div class="line"><span class="k">experience</span><span class="v"><span class="muted">ex-intern @ SiDi</span> <span class="dim">· samsung product assessments · AD exploitation · windows privesc · phishing simulation</span></span></div>
-        <div class="line"><span class="k">status</span><span class="v"><span style="color:var(--yellow);">● studying full-time for OSCP</span> <span class="dim">· brazil · open to remote and relocation</span></span></div>
-        <div class="line"><span class="k">location</span><span class="v">brazil <span class="dim">· open to remote and relocation</span></span></div>
-        <div class="line"><span class="k">spoken</span><span class="v"><span class="muted">portuguese (native)</span><span class="sep">·</span><span class="muted">english (C1)</span><span class="sep">·</span><span class="muted">french (A2 · learning)</span></span></div>
-        <div class="line"><span class="k">education</span><span class="v"><span class="muted">Software Engineering</span> <span class="dim">— PUC-Campinas</span></span></div>
-        <div class="line"><span class="k">certs</span><span class="v">
-          <span class="kbd training">OSCP · in progress</span>
-          <span class="kbd planned">OSWP · planned</span>
-          <span class="kbd planned">OSAI · planned</span>
-        </span></div>
-        <div class="line"><span class="k">skills</span><span class="v"><span class="muted">active directory</span><span class="sep">·</span><span class="muted">windows privesc</span><span class="sep">·</span><span class="muted">web exploitation</span><span class="sep">·</span><span class="muted">python</span><span class="sep">·</span><span class="muted">typescript / react</span></span></div>
-        <div class="line"><span class="k">contact</span><span class="v">
-          <a href="https://github.com/whisperx00" target="_blank" rel="noopener">github.com/whisperx00</a>
-          <span class="sep">·</span>
-          <a href="mailto:gm.manoel.albino@proton.me">gm.manoel.albino@proton.me</a>
-          <span class="sep">·</span>
-          <a href="https://www.linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237" target="_blank" rel="noopener">linkedin</a>
-          <span class="sep">·</span>
-          <a href="/about/" style="color:var(--mauve);border-bottom:1px dotted var(--mauve);">full cv →</a>
-        </span></div>
+        <div class="line">
+          <span class="k"><span data-lang="en">name</span><span data-lang="pt" hidden>nome</span></span>
+          <span class="v">Manoel Albino Coelho de Miranda Neto <span class="dim">// whisperx00@kali</span></span>
+        </div>
+        <div class="line">
+          <span class="k"><span data-lang="en">role</span><span data-lang="pt" hidden>função</span></span>
+          <span class="v">
+            <span data-lang="en">offensive security researcher <span class="muted">— windows &amp; AD · web exploitation · custom tooling</span></span>
+            <span data-lang="pt" hidden>pesquisador de segurança ofensiva <span class="muted">— windows &amp; AD · exploração web · ferramentas</span></span>
+          </span>
+        </div>
+        <div class="line">
+          <span class="k"><span data-lang="en">experience</span><span data-lang="pt" hidden>experiência</span></span>
+          <span class="v">
+            <span data-lang="en"><span class="muted">ex-intern @ SiDi</span> <span class="dim">· samsung product assessments · AD exploitation · windows privesc · phishing simulation</span></span>
+            <span data-lang="pt" hidden><span class="muted">ex-estagiário @ SiDi</span> <span class="dim">· avaliações de produtos Samsung · exploração de AD · privesc no Windows · simulação de phishing</span></span>
+          </span>
+        </div>
+        <div class="line">
+          <span class="k">status</span>
+          <span class="v">
+            <span data-lang="en"><span style="color:var(--yellow);">● studying full-time for OSCP</span> <span class="dim">· brazil · open to remote and relocation</span></span>
+            <span data-lang="pt" hidden><span style="color:var(--yellow);">● estudando em tempo integral para o OSCP</span> <span class="dim">· brasil · aberto a remoto e realocação</span></span>
+          </span>
+        </div>
+        <div class="line">
+          <span class="k"><span data-lang="en">location</span><span data-lang="pt" hidden>localização</span></span>
+          <span class="v">
+            <span data-lang="en">brazil <span class="dim">· open to remote and relocation</span></span>
+            <span data-lang="pt" hidden>brasil <span class="dim">· aberto a remoto e realocação</span></span>
+          </span>
+        </div>
+        <div class="line">
+          <span class="k"><span data-lang="en">spoken</span><span data-lang="pt" hidden>idiomas</span></span>
+          <span class="v"><span class="muted">português (nativo)</span><span class="sep">·</span><span class="muted">english (C1)</span><span class="sep">·</span><span class="muted">français (A2)</span></span>
+        </div>
+        <div class="line">
+          <span class="k"><span data-lang="en">education</span><span data-lang="pt" hidden>formação</span></span>
+          <span class="v">
+            <span data-lang="en"><span class="muted">Software Engineering</span> <span class="dim">— PUC-Campinas</span></span>
+            <span data-lang="pt" hidden><span class="muted">Engenharia de Software</span> <span class="dim">— PUC-Campinas</span></span>
+          </span>
+        </div>
+        <div class="line">
+          <span class="k"><span data-lang="en">certs</span><span data-lang="pt" hidden>certs</span></span>
+          <span class="v">
+            <span data-lang="en"><span class="kbd training">OSCP · in progress</span> <span class="kbd planned">OSWP · planned</span> <span class="kbd planned">OSAI · planned</span></span>
+            <span data-lang="pt" hidden><span class="kbd training">OSCP · em andamento</span> <span class="kbd planned">OSWP · planejado</span> <span class="kbd planned">OSAI · planejado</span></span>
+          </span>
+        </div>
+        <div class="line">
+          <span class="k"><span data-lang="en">skills</span><span data-lang="pt" hidden>habilidades</span></span>
+          <span class="v">
+            <span data-lang="en"><span class="muted">active directory</span><span class="sep">·</span><span class="muted">windows privesc</span><span class="sep">·</span><span class="muted">web exploitation</span><span class="sep">·</span><span class="muted">python</span></span>
+            <span data-lang="pt" hidden><span class="muted">active directory</span><span class="sep">·</span><span class="muted">privesc no windows</span><span class="sep">·</span><span class="muted">exploração web</span><span class="sep">·</span><span class="muted">python</span></span>
+          </span>
+        </div>
+        <div class="line">
+          <span class="k"><span data-lang="en">contact</span><span data-lang="pt" hidden>contato</span></span>
+          <span class="v">
+            <a href="https://github.com/whisperx00" target="_blank" rel="noopener">github.com/whisperx00</a>
+            <span class="sep">·</span>
+            <a href="mailto:gm.manoel.albino@proton.me">gm.manoel.albino@proton.me</a>
+            <span class="sep">·</span>
+            <a href="https://www.linkedin.com/in/manoel-albino-coelho-de-miranda-neto-6074b6237" target="_blank" rel="noopener">linkedin</a>
+            <span class="sep">·</span>
+            <a href="/about/" style="color:var(--mauve);border-bottom:1px dotted var(--mauve);">
+              <span data-lang="en">full cv →</span><span data-lang="pt" hidden>cv completo →</span>
+            </a>
+          </span>
+        </div>
       </div>
     </section>
 

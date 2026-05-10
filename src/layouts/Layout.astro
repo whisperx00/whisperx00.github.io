@@ -28,6 +28,13 @@ const nav = [
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
   <slot name="head" />
+  <!-- Apply saved language before paint to avoid flash -->
+  <script is:inline>
+    (function(){
+      var lang = localStorage.getItem('wx00-lang') || 'en';
+      if (lang === 'pt') document.documentElement.lang = 'pt-BR';
+    })();
+  </script>
 </head>
 <body>
 
@@ -40,6 +47,11 @@ const nav = [
           <span class="slash">./</span><span class="label">{n.label}</span>
         </a>
       ))}
+      <button class="lang-toggle" id="lang-toggle" aria-label="Switch language">
+        <span class="lopt" data-lang="en">EN</span>
+        <span class="lsep">|</span>
+        <span class="lopt" data-lang="pt">PT</span>
+      </button>
     </div>
   </div>
 </nav>
@@ -55,7 +67,8 @@ const nav = [
       <span class="sep">|</span>
       <span>&copy; 2026</span>
       <span class="sep">|</span>
-      <span>built in vim, served from a pi</span>
+      <span data-lang="en">built in vim, served from a pi</span>
+      <span data-lang="pt" hidden>feito no vim, servido num pi</span>
     </div>
     <div class="r">
       <a href="https://github.com/whisperx00" target="_blank" rel="noopener"><span class="slash">./</span>github</a>
@@ -64,6 +77,31 @@ const nav = [
     </div>
   </div>
 </footer>
+
+<script>
+  const LANG_KEY = 'wx00-lang';
+
+  function applyLang(lang: string, save: boolean) {
+    document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+    document.querySelectorAll<HTMLElement>('[data-lang]').forEach(el => {
+      const elLang = el.getAttribute('data-lang');
+      if (elLang === lang) el.removeAttribute('hidden');
+      else el.setAttribute('hidden', '');
+    });
+    document.querySelectorAll('.lopt').forEach(opt => {
+      opt.classList.toggle('active', opt.getAttribute('data-lang') === lang);
+    });
+    if (save) localStorage.setItem(LANG_KEY, lang);
+  }
+
+  document.getElementById('lang-toggle')?.addEventListener('click', () => {
+    const current = localStorage.getItem(LANG_KEY) || 'en';
+    applyLang(current === 'en' ? 'pt' : 'en', true);
+  });
+
+  // Apply saved preference on every page load
+  applyLang(localStorage.getItem(LANG_KEY) || 'en', false);
+</script>
 
 </body>
 </html>
