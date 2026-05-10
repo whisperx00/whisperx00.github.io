@@ -18,7 +18,7 @@ const posts = (await getCollection('posts', p => !p.data.draft))
       <h1 class="title"><span class="typed" id="typed"></span><span class="cursor" id="cursor"></span></h1>
       <p class="subtitle" id="subtitle">
         focus on <span class="hl">windows &amp; active directory</span>, web exploitation, and custom tooling.
-        writeups from HTB labs, intern work at SiDi, and anything else worth documenting.
+        writeups from HTB labs, past work at SiDi, and anything else worth documenting.
       </p>
       <div class="tags" id="tags">
         <span class="tag" style="--col:var(--mauve);">active-directory</span>
@@ -43,10 +43,10 @@ const posts = (await getCollection('posts', p => !p.data.draft))
         <span class="lbl">drop headshot here<span class="sub">./assets/whisperx00.jpg</span></span>
       </div>
       <div class="info">
-        <div class="line"><span class="k">name</span><span class="v">Manoel Albino Coelho de Miranda <span class="dim">// whisperx00@kali</span></span></div>
+        <div class="line"><span class="k">name</span><span class="v">Manoel Albino Coelho de Miranda Neto <span class="dim">// whisperx00@kali</span></span></div>
         <div class="line"><span class="k">role</span><span class="v">offensive security researcher <span class="muted">— windows &amp; AD · web exploitation · custom tooling</span></span></div>
-        <div class="line"><span class="k">experience</span><span class="v"><span class="muted">offensive security intern @ SiDi</span> <span class="dim">· samsung product assessments · AD exploitation · windows privesc · phishing simulation</span></span></div>
-        <div class="line"><span class="k">status</span><span class="v"><span style="color:var(--green);">● open to opportunities</span> <span class="dim">· brazil · open to remote and relocation</span></span></div>
+        <div class="line"><span class="k">experience</span><span class="v"><span class="muted">ex-intern @ SiDi</span> <span class="dim">· samsung product assessments · AD exploitation · windows privesc · phishing simulation</span></span></div>
+        <div class="line"><span class="k">status</span><span class="v"><span style="color:var(--yellow);">● studying full-time for OSCP</span> <span class="dim">· brazil · open to remote and relocation</span></span></div>
         <div class="line"><span class="k">location</span><span class="v">brazil <span class="dim">· open to remote and relocation</span></span></div>
         <div class="line"><span class="k">spoken</span><span class="v"><span class="muted">portuguese (native)</span><span class="sep">·</span><span class="muted">english (C1)</span><span class="sep">·</span><span class="muted">french (A2 · learning)</span></span></div>
         <div class="line"><span class="k">education</span><span class="v"><span class="muted">Software Engineering</span> <span class="dim">— PUC-Campinas</span></span></div>
@@ -205,7 +205,7 @@ const BOOT_LINES = [
   { t:"[  0.118440]", badge:"INFO", cls:"info", msg:'mounting <b>/dev/sda2</b> on <span class="acc-b">/home/whisperx00</span>' },
   { t:"[  0.239001]", badge:"OK",   cls:"ok",   msg:'loaded content collections (posts + writeups indexed, drafts excluded)' },
   { t:"[  0.402771]", badge:"OK",   cls:"ok",   msg:'tools: <span class="acc-p">burp-intruder-cli</span>, <span class="acc-b">ldap-parse</span> — beta · in use' },
-  { t:"[  0.613098]", badge:"INFO", cls:"info", msg:'OSCP: <span style="color:var(--yellow);">● in progress</span> · SiDi internship active · wireguard up' },
+  { t:"[  0.613098]", badge:"INFO", cls:"info", msg:'OSCP: <span style="color:var(--yellow);">● in progress</span> · studying full-time · wireguard up' },
   { t:"[  0.887240]", badge:"OK",   cls:"ok",   msg:'spawning shell on /dev/tty1 ...' },
 ];
 
