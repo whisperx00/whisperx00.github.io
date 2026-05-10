@@ -25,23 +25,23 @@ import Layout from '../../layouts/Layout.astro';
     <section class="hud">
       <div class="cell" style="--col:var(--mauve);">
         <div class="k">profile · level</div>
-        <div class="v">8 <span style="font-size:11px;color:var(--dim);font-weight:500;">/ 40</span></div>
-        <div class="lvlbar"><span style="--p:20%;background:var(--mauve);"></span><span class="ticks"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
-        <div class="s">XP 3,200 · grinding OSCP</div>
+        <div class="v">12 <span style="font-size:11px;color:var(--dim);font-weight:500;">/ 40</span></div>
+        <div class="lvlbar"><span style="--p:30%;background:var(--mauve);"></span><span class="ticks"><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+        <div class="s">XP 5,400 · grinding OSCP</div>
       </div>
       <div class="cell" style="--col:var(--green);">
         <div class="k">talent points</div>
-        <div class="v">10 / 22</div>
-        <div class="s">spent across 4 classes</div>
+        <div class="v">20 / 50</div>
+        <div class="s">spent across 5 classes</div>
       </div>
       <div class="cell" style="--col:var(--peach);">
         <div class="k">mastered</div>
-        <div class="v">6</div>
+        <div class="v">18</div>
         <div class="s">★ internalized + lab proof</div>
       </div>
       <div class="cell" style="--col:var(--yellow);">
         <div class="k">in training</div>
-        <div class="v">4</div>
+        <div class="v">6</div>
         <div class="s">currently grinding</div>
       </div>
     </section>
@@ -84,8 +84,8 @@ import Layout from '../../layouts/Layout.astro';
     <div class="statusbar-inner">
       <div class="left">
         <span><span class="dot"></span><span class="k">tree:</span> <span class="v" style="color:var(--green);">in progress · v1</span></span>
-        <span><span class="k">classes:</span> <span class="v">4</span></span>
-        <span><span class="k">nodes:</span> <span class="v">22</span></span>
+        <span><span class="k">classes:</span> <span class="v">5</span></span>
+        <span><span class="k">nodes:</span> <span class="v">50</span></span>
       </div>
       <div class="right">
         <span><span class="k">tooltip:</span> <span class="v">click hex → side panel</span></span>
@@ -212,7 +212,7 @@ import Layout from '../../layouts/Layout.astro';
 <script>
 const CLASSES = [
   {
-    id:"winAD", name:"Windows & AD", glyph:"⎘", color:"mauve", points:"4/8",
+    id:"winAD", name:"Windows & AD", glyph:"⎘", color:"mauve", points:"4/9",
     origin:{ id:"wa-root", label:"AD Enumeration", lvl:"core", state:"mastered",
       desc:"bloodhound, ldap enumeration, GPO mapping, trust relationships — the patient half of every AD engagement.",
       tags:["bloodhound","ldap","gpos","trusts"], proofs:["SiDi internship · lab proof","HTB AD boxes"],
@@ -244,6 +244,10 @@ const CLASSES = [
             desc:"RunasCs for lateral movement with known credentials, LSASS dump techniques and their EDR implications.",
             tags:["runascs","lsass","mimikatz"], proofs:["HTB lab repros"],
             stat:{xp:"350",time:"3 wks"} },
+          { id:"wa-postex", label:"Post-Exploitation", lvl:"L3", state:"unlocked", parent:"wa-rundll",
+            desc:"persistence, credential harvesting post-shell, lateral movement planning. SAM dumps, scheduled tasks, registry abuse.",
+            tags:["persistence","credential-dump","lateral-movement","post-ex"], proofs:["SiDi windows assessments","HTB windows boxes"],
+            stat:{xp:"300",time:"2 mo"} },
         ]
       },
       { name:"Pivoting", color:"teal", labelX:82,
@@ -261,7 +265,7 @@ const CLASSES = [
     ]
   },
   {
-    id:"webClient", name:"Web & Client-Side", glyph:"⌖", color:"peach", points:"3/7",
+    id:"webClient", name:"Web & Client-Side", glyph:"⌖", color:"peach", points:"5/13",
     origin:{ id:"wc-root", label:"Web Applications", lvl:"core", state:"mastered",
       desc:"HTTP semantics, session handling, parser footguns. web is where most external footholds happen.",
       tags:["http","cookies","burp"], proofs:["SiDi · samsung web assessments"],
@@ -269,6 +273,10 @@ const CLASSES = [
     branches:[
       { name:"Web exploitation", color:"peach", labelX:18,
         nodes:[
+          { id:"wc-owasp", label:"OWASP Top 10", lvl:"L2", state:"mastered", parent:"wc-root",
+            desc:"solid grounding in the OWASP Top 10 — injection, broken auth, IDOR, XXE, SSRF, misconfig. used as a checklist on every web assessment.",
+            tags:["owasp","injection","idor","ssrf","xxe"], proofs:["SiDi · samsung web assessments","portswigger labs"],
+            stat:{xp:"550",time:"2 yrs"} },
           { id:"wc-lfi", label:"LFI / Path Traversal", lvl:"L2", state:"mastered", parent:"wc-root",
             desc:"local file inclusion, null-byte tricks, log poisoning, php wrappers, path traversal to RCE chains.",
             tags:["lfi","rfi","php","log-poisoning"], proofs:["SiDi · samsung assessment","HTB boxes"],
@@ -281,6 +289,14 @@ const CLASSES = [
             desc:"manual union-based and blind SQLi, time-based exfil, sqlmap when earned.",
             tags:["sqli","union","blind","sqlmap"], proofs:["portswigger all-labs","HTB"],
             stat:{xp:"350",time:"2 wks"} },
+          { id:"wc-api", label:"API Security Testing", lvl:"L3", state:"unlocked", parent:"wc-owasp",
+            desc:"REST/GraphQL endpoint enumeration, broken object-level auth, mass assignment, excessive data exposure.",
+            tags:["api","rest","graphql","bola","mass-assignment"], proofs:["SiDi samsung API assessments"],
+            stat:{xp:"350",time:"6 mo"} },
+          { id:"wc-auth", label:"Auth Bypass", lvl:"L3", state:"unlocked", parent:"wc-sqli",
+            desc:"JWT tampering, OAuth misconfigs, password reset flaws, account takeover chains.",
+            tags:["jwt","oauth","auth-bypass","account-takeover"], proofs:["portswigger · HTB boxes"],
+            stat:{xp:"300",time:"3 mo"} },
         ]
       },
       { name:"Client-side", color:"yellow", labelX:50,
@@ -293,6 +309,14 @@ const CLASSES = [
             desc:"static signature bypass, AMSI patching basics, getting shellcode past Defender on a stock Win10 box.",
             tags:["amsi","defender","shellcode","bypass"], proofs:["lab work · in progress"],
             stat:{xp:"150",time:"ongoing"} },
+          { id:"wc-sess", label:"Session / Input Testing", lvl:"L2", state:"unlocked", parent:"wc-root",
+            desc:"session fixation, cookie attribute auditing, XSS via stored/reflected/DOM vectors, input validation gaps.",
+            tags:["xss","session","input-validation","cookies"], proofs:["SiDi web DAST assessments","portswigger"],
+            stat:{xp:"320",time:"6 mo"} },
+          { id:"wc-manual", label:"Manual Exploitation", lvl:"L3", state:"unlocked", parent:"wc-root",
+            desc:"no-tool exploitation: hand-crafting requests, reading source to spot logic bugs, exploiting race conditions.",
+            tags:["manual","logic-bugs","race-condition","burp"], proofs:["SiDi DAST workflow","HTB web boxes"],
+            stat:{xp:"380",time:"1 yr"} },
         ]
       },
       { name:"Linux privesc", color:"green", labelX:82,
@@ -310,10 +334,10 @@ const CLASSES = [
     ]
   },
   {
-    id:"engineering", name:"Engineering", glyph:"◈", color:"teal", points:"2/5",
+    id:"engineering", name:"Engineering", glyph:"◈", color:"teal", points:"4/7",
     origin:{ id:"en-root", label:"Programming", lvl:"core", state:"mastered",
-      desc:"the tooling that makes the offensive work faster. python for scripting, typescript for frontends.",
-      tags:["python","typescript","react"], proofs:["shipped tools: burp-intruder-cli, ldap-parse"],
+      desc:"the tooling that makes the offensive work faster. python for scripting, bash for automation, metasploit for exploitation.",
+      tags:["python","bash","metasploit","automation"], proofs:["shipped tools: burp-intruder-cli, ldap-parse"],
       stat:{xp:"800",time:"ongoing"} },
     branches:[
       { name:"Languages", color:"teal", labelX:25,
@@ -322,10 +346,14 @@ const CLASSES = [
             desc:"primary scripting language for exploit automation, parsing tools, and quick PoCs. ldap_parse.py shipped as a tool.",
             tags:["python","scripting","automation"], proofs:["ldap-parse.py","SiDi tooling"],
             stat:{xp:"600",time:"3+ yrs"} },
-          { id:"en-ts", label:"TypeScript / React", lvl:"B2", state:"mastered", parent:"en-root",
-            desc:"frontend work — burp-intruder-cli is a React app. comfortable with hooks, state, fetch.",
-            tags:["typescript","react","frontend"], proofs:["burp-intruder-cli"],
-            stat:{xp:"400",time:"1+ yr"} },
+          { id:"en-bash", label:"Bash / PowerShell", lvl:"B2", state:"unlocked", parent:"en-root",
+            desc:"shell scripting for automation, enumeration, and post-exploitation tasks. PowerShell for Windows environments — one-liners, reverse shells, empire stagers.",
+            tags:["bash","powershell","scripting","one-liners"], proofs:["SiDi automation scripts","OSCP lab work"],
+            stat:{xp:"350",time:"2+ yrs"} },
+          { id:"en-msf", label:"Metasploit / C2", lvl:"L3", state:"unlocked", parent:"en-bash",
+            desc:"Metasploit for framework-aided exploitation and post-exploitation modules. basic Cobalt Strike familiarity for understanding C2 concepts and beacon staging.",
+            tags:["metasploit","cobalt-strike","c2","msfconsole","meterpreter"], proofs:["SiDi lab work","HTB boxes"],
+            stat:{xp:"350",time:"6 mo"} },
         ]
       },
       { name:"Tooling shipped", color:"blue", labelX:75,
@@ -338,12 +366,16 @@ const CLASSES = [
             desc:"parses raw ldap enumeration output for AD recon workflows.",
             tags:["ldap","python","ad","recon"], proofs:["github.com/whisperx00/ldap-parse"],
             stat:{xp:"250",time:"1 mo"} },
+          { id:"en-automate", label:"Security Automation", lvl:"L3", state:"unlocked", parent:"en-py",
+            desc:"custom python tooling for repeatable assessments — automated PoC scripts, exploit chaining, SAST/DAST pipeline helpers written at SiDi.",
+            tags:["python","automation","poc","exploit-dev","sast","dast"], proofs:["SiDi custom automation tooling","OSCP lab scripts"],
+            stat:{xp:"400",time:"2 yrs"} },
         ]
       }
     ]
   },
   {
-    id:"meta", name:"Meta", glyph:"✦", color:"blue", points:"1/2",
+    id:"meta", name:"Meta", glyph:"✦", color:"blue", points:"2/7",
     origin:{ id:"mt-root", label:"Identity", lvl:"origin", state:"mastered",
       desc:"the person behind the handle. languages spoken, certs pursued, and research directions.",
       tags:["portuguese","english","oscp"], proofs:["this page"],
@@ -373,6 +405,79 @@ const CLASSES = [
           { id:"mt-osai", label:"OSAI", lvl:"planned", state:"locked", parent:"mt-oswp",
             desc:"AI security cert. planned — aligns with ML/AI research interest.",
             tags:["osai","ai-security"], proofs:["—"], stat:{xp:"0",time:"queued"} },
+        ]
+      }
+    ]
+  },
+  {
+    id:"reconOps", name:"Recon & Ops", glyph:"⊙", color:"green", points:"6/14",
+    origin:{ id:"ro-root", label:"Penetration Testing", lvl:"core", state:"mastered",
+      desc:"full kill-chain: recon → scan → exploit → post-ex → report. driven by 2 years of SAST/DAST at SiDi and active OSCP prep.",
+      tags:["pentest","kill-chain","recon","oscp"], proofs:["SiDi · 2 yr SAST/DAST","OSCP lab work"],
+      stat:{xp:"900",time:"2+ yrs"} },
+    branches:[
+      { name:"Network Recon", color:"green", labelX:18,
+        nodes:[
+          { id:"ro-npt", label:"Network Pentest", lvl:"L2", state:"mastered", parent:"ro-root",
+            desc:"full network penetration testing workflow — discovery, fingerprinting, service enumeration, exploitation, reporting.",
+            tags:["nmap","network","enumeration","pentest"], proofs:["SiDi windows network assessments","HTB boxes"],
+            stat:{xp:"700",time:"2 yrs"} },
+          { id:"ro-proto", label:"Protocol Knowledge", lvl:"L3", state:"unlocked", parent:"ro-npt",
+            desc:"TCP/IP internals, SMB/LDAP/Kerberos/WinRM semantics — understanding what each service exposes and how to abuse it.",
+            tags:["smb","ldap","kerberos","winrm","tcp-ip"], proofs:["SiDi assessments","HTB"],
+            stat:{xp:"400",time:"1 yr"} },
+          { id:"ro-traffic", label:"Traffic Analysis", lvl:"L3", state:"unlocked", parent:"ro-proto",
+            desc:"Wireshark / tcpdump for protocol analysis, credential sniffing in lab contexts, capturing and replaying network flows.",
+            tags:["wireshark","tcpdump","packet-analysis"], proofs:["lab exercises","OSCP prep"],
+            stat:{xp:"250",time:"3 mo"} },
+          { id:"ro-fw", label:"VPN / FW / IDS / IPS", lvl:"L4", state:"training", parent:"ro-traffic",
+            desc:"firewall rule analysis, IDS/IPS evasion techniques, VPN pivoting — understanding defensive gear from the attacker side.",
+            tags:["firewall","ids","ips","vpn","evasion"], proofs:["in progress"],
+            stat:{xp:"100",time:"ongoing"} },
+        ]
+      },
+      { name:"OSINT & Scanning", color:"teal", labelX:50,
+        nodes:[
+          { id:"ro-osint", label:"OSINT", lvl:"L2", state:"mastered", parent:"ro-root",
+            desc:"passive recon: shodan, censys, WHOIS, LinkedIn, certificate transparency logs, DNS enumeration. built out the recon phase of SiDi phishing campaigns.",
+            tags:["osint","shodan","censys","passive-recon","dns"], proofs:["SiDi phishing recon","HTB recon phases"],
+            stat:{xp:"500",time:"1+ yr"} },
+          { id:"ro-vscan", label:"Vulnerability Scanning", lvl:"L2", state:"mastered", parent:"ro-osint",
+            desc:"Nessus, OpenVAS, Nuclei for surface enumeration — understanding what to prioritize and what's noise.",
+            tags:["nessus","nuclei","openvas","vuln-scan"], proofs:["SiDi SAST/DAST workflow"],
+            stat:{xp:"450",time:"2 yrs"} },
+          { id:"ro-crack", label:"Password Cracking", lvl:"L3", state:"unlocked", parent:"ro-vscan",
+            desc:"hashcat wordlist + rule attacks, john for quick wins, custom wordlist generation from OSINT data.",
+            tags:["hashcat","john","wordlists","rule-attacks"], proofs:["HTB boxes","OSCP labs"],
+            stat:{xp:"300",time:"6 mo"} },
+          { id:"ro-misc", label:"Misconfiguration ID", lvl:"L2", state:"unlocked", parent:"ro-root",
+            desc:"identifying common misconfigs — exposed services, default creds, weak ACLs, overpermissioned roles. core of the DAST workflow at SiDi.",
+            tags:["misconfig","acls","default-creds","hardening"], proofs:["SiDi DAST assessments","HTB"],
+            stat:{xp:"450",time:"2 yrs"} },
+        ]
+      },
+      { name:"Reporting & Framework", color:"blue", labelX:82,
+        nodes:[
+          { id:"ro-mitre", label:"MITRE ATT&CK", lvl:"L2", state:"unlocked", parent:"ro-root",
+            desc:"mapping TTPs to ATT&CK framework — identifying tactic/technique/procedure chains from an engagement.",
+            tags:["mitre","attck","ttps","framework"], proofs:["SiDi reporting"],
+            stat:{xp:"350",time:"6 mo"} },
+          { id:"ro-cve", label:"CVE Analysis", lvl:"L2", state:"unlocked", parent:"ro-mitre",
+            desc:"reading CVE advisories, understanding CVSS scoring, reproducing public exploits from patch diffs.",
+            tags:["cve","cvss","advisory","exploit-repro"], proofs:["SiDi vulnerability assessments"],
+            stat:{xp:"400",time:"2 yrs"} },
+          { id:"ro-report", label:"Security Reporting", lvl:"L3", state:"unlocked", parent:"ro-cve",
+            desc:"writing executive-facing and technical vulnerability reports — risk rating, reproduction steps, remediation guidance.",
+            tags:["reporting","documentation","risk-rating","remediation"], proofs:["SiDi reports · multiple assessments"],
+            stat:{xp:"450",time:"2 yrs"} },
+          { id:"ro-vulnrep", label:"Vulnerability Reporting", lvl:"L3", state:"unlocked", parent:"ro-report",
+            desc:"responsible disclosure workflow, drafting CVE submissions, coordinating with vendors on remediation timelines.",
+            tags:["disclosure","cve-submission","vendor-coordination"], proofs:["SiDi assessments"],
+            stat:{xp:"300",time:"1 yr"} },
+          { id:"ro-best", label:"Security Best Practices", lvl:"L2", state:"unlocked", parent:"ro-root",
+            desc:"OWASP ASVS, CIS benchmarks, secure defaults — understanding what good looks like to find what's broken.",
+            tags:["owasp-asvs","cis","benchmarks","hardening"], proofs:["SiDi remediation guidance"],
+            stat:{xp:"300",time:"2 yrs"} },
         ]
       }
     ]
