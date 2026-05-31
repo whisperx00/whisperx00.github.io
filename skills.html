@@ -21,7 +21,7 @@
   ::selection{background:var(--mauve);color:var(--crust);}
 
   nav.topnav{position:sticky;top:0;z-index:40;background:var(--mantle);border-bottom:1px solid var(--surface1);}
-  .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;font-size:13px;}
+  .nav-inner{max-width:1440px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;font-size:13px;}
   .brand{font-weight:700;color:var(--mauve);}
   .brand .caret{color:var(--green);margin-right:2px;}
   .nav-links{display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
@@ -31,7 +31,7 @@
   .nav-links a.active{color:var(--blue);border-bottom-color:var(--blue);}
   .nav-links a.active .slash{color:var(--blue);opacity:.6;}
 
-  main{max-width:1200px;margin:0 auto;padding:36px 28px 70px;}
+  main{max-width:1440px;margin:0 auto;padding:36px 28px 70px;}
 
   .cmd{font-size:13px;margin-bottom:16px;color:var(--sub);}
   .cmd .u{color:var(--green);} .cmd .h{color:var(--mauve);} .cmd .d{color:var(--blue);}
@@ -105,7 +105,7 @@
     border:1px solid var(--surface1);
     border-top:2px solid var(--col,var(--mauve));
     overflow:hidden;
-    min-height:780px;
+    min-height:860px;
   }
   .canvas .grid-bg{
     position:absolute;inset:0;pointer-events:none;
@@ -311,14 +311,14 @@
 
   /* status/footer (same as siblings) */
   .statusbar{margin-top:32px;background:var(--surface0);border-top:1px solid var(--surface1);border-bottom:1px solid var(--surface1);}
-  .statusbar-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:10px 28px;font-size:11px;color:var(--sub);}
+  .statusbar-inner{max-width:1440px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:10px 28px;font-size:11px;color:var(--sub);}
   .statusbar .left{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
   .statusbar .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);display:inline-block;margin-right:6px;}
   .statusbar .right{display:flex;gap:18px;align-items:center;flex-wrap:wrap;}
   .statusbar .k{color:var(--dim);} .statusbar .v{color:var(--text);}
 
   footer{background:var(--mantle);border-top:1px solid var(--surface1);}
-  .foot-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:18px 28px;font-size:11px;color:var(--dim);}
+  .foot-inner{max-width:1440px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:18px 28px;font-size:11px;color:var(--dim);}
   .foot-inner .l span.sep{color:var(--surface1);margin:0 10px;}
   .foot-inner .r{display:flex;gap:20px;}
   .foot-inner .r a{color:var(--sub);}
@@ -617,7 +617,7 @@ const CLASSES = [
     ]
   },
   {
-    id:"ad", name:"Active Directory", glyph:"⎘", color:"mauve", points:"2/7",
+    id:"ad", name:"Active Directory", glyph:"⎘", color:"mauve", points:"11/13",
     origin:{ id:"ad-root", label:"AD Intro & Enumeration", lvl:"core", state:"mastered",
              desc:"How AD actually works — domains, trusts, GPOs, ACLs — and how to enumerate it without getting caught by a stock SOC.",
              tags:["bloodhound","ldap","gpos"], proofs:["self-study · lab proof"],
@@ -629,9 +629,17 @@ const CLASSES = [
             desc:"asreproast, kerberoast, pre-auth abuses, NTLM relay basics. The bag of tricks that turns a foothold into domain influence.",
             tags:["kerberoast","asreproast","ntlm"], proofs:["self-study · lab proof","HTB AD boxes"],
             stat:{xp:"600",time:"2 wks"} },
-          { id:"ad-kerb", label:"Kerberos Deep Dive", lvl:"adv", state:"locked", parent:"ad-auth",
+          { id:"ad-kerb", label:"Kerberos Deep Dive", lvl:"adv", state:"unlocked", parent:"ad-auth",
             desc:"S4U2self/proxy, golden &amp; silver tickets, unconstrained delegation, trust hops. The OSEP-track followup.",
             tags:["kerberos","delegation","tickets"], proofs:["—"],
+            stat:{xp:"0",time:"queued"} },
+          { id:"ad-coerce", label:"Coercion &amp; Relay", lvl:"adv", state:"locked", parent:"ad-auth",
+            desc:"Forcing machine authentication via <span class='hl'>PetitPotam, PrintSpooler (MS-RPRN), DFSCoerce</span>. Relay to LDAP/SMB/ADCS enrollment endpoint for <span class='hl'>NTLMv2 → hash or cert</span>. ntlmrelayx, Impacket, and Responder plumbing.",
+            tags:["petitpotam","printspooler","dfscoerce","ntlmrelay","responder"], proofs:["—"],
+            stat:{xp:"0",time:"queued"} },
+          { id:"ad-adcs", label:"ADCS / PKI Attacks", lvl:"adv", state:"unlocked", parent:"ad-kerb",
+            desc:"Certificate Services as an attack surface: <span class='hl'>ESC1–ESC8</span> misconfiguration chains, SAN spoofing to impersonate DA, certificate theft from DPAPI/machine store, <span class='hl'>shadow credentials</span> (msDS-KeyCredentialLink), and PKINIT for hash retrieval without touching LSASS.",
+            tags:["adcs","esc1","esc4","shadow-creds","pkinit","certify"], proofs:["—"],
             stat:{xp:"0",time:"queued"} },
         ]
       },
@@ -641,21 +649,37 @@ const CLASSES = [
             desc:"Pass-the-hash, pass-the-ticket, WMI/WinRM/PSExec, evading EDR while hopping. The exam-relevant grind.",
             tags:["pth","ptt","winrm","wmi"], proofs:["lab work · in progress"],
             stat:{xp:"350",time:"ongoing"} },
-          { id:"ad-pth", label:"Hash &amp; Token Reuse", lvl:"adv", state:"locked", parent:"ad-lat",
+          { id:"ad-pth", label:"Hash &amp; Token Reuse", lvl:"adv", state:"unlocked", parent:"ad-lat",
             desc:"Building muscle memory for impacket-suite tooling and quiet token impersonation chains.",
             tags:["impacket","mimikatz"], proofs:["—"],
+            stat:{xp:"0",time:"queued"} },
+          { id:"ad-acl", label:"ACL / DACL Attacks", lvl:"adv", state:"unlocked", parent:"ad-lat",
+            desc:"Abusing AD object permissions: <span class='hl'>GenericAll, WriteDACL, WriteOwner, GenericWrite, AddSelf, ForceChangePassword</span>. BloodHound-driven attack path from any low-priv object to DA via ownership chains and group membership injection.",
+            tags:["genericall","writedacl","bloodhound","acleditor","powerview"], proofs:["—"],
+            stat:{xp:"0",time:"queued"} },
+          { id:"ad-gpo", label:"GPO Abuse", lvl:"adv", state:"unlocked", parent:"ad-acl",
+            desc:"When write permissions land on a linked Group Policy Object: injecting <span class='hl'>Immediate Scheduled Tasks, GptTmpl logon scripts, and software install MSIs</span> to execute as SYSTEM or DA on every machine the GPO covers. SharpGPOAbuse + manual gpo-path writes.",
+            tags:["gpo","sharpgpoabuse","scheduled-tasks","gpttmpl","computer-policy"], proofs:["—"],
             stat:{xp:"0",time:"queued"} },
         ]
       },
       { name:"Persistence", color:"yellow", labelX:82,
         nodes:[
-          { id:"ad-dcsync", label:"DCSync / NTDS", lvl:"adv", state:"locked", parent:"ad-root",
+          { id:"ad-dcsync", label:"DCSync / NTDS", lvl:"adv", state:"unlocked", parent:"ad-root",
             desc:"Replication-rights abuse, NTDS dumping, the boring-but-essential close once you have DA-equivalent rights.",
             tags:["dcsync","ntds","replication"], proofs:["—"],
             stat:{xp:"0",time:"queued"} },
-          { id:"ad-persist", label:"Domain Persistence", lvl:"adv", state:"locked", parent:"ad-dcsync",
+          { id:"ad-persist", label:"Domain Persistence", lvl:"adv", state:"unlocked", parent:"ad-dcsync",
             desc:"Skeleton key, AdminSDHolder, ACL backdoors. Long-term hold tradecraft — for after the OSCP.",
             tags:["adminsd","skeleton","acl"], proofs:["—"],
+            stat:{xp:"0",time:"queued"} },
+          { id:"ad-backup", label:"Backup Operators Abuse", lvl:"adv", state:"unlocked", parent:"ad-persist",
+            desc:"<span class='hl'>SeBackupPrivilege</span> turns a non-admin domain account into NTDS.dit access: <code>diskshadow</code> volume shadow copy, <code>robocopy /B</code> bypass, remote registry pull of SYSTEM hive, offline <span class='hl'>secretsdump</span>. Also covers Print Operators and Account Operators privilege paths.",
+            tags:["sebackupprivilege","diskshadow","ntds.dit","secretsdump","backup-operators"], proofs:["—"],
+            stat:{xp:"0",time:"queued"} },
+          { id:"ad-rbcd", label:"RBCD &amp; Delegation Abuse", lvl:"adv", state:"unlocked", parent:"ad-dcsync",
+            desc:"<span class='hl'>Resource-Based Constrained Delegation</span>: writing <code>msDS-AllowedToActOnBehalfOfOtherIdentity</code> on a target computer when you control a machine account, then S4U2Self/S4U2Proxy to impersonate any user against it. Intersects with LAPS read, MachineAccountQuota abuse, and WebDAV coercion.",
+            tags:["rbcd","s4u2proxy","msds-allowedtoactonbehalf","machineaccountquota","laps"], proofs:["—"],
             stat:{xp:"0",time:"queued"} },
         ]
       }
@@ -671,7 +695,7 @@ const CLASSES = [
    - Within a branch, nodes lay out top-to-bottom with optional
      left/right offset for tree-shape via the `parent` field.
    ========================================================= */
-const W = 1000, H = 780;
+const W = 1000, H = 860;
 function layout(klass){
   const positioned = {};
   // origin
