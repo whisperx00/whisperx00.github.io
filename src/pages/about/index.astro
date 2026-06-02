@@ -57,12 +57,16 @@ import Layout from '../../layouts/Layout.astro';
     </div>
     <section class="summary">
       <p>
-        <span data-lang="en">Offensive security researcher with a focus on <span class="hl">windows &amp; active directory exploitation</span>, web application attacks, and custom tooling. Previously interned at <span class="hl">SiDi</span> (Samsung's R&amp;D institute in Brazil), running security assessments across android, web, and windows surfaces — uncovering privilege escalation chains, arbitrary file delete bugs, and leading a phishing simulation campaign.</span>
-        <span data-lang="pt" hidden>Pesquisador de segurança ofensiva com foco em <span class="hl">exploração de windows &amp; active directory</span>, ataques a aplicações web e ferramentas customizadas. Ex-estagiário no <span class="hl">SiDi</span> (instituto de P&amp;D da Samsung no Brasil), realizando avaliações de segurança em plataformas android, web e windows — identificando cadeias de escalada de privilégios, bugs de exclusão arbitrária de arquivos e liderando uma campanha de simulação de phishing.</span>
+        <span data-lang="en">Offensive security professional with <span class="hl">~2 years of experience</span> running penetration tests on Web, Android, and especially Windows Apps targets. During my internship at <span class="hl">SiDi</span> (Samsung's R&amp;D institute in Brazil), I worked on security assessments of Samsung products, where I found real vulnerabilities — including an <span class="hl">arbitrary delete</span> and multiple <span class="hl">privilege escalation</span> cases — always documented with clear technical evidence.</span>
+        <span data-lang="pt" hidden>Profissional de segurança ofensiva com <span class="hl">~2 anos de experiência</span> realizando testes de penetração em alvos Web, Android e especialmente Windows Apps. Durante meu estágio no <span class="hl">SiDi</span> (instituto de P&amp;D da Samsung no Brasil), trabalhei em avaliações de segurança de produtos Samsung, onde encontrei vulnerabilidades reais — incluindo um <span class="hl">delete arbitrário</span> e múltiplos casos de <span class="hl">escalada de privilégios</span> — sempre documentados com evidências técnicas claras.</span>
       </p>
       <p>
-        <span data-lang="en">Currently studying <span class="hl">full-time for the OSCP (PEN-200)</span> and shipping offensive tools alongside it. Strong python, comfortable in linux and windows internals, fluent in AD attack paths (Kerberoasting, AS-REP, Pass-the-Hash, BloodHound enumeration). Looking for a junior offensive security role after certification — open to remote and relocation anywhere.</span>
-        <span data-lang="pt" hidden>Atualmente estudando <span class="hl">em tempo integral para o OSCP (PEN-200)</span> e desenvolvendo ferramentas ofensivas em paralelo. Sólido em python, confortável com internals de linux e windows, fluente em caminhos de ataque no AD (Kerberoasting, AS-REP, Pass-the-Hash, enumeração com BloodHound). Buscando uma vaga júnior em segurança ofensiva após a certificação — aberto a remoto e realocação.</span>
+        <span data-lang="en">Experience with Android, Web and Windows apps security testing, plus attack simulation and phishing. Currently working toward the <span class="hl">OSCP (PEN-200)</span> and staying sharp through CTFs and labs on Hack The Box and OffSec, with an emphasis on Active Directory and privesc. I also spoke at the <span class="hl">307 Conference</span> on browser exploitation and V8 internals, with a live RCE demo.</span>
+        <span data-lang="pt" hidden>Experiência em testes de segurança para apps Android, Web e Windows, além de simulação de ataques e phishing. Atualmente me preparando para o <span class="hl">OSCP (PEN-200)</span> e me mantendo afiado através de CTFs e labs no Hack The Box e OffSec, com ênfase em Active Directory e privesc. Também palestrei na <span class="hl">307 Conference</span> sobre exploração de browsers e internals do V8, com uma demo de RCE ao vivo.</span>
+      </p>
+      <p>
+        <span data-lang="en">Currently <span class="hl">open to offensive security / pentest roles</span>, ideally remote. If you work in red teaming, pentesting, or vulnerability research, let's connect.</span>
+        <span data-lang="pt" hidden>Atualmente <span class="hl">aberto a vagas em segurança ofensiva / pentest</span>, preferencialmente remoto. Se você trabalha com red team, pentesting ou pesquisa de vulnerabilidades, vamos conversar.</span>
       </p>
     </section>
 
@@ -75,8 +79,13 @@ import Layout from '../../layouts/Layout.astro';
       <div class="row">
         <div class="when">2023 — 2025<span class="span">2 years</span></div>
         <div class="body">
-          <h3>Offensive Security Intern</h3>
-          <div class="org">SiDi — Samsung Innovation Institute<span class="pipe">|</span><span class="loc">Brazil · on-site</span></div>
+          <div class="org-head">
+            <img src="/sidi.jpg" alt="SiDi logo" class="org-logo" />
+            <div>
+              <h3>Offensive Security Intern</h3>
+              <div class="org">SiDi — Samsung Innovation Institute<span class="pipe">|</span><span class="loc">Brazil · on-site</span></div>
+            </div>
+          </div>
           <ul>
             <li>SAST and DAST security assessments of <b>Samsung products</b> across <b>android</b>, <b>web</b>, and mainly <b>windows</b> surfaces — managed by Marcus Farbiarz (offensive security R&amp;D manager).</li>
             <li>Identified vulnerabilities including <b>arbitrary file delete</b> and <b>privilege escalation</b> on Windows products using static and dynamic analysis.</li>
@@ -276,8 +285,10 @@ import Layout from '../../layouts/Layout.astro';
 .xp .when { font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums;letter-spacing:.04em; }
 .xp .when .now { color:var(--green); }
 .xp .when .span { display:block;color:var(--sub);margin-top:3px;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em; }
+.xp .body .org-head { display:flex;align-items:flex-start;gap:12px;margin-bottom:8px; }
+.xp .body .org-logo { width:36px;height:36px;object-fit:contain;background:var(--base);border:1px solid var(--surface1);padding:4px;flex-shrink:0;margin-top:2px; }
 .xp .body h3 { font-family:var(--sans);font-weight:600;font-size:16px;color:var(--text);margin:0 0 3px;letter-spacing:-.005em; }
-.xp .body .org { font-size:12px;color:var(--blue);margin-bottom:8px; }
+.xp .body .org { font-size:12px;color:var(--blue);margin-bottom:0; }
 .xp .body .org .pipe { color:var(--surface1);margin:0 7px; }
 .xp .body .org .loc { color:var(--sub); }
 .xp .body ul { margin:0 0 8px;padding-left:18px;font-size:12px;color:var(--sub);line-height:1.65; }

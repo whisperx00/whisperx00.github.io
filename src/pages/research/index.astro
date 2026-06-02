@@ -80,12 +80,19 @@ import Layout from '../../layouts/Layout.astro';
       <article class="talk" style="--col:var(--peach);">
         <div class="talk-head">
           <div class="venue">307 Conference</div>
-          <div class="year">[REVISE: year]</div>
+          <div class="year">2024</div>
         </div>
-        <h3 class="talk-title">Browser Exploitation</h3>
+        <h3 class="talk-title">Browser Exploitation — V8 Internals &amp; Memory Corruption</h3>
         <p class="talk-desc">
-          <span class="placeholder">[REVISE: add talk abstract / description]</span>
+          Deep dive into modern web engine vulnerabilities: attack surfaces, memory corruption primitives, and the evolving landscape of browser security defenses. Closed with a live RCE demo against a real V8 target.
         </p>
+        <div class="talk-tags">
+          <span class="tag">#browser-exploitation</span>
+          <span class="tag">#v8</span>
+          <span class="tag">#memory-corruption</span>
+          <span class="tag">#vulnerability-research</span>
+          <span class="tag">#offensive-security</span>
+        </div>
       </article>
     </div>
 
@@ -122,5 +129,6 @@ import Layout from '../../layouts/Layout.astro';
 .talk-head { display: flex; justify-content: space-between; font-size: 11px; color: var(--dim); margin-bottom: 6px; }
 .talk-head .venue { color: var(--col, var(--peach)); font-weight: 600; letter-spacing: .04em; }
 .talk-title { margin: 0 0 8px; font-size: 15px; color: var(--text); font-family: var(--sans); font-weight: 600; }
-.talk-desc { margin: 0; font-size: 12px; color: var(--sub); }
+.talk-desc { margin: 0 0 10px; font-size: 12px; color: var(--sub); }
+.talk-tags { display: flex; flex-wrap: wrap; gap: 5px; }
 </style>
