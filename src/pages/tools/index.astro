@@ -1,26 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 
-const TOOLS = [
-  {
-    id: "burp-intruder-cli", ver: "0.1", lang: "react", accent: "blue",
-    cat: "tooling", ci: "beta", ciLabel: "beta",
-    tags: ["burp", "fuzzing", "ffuf", "hydra"],
-    desc: "converts burp intruder configs into <span class='hl'>ffuf / hydra / wfuzz / curl</span> commands",
-    demo: [{ t: "p", s: "# [REVISE: paste real demo transcript]" }],
-    stars: 0, forks: 0, issues: 0, downloads: "n/a",
-    updated: "[REVISE: date]", updatedRank: 1,
-  },
-  {
-    id: "ldap-parse", ver: "0.1", lang: "python", accent: "teal",
-    cat: "tooling", ci: "beta", ciLabel: "beta",
-    tags: ["ldap", "ad", "enumeration", "bloodhound"],
-    desc: "parses raw <span class='hl'>ldap enumeration output</span> for AD recon workflows",
-    demo: [{ t: "p", s: "# [REVISE: paste real demo transcript]" }],
-    stars: 0, forks: 0, issues: 0, downloads: "n/a",
-    updated: "[REVISE: date]", updatedRank: 2,
-  },
-];
+const TOOLS: never[] = [];
 ---
 <Layout title="whisperx00@kali — tools" active="tools">
   <main>
@@ -40,15 +21,16 @@ const TOOLS = [
     <div class="summary">
       <div class="sm" style="--col:var(--mauve);">
         <div class="k">published</div>
-        <div class="v">2</div>
-        <div class="s">2 beta</div>
+        <div class="v">0</div>
+        <div class="s">coming soon</div>
       </div>
-      <div class="sm" style="--col:var(--blue);">
-        <div class="k">languages</div>
-        <div class="v">2</div>
-        <div class="s">react · python</div>
+      <div class="sm" style="--col:var(--dim);">
+        <div class="k">status</div>
+        <div class="v" style="font-size:13px;">wip</div>
+        <div class="s">tools in development</div>
       </div>
     </div>
+    <p class="lede" style="margin-top:24px;color:var(--dim);">no public tools yet — working on a few things. check back later.</p>
 
     <div class="grid">
       {TOOLS.map(t => (

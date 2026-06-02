@@ -87,10 +87,12 @@ import Layout from '../../layouts/Layout.astro';
             </div>
           </div>
           <ul>
-            <li>SAST and DAST security assessments of <b>Samsung products</b> across <b>android</b>, <b>web</b>, and mainly <b>windows</b> surfaces — managed by Marcus Farbiarz (offensive security R&amp;D manager).</li>
-            <li>Identified vulnerabilities including <b>arbitrary file delete</b> and <b>privilege escalation</b> on Windows products using static and dynamic analysis.</li>
-            <li>Participated in a <b>phishing simulation</b> project end-to-end — from payload crafting to post-campaign reporting.</li>
-            <li>Day-to-day: windows privesc, web exploitation (Burp Suite), SAST tooling, custom python scripts for automation.</li>
+            <li data-lang="en">Conducted penetration testing on Samsung products across <b>Web, Android, and Windows</b> (specialization) platforms — identifying, exploiting, and validating real vulnerabilities.</li>
+            <li data-lang="en">Reported high-impact vulnerabilities including an <b>arbitrary delete</b> and multiple <b>privilege escalation</b> scenarios, all documented with clear technical evidence.</li>
+            <li data-lang="en">Participated in a <b>phishing simulation</b> project end-to-end — from payload crafting to post-campaign reporting.</li>
+            <li data-lang="pt" hidden>Conduziu testes de penetração em produtos Samsung nas plataformas <b>Web, Android e Windows</b> (especialização), identificando, explorando e validando vulnerabilidades reais.</li>
+            <li data-lang="pt" hidden>Reportou vulnerabilidades de alto impacto — incluindo um <b>arbitrary delete</b> e múltiplos cenários de <b>escalonamento de privilégio</b> — com documentação técnica e evidências.</li>
+            <li data-lang="pt" hidden>Atuou em projeto de <b>simulação de phishing</b> de ponta a ponta — da criação de payloads ao relatório pós-campanha.</li>
           </ul>
           <div class="stack">
             <span class="t">SAST</span>
@@ -131,16 +133,60 @@ import Layout from '../../layouts/Layout.astro';
           <span class="v"><b>OSCP</b> · <span style="color:var(--yellow);">in progress · target 2026</span><br/><span class="muted">PEN-200 · penetration testing with Kali Linux</span></span>
         </div>
         <div class="item">
-          <span class="k">offsec</span>
-          <span class="v"><b>OSWP</b> · <span class="muted">planned · PEN-210</span><br/><span class="muted">offensive security wireless professional</span></span>
+          <span class="k">tryhackme</span>
+          <span class="v"><a href="https://tryhackme-certificates.s3-eu-west-1.amazonaws.com/THM-PE0UAZVZDU.pdf" target="_blank" rel="noopener" class="cert-link"><b>Jr Penetration Tester</b></a> · <span style="color:var(--green);">certified</span></span>
         </div>
         <div class="item">
-          <span class="k">offsec</span>
-          <span class="v"><b>OSAI</b> · <span class="muted">planned</span><br/><span class="muted">AI security — adversarial ML track</span></span>
+          <span class="k">tryhackme</span>
+          <span class="v"><a href="https://tryhackme-certificates.s3-eu-west-1.amazonaws.com/THM-SADT1LXDDX.pdf" target="_blank" rel="noopener" class="cert-link"><b>Web Fundamentals</b></a> · <span style="color:var(--green);">certified</span></span>
         </div>
         <div class="item">
-          <span class="k">platforms</span>
-          <span class="v"><span class="muted">HackTheBox (active) · TryHackMe · VulnHub</span></span>
+          <span class="k">tryhackme</span>
+          <span class="v"><a href="https://tryhackme-certificates.s3-eu-west-1.amazonaws.com/THM-RZCPAFQTIE.pdf" target="_blank" rel="noopener" class="cert-link"><b>Pre-Security</b></a> · <span style="color:var(--green);">certified</span></span>
+        </div>
+        <div class="item">
+          <span class="k">planned</span>
+          <span class="v"><b>OSWP</b> · <span class="muted">PEN-210</span> &nbsp;·&nbsp; <b>OSAI</b> · <span class="muted">AI security</span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- projects / labs / publications -->
+    <div class="section-head">
+      <h2><span class="sym">▸</span>projects <span class="slash">/</span> <span style="color:var(--text);">labs &amp; publications</span></h2>
+      <div class="meta">ctfs · talks · research</div>
+    </div>
+    <section class="proj-list">
+      <div class="proj-item">
+        <div class="proj-icon" style="--c:var(--green);">⬡</div>
+        <div class="proj-body">
+          <div class="proj-title">
+            <span data-lang="en">CTFs &amp; Labs</span>
+            <span data-lang="pt" hidden>CTFs &amp; Labs</span>
+          </div>
+          <div class="proj-desc">
+            <span data-lang="en"><b>Hack The Box</b> — Level 30, rank <b>Apprentice</b> · <b>OffSec</b> — Level 25 · <b>TJ Null list</b> — 40+ machines compromised. focus on Active Directory, privilege escalation, and Windows / Web / Linux exploitation.</span>
+            <span data-lang="pt" hidden><b>Hack The Box</b> — Level 30, rank <b>Apprentice</b> · <b>OffSec</b> — Level 25 · <b>lista TJ Null</b> — 40+ máquinas comprometidas. foco em Active Directory, escalonamento de privilégio e exploração de Windows, Web e Linux.</span>
+          </div>
+          <div class="proj-tags">
+            <span class="t">#active-directory</span><span class="t">#windows-privesc</span><span class="t">#web</span><span class="t">#linux</span>
+          </div>
+        </div>
+      </div>
+      <div class="proj-item">
+        <div class="proj-icon" style="--c:var(--peach);">⬡</div>
+        <div class="proj-body">
+          <div class="proj-title">
+            <span data-lang="en">Speaker — 307 Conference</span>
+            <span data-lang="pt" hidden>Palestrante — 307 Conference</span>
+          </div>
+          <div class="proj-desc">
+            <span data-lang="en">Browser exploitation and V8 engine internals, with a live remote code execution (RCE) demo.</span>
+            <span data-lang="pt" hidden>Exploração de browser e internals do motor V8, com demonstração prática de execução remota de código (RCE).</span>
+          </div>
+          <div class="proj-tags">
+            <span class="t">#browser-exploitation</span><span class="t">#v8</span><span class="t">#rce</span><span class="t">#speaker</span>
+          </div>
         </div>
       </div>
     </section>
@@ -346,6 +392,20 @@ import Layout from '../../layouts/Layout.astro';
 .ref-org { font-size:10.5px;color:var(--dim);letter-spacing:.04em; }
 .ref-note { font-size:11.5px;color:var(--sub);line-height:1.65;margin-top:8px;font-style:italic;border-top:1px dashed var(--surface1);padding-top:8px; }
 .ref-meta { margin-top:auto;padding-top:8px;font-size:10.5px;color:var(--dim); }
+
+/* cert links */
+.cert-link { color:var(--text);border-bottom:1px dotted var(--surface1);transition:color .15s,border-color .15s; }
+.cert-link:hover { color:var(--mauve);border-bottom-color:var(--mauve); }
+
+/* projects / labs */
+.proj-list { display:flex;flex-direction:column;gap:0; }
+.proj-item { display:grid;grid-template-columns:32px 1fr;gap:14px;padding:16px 0;border-bottom:1px dashed var(--surface1);align-items:flex-start; }
+.proj-item:last-child { border-bottom:none; }
+.proj-icon { font-size:20px;color:var(--c,var(--green));padding-top:2px; }
+.proj-title { font-family:var(--sans);font-weight:600;font-size:14px;color:var(--text);margin-bottom:5px; }
+.proj-desc { font-size:12px;color:var(--sub);line-height:1.65;margin-bottom:7px; }
+.proj-desc b { color:var(--text);font-weight:500; }
+.proj-tags { display:flex;flex-wrap:wrap;gap:5px; }
 
 @media (max-width:900px) {
   .stripe { grid-template-columns:repeat(3,1fr); }

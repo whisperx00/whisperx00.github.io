@@ -36,7 +36,7 @@ import Layout from '../../layouts/Layout.astro';
       </div>
       <div class="cell" style="--col:var(--peach);">
         <div class="k">mastered</div>
-        <div class="v">18</div>
+        <div class="v">16</div>
         <div class="s">★ internalized + lab proof</div>
       </div>
       <div class="cell" style="--col:var(--yellow);">
@@ -85,7 +85,7 @@ import Layout from '../../layouts/Layout.astro';
       <div class="left">
         <span><span class="dot"></span><span class="k">tree:</span> <span class="v" style="color:var(--green);">in progress · v1</span></span>
         <span><span class="k">classes:</span> <span class="v">5</span></span>
-        <span><span class="k">nodes:</span> <span class="v">50</span></span>
+        <span><span class="k">nodes:</span> <span class="v">48</span></span>
       </div>
       <div class="right">
         <span><span class="k">tooltip:</span> <span class="v">click hex → side panel</span></span>
@@ -334,17 +334,17 @@ const CLASSES = [
     ]
   },
   {
-    id:"engineering", name:"Engineering", glyph:"◈", color:"teal", points:"4/7",
+    id:"engineering", name:"Engineering", glyph:"◈", color:"teal", points:"2/5",
     origin:{ id:"en-root", label:"Programming", lvl:"core", state:"mastered",
       desc:"the tooling that makes the offensive work faster. python for scripting, bash for automation, metasploit for exploitation.",
-      tags:["python","bash","metasploit","automation"], proofs:["shipped tools: burp-intruder-cli, ldap-parse"],
+      tags:["python","bash","metasploit","automation"], proofs:["SiDi automation tooling","OSCP lab scripts"],
       stat:{xp:"800",time:"ongoing"} },
     branches:[
       { name:"Languages", color:"teal", labelX:25,
         nodes:[
           { id:"en-py", label:"Python", lvl:"C1", state:"mastered", parent:"en-root",
-            desc:"primary scripting language for exploit automation, parsing tools, and quick PoCs. ldap_parse.py shipped as a tool.",
-            tags:["python","scripting","automation"], proofs:["ldap-parse.py","SiDi tooling"],
+            desc:"primary scripting language for exploit automation, parsing tools, and quick PoCs. used daily at SiDi for SAST/DAST automation.",
+            tags:["python","scripting","automation"], proofs:["SiDi tooling","OSCP lab scripts"],
             stat:{xp:"600",time:"3+ yrs"} },
           { id:"en-bash", label:"Bash / PowerShell", lvl:"B2", state:"unlocked", parent:"en-root",
             desc:"shell scripting for automation, enumeration, and post-exploitation tasks. PowerShell for Windows environments — one-liners, reverse shells, empire stagers.",
@@ -358,14 +358,6 @@ const CLASSES = [
       },
       { name:"Tooling shipped", color:"blue", labelX:75,
         nodes:[
-          { id:"en-burp", label:"Burp Intruder CLI", lvl:"L2", state:"mastered", parent:"en-root",
-            desc:"converts burp intruder configs into ffuf / hydra / wfuzz / curl commands. react frontend.",
-            tags:["burp","ffuf","hydra","react"], proofs:["github.com/whisperx00/burp-intruder-cli"],
-            stat:{xp:"300",time:"2 mo"} },
-          { id:"en-ldap", label:"ldap_parse.py", lvl:"L2", state:"mastered", parent:"en-root",
-            desc:"parses raw ldap enumeration output for AD recon workflows.",
-            tags:["ldap","python","ad","recon"], proofs:["github.com/whisperx00/ldap-parse"],
-            stat:{xp:"250",time:"1 mo"} },
           { id:"en-automate", label:"Security Automation", lvl:"L3", state:"unlocked", parent:"en-py",
             desc:"custom python tooling for repeatable assessments — automated PoC scripts, exploit chaining, SAST/DAST pipeline helpers written at SiDi.",
             tags:["python","automation","poc","exploit-dev","sast","dast"], proofs:["SiDi custom automation tooling","OSCP lab scripts"],
