@@ -17,10 +17,8 @@ const posts = (await getCollection('posts', p => !p.data.draft))
       </div>
       <h1 class="title"><span class="typed" id="typed"></span><span class="cursor" id="cursor"></span></h1>
       <p class="subtitle" id="subtitle">
-        <span data-lang="en">focus on <span class="hl">windows &amp; active directory</span>, web exploitation, and custom tooling.
-        writeups from HTB labs, past work at SiDi, and anything else worth documenting.</span>
-        <span data-lang="pt" hidden>foco em <span class="hl">windows &amp; active directory</span>, exploração web e ferramentas customizadas.
-        writeups do HTB, trabalho passado no SiDi e tudo que vale documentar.</span>
+        <span data-lang="en">offensive security. writeups, articles, and anything else worth documenting.</span>
+        <span data-lang="pt" hidden>segurança ofensiva. writeups, artigos e tudo que vale documentar.</span>
       </p>
       <div class="tags" id="tags">
         <span class="tag" style="--col:var(--mauve);">active-directory</span>
@@ -49,8 +47,8 @@ const posts = (await getCollection('posts', p => !p.data.draft))
         <div class="line">
           <span class="k"><span data-lang="en">role</span><span data-lang="pt" hidden>função</span></span>
           <span class="v">
-            <span data-lang="en">offensive security researcher <span class="muted">— windows &amp; AD · web exploitation · custom tooling</span></span>
-            <span data-lang="pt" hidden>pesquisador de segurança ofensiva <span class="muted">— windows &amp; AD · exploração web · ferramentas</span></span>
+            <span data-lang="en">offensive security</span>
+            <span data-lang="pt" hidden>segurança ofensiva</span>
           </span>
         </div>
         <div class="line">
@@ -253,7 +251,7 @@ const BOOT_LINES = [
   { t:"[  0.887240]", badge:"OK",   cls:"ok",   msg:'spawning shell on /dev/tty1 ...' },
 ];
 
-const TITLE_TEXT = "offensive security researcher. windows & AD.";
+const TITLE_TEXT = "offensive security.";
 
 let timers: ReturnType<typeof setTimeout>[] = [];
 function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
