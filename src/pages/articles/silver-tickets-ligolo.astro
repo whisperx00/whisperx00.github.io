@@ -647,7 +647,7 @@ SeDelegateSessionUserImpersonatePrivilege Obtain an impersonation token for anot
       <!-- article footer -->
       <div class="doc-foot">
         <div class="author-card">
-          <div class="avatar">W</div>
+          <div class="avatar"><img src="/pfp.jpg" alt="whisperx00" /></div>
           <div>
             <div class="aw">whisperx00</div>
             <div class="ad">offensive security student · OSCP candidate. step-by-step notes on techniques worth documenting.</div>
@@ -789,7 +789,8 @@ figcaption { font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:
 
 .doc-foot { margin-top:48px;padding-top:24px;border-top:1px dashed var(--surface1);display:flex;flex-direction:column;gap:18px; }
 .author-card { display:grid;grid-template-columns:56px 1fr auto;gap:16px;align-items:center;background:var(--mantle);border:1px solid var(--surface1);border-left:2px solid var(--mauve);padding:14px 16px;font-family:var(--mono); }
-.avatar { width:52px;height:52px;background:var(--base);border:1px solid var(--surface1);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:var(--mauve); }
+.avatar { width:52px;height:52px;border:1px solid var(--surface1);overflow:hidden;flex-shrink:0; }
+.avatar img { width:100%;height:100%;object-fit:cover;object-position:center top;display:block; }
 .aw { font-size:13px;color:var(--text);font-weight:600;font-family:var(--sans);margin-bottom:3px; }
 .ad { font-size:11.5px;color:var(--sub);line-height:1.5; }
 .alinks { display:flex;gap:8px;font-size:11px; }
