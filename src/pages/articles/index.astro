@@ -1,0 +1,121 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const articles = [
+  {
+    href: '/articles/silver-tickets-ligolo/',
+    date: '2026-05-14',
+    read: '12 min',
+    accent: 'mauve',
+    label: 'article · technique · active directory',
+    title: 'Forging Silver Tickets Against MSSQL Through a Ligolo-ng Tunnel',
+    desc: 'combining Ligolo-ng tunneling with a kerberoasted service account to forge a silver ticket and access a firewall-blocked MSSQL instance as Administrator, then escalating via SeImpersonatePrivilege.',
+    tags: ['active-directory','kerberos','silver-ticket','mssql','ligolo-ng','pivoting','impacket'],
+  },
+];
+---
+<Layout title="whisperx00@kali — articles" active="articles">
+  <main>
+    <div class="cmd">
+      <span class="u">whisperx00</span>@<span class="h">kali</span>:<span class="d">~/articles</span>
+      <span style="color:var(--text);">$ ls</span>
+      <span class="flag">-lt</span>
+      <span class="arg">*.md</span>
+    </div>
+
+    <h1 class="title">articles <span class="slash">/</span> <span class="ext">technical</span></h1>
+    <p class="lede">
+      <span class="hl">Step-by-step technique walkthroughs.</span>
+      attack chains, tooling mechanics, and patterns worth documenting.
+      all environments are labs or fictional.
+    </p>
+
+    <div class="section-head">
+      <h2><span class="sym">▸</span>published</h2>
+      <span class="meta"><span class="dot">●</span>{articles.length} article{articles.length !== 1 ? 's' : ''}</span>
+    </div>
+
+    <div class="art-list">
+      {articles.map(a => (
+        <a href={a.href} class="art-card" style={`--ac:var(--${a.accent})`}>
+          <div class="ac-top">
+            <span class="ac-label">{a.label}</span>
+            <span class="ac-meta">{a.date} · {a.read}</span>
+          </div>
+          <div class="ac-title">{a.title}</div>
+          <div class="ac-desc">{a.desc}</div>
+          <div class="ac-tags">
+            {a.tags.map(t => <span class="tag">#{t}</span>)}
+          </div>
+        </a>
+      ))}
+    </div>
+  </main>
+
+  <div class="statusbar" slot="statusbar">
+    <div class="statusbar-inner">
+      <div class="left">
+        <span><span class="dot"></span><span class="k">articles:</span> <span class="v" style="color:var(--green);">published · lab-verified</span></span>
+        <span><span class="k">count:</span> <span class="v">{articles.length}</span></span>
+      </div>
+      <div class="right">
+        <span><span class="k">topics:</span> <span class="v">ad · pivoting · privesc</span></span>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+.art-list { display: flex; flex-direction: column; gap: 10px; }
+
+.art-card {
+  display: block;
+  background: var(--mantle);
+  border: 1px solid var(--surface1);
+  border-left: 2px solid var(--ac, var(--mauve));
+  padding: 20px 22px;
+  transition: background .15s, border-color .15s;
+}
+.art-card:hover {
+  background: var(--base);
+  border-color: color-mix(in oklab, var(--ac, var(--mauve)) 60%, var(--surface1));
+}
+
+.ac-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10.5px;
+  margin-bottom: 10px;
+}
+.ac-label {
+  color: var(--ac, var(--mauve));
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ac-label::before { content: ""; display: inline-block; width: 6px; height: 6px; background: currentColor; }
+.ac-meta { color: var(--dim); font-variant-numeric: tabular-nums; }
+
+.ac-title {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.25;
+}
+.ac-desc {
+  font-size: 12.5px;
+  color: var(--sub);
+  line-height: 1.65;
+  margin-bottom: 12px;
+  max-width: 80ch;
+}
+
+.ac-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag { font-size: 10px; color: var(--dim); background: var(--base); border: 1px solid var(--surface1); padding: 1px 5px; }
+</style>

@@ -3,14 +3,15 @@ import '../styles/global.css';
 
 export interface Props {
   title: string;
-  active: 'index' | 'writeups' | 'research' | 'tools' | 'skills' | 'about' | 'rss';
+  active: 'index' | 'writeups' | 'articles' | 'research' | 'tools' | 'skills' | 'about' | 'rss';
 }
 const { title, active } = Astro.props;
 
 const nav = [
   { id: 'index',    href: '/',             label: 'index'    },
-  { id: 'writeups', href: '/writeups/',    label: 'writeups' },
-  { id: 'research', href: '/research/',    label: 'research' },
+  { id: 'writeups',  href: '/writeups/',   label: 'writeups'  },
+  { id: 'articles',  href: '/articles/',  label: 'articles'  },
+  { id: 'research',  href: '/research/',  label: 'research'  },
   { id: 'tools',    href: '/tools/',       label: 'tools'    },
   { id: 'skills',   href: '/skills/',      label: 'skills'   },
   { id: 'about',    href: '/about/',       label: 'about'    },
